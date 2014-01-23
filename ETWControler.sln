@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETWControler", "ETWControler\ETWControler.csproj", "{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{041E034A-621D-48E4-9E02-29EA3DFC5E5B}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETWControler_uTest", "ETWControler_uTest\ETWControler_uTest.csproj", "{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Debug|x64.ActiveCfg = Debug|x64
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Debug|x64.Build.0 = Debug|x64
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Release|Win32.ActiveCfg = Release|Any CPU
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Release|x64.ActiveCfg = Release|x64
+		{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}.Release|x64.Build.0 = Release|x64
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Debug|x64.ActiveCfg = Debug|x64
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Debug|x64.Build.0 = Debug|x64
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Release|Win32.ActiveCfg = Release|Any CPU
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Release|x64.ActiveCfg = Release|x64
+		{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

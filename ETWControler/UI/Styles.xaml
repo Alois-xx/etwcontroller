@@ -1,0 +1,27 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:ETWControler"
+                    >
+    <l:StringIsNullOrEmptyConverter x:Key="StringIsNullOrEmpty" />
+    <Style x:Key="enableMouseMoveHook" TargetType="{x:Type CheckBox}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ElementName=cHookMouse, Path=IsChecked}" Value="True">
+                <Setter Property="CheckBox.IsEnabled" Value="True"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ElementName=cHookMouse, Path=IsChecked}"  Value="False">
+                <Setter Property="CheckBox.IsEnabled" Value="False"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="enableSlowMessage" TargetType="{x:Type TextBox}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ElementName=cSignalKey, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="True">
+                <Setter Property="TextBox.IsEnabled" Value="False"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ElementName=cSignalKey, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="False">
+                <Setter Property="TextBox.IsEnabled" Value="True"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

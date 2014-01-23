@@ -1,0 +1,42 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ETWControler" GeneratedClassName="Configuration">
+  <Profiles />
+  <Settings>
+    <Setting Name="PortNumber" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4295</Value>
+    </Setting>
+    <Setting Name="Host" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="WCFPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">8090</Value>
+    </Setting>
+    <Setting Name="SlowEventMessage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Here it was slow</Value>
+    </Setting>
+    <Setting Name="SlowEventHotkey" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="WCFServerUri" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://localhost:8090/TraceControlerService</Value>
+    </Setting>
+    <Setting Name="LocalTraceStart" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-start GeneralProfile</Value>
+    </Setting>
+    <Setting Name="LocalTraceStop" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-stop c:\temp\etwcontroler.etl</Value>
+    </Setting>
+    <Setting Name="ServerTraceStart" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-start GeneralProfile</Value>
+    </Setting>
+    <Setting Name="ServerTraceStop" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-stop c:\temp\etwServercontroler.etl</Value>
+    </Setting>
+    <Setting Name="LocalTraceEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ServerTraceEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

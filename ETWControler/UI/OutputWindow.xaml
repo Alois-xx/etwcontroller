@@ -1,0 +1,15 @@
+﻿<Window x:Class="ETWControler.UI.OutputWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WPR Command Output" Height="300" Width="997.675">
+    <Grid>
+        <ListView Name="cView" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto"  ItemsSource="{Binding CommandOutputs}">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Copy" Click="CopyMessage"></MenuItem>
+                    <MenuItem Header="Clear" Click="ClearAllMessages"></MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+        </ListView>
+    </Grid>
+</Window>

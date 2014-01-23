@@ -1,0 +1,188 @@
+﻿<Window x:Class="ETWControler.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:ETWControler"
+        xmlns:h="clr-namespace:ETWControler.Hooking"
+        xmlns:ui="clr-namespace:ETWControler.UI"
+        Title="ETW Controler And Logger" Height="440" Width="640.5" Closing="Window_Closing">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="UI\Styles.xaml"/>
+                <ResourceDictionary Source="UI\GlassButton.xaml"/>
+                <ResourceDictionary Source="UI\Validation.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <Menu Grid.Row="0"  DockPanel.Dock="Top">
+            <MenuItem Header="Configuration">
+                <MenuItem Header="Network" Command="{Binding Commands[Network]}"/>
+                <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
+            </MenuItem>
+        </Menu>
+        <StatusBar 
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch" DockPanel.Dock="Bottom"
+            >
+            <StatusBar.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Show Messages" Command="{Binding Commands[ShowMessages]}" />
+                    <MenuItem Header="Clear Messages" Command="{Binding Commands[ClearStatusMessages]}"/>
+                </ContextMenu>
+            </StatusBar.ContextMenu>
+
+            <TextBlock Text="{Binding StatusText}"
+                       Foreground="{Binding StatusColor}"
+                       TextWrapping="WrapWithOverflow" 
+                       PreviewMouseLeftButtonUp="StatusBarClick" Padding="5">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Style.Resources>
+                            <Storyboard x:Key="flashAnimation" >
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" AutoReverse="True" Duration="0:0:0.5" RepeatBehavior="0:0:5" />
+                            </Storyboard>
+                        </Style.Resources>
+                        <!-- <Setter Property="Visibility" Value="Hidden" /> -->
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ErrorHasOccured}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard Name="flash" Storyboard="{StaticResource flashAnimation}" />
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="flash"/>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StatusBar>
+        <TabControl>
+            <TabItem Header="Network And Capturing">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="130"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer>
+                        <ItemsControl>
+                            <Expander Header="Capture Keyboard And Mouse" IsExpanded="True" Grid.Row="0" Expanded="Expander_Expanded">
+                                <Grid Height="82">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="58" />
+                                        <ColumnDefinition Width="399"/>
+                                        <ColumnDefinition Width="200" />
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="cHookKeyboard" Content="Capture Keyboard" HorizontalAlignment="Left" Margin="6,8,0,0" VerticalAlignment="Top" IsChecked="{Binding CaptureKeyboard}" Checked="HookOrUnhookKeyboard" Unchecked="HookOrUnhookKeyboard" Height="15" Width="146" Grid.ColumnSpan="2" ToolTip="Log all deyboard down events to ETW."/>
+                                    <CheckBox x:Name="cHookMouse" Content="Capture Mouse Clicks" HorizontalAlignment="Left" Margin="6,28,0,0" VerticalAlignment="Top" IsChecked="{Binding CaptureMouseButtonDown}" Width="158" Height="16" Checked="HookOrUnhookMouse" Unchecked="HookOrUnhookMouse" Grid.ColumnSpan="2" ToolTip="Log all mouse button down events to ETW."/>
+                                    <CheckBox x:Name="cCaptureMouseMove" Content="Capture Mouse Move" Style="{StaticResource enableMouseMoveHook}" HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseMove}" Margin="28,49,0,0" VerticalAlignment="Top" Width="150" Height="15" Grid.ColumnSpan="2" ToolTip="Log all mouse move events to ETW. There can be many of them!"/>
+                                    <Button  Style="{StaticResource GlassButton}" Width="28" Height="23" Background="#FF1DB97A"  Margin="124,3,0,0" x:Name="cSignalButton" Content="Slow" HorizontalAlignment="Left" VerticalAlignment="Top"  Click="cSignalButton_Click" ToolTip="Define hotkey to log a slow event with Slow Message text below." RenderTransformOrigin="0.15,3.217" Grid.Column="1"/>
+                                    <TextBox x:Name="cSignalKey" HorizontalAlignment="Left" Height="25" Margin="157,3,0,0" TextWrapping="Wrap" Text="{Binding SlowEventHotkey}" VerticalAlignment="Top" Width="130" IsEnabled="False" Grid.Column="1" ToolTip="Press the Slow Button to define a hotkey for the slow event."/>
+                                    <TextBox x:Name="cSlowMessageText"  Text="{Binding SlowEventMessage}"  Style="{StaticResource enableSlowMessage}" Height="25" Margin="183,54,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="258" Grid.Column="1" Grid.ColumnSpan="2" ToolTip="Log this message when the Slow event key was pressed." HorizontalAlignment="Left" />
+                                    <Label Content="Log Slow Event When Key Is Pressed" HorizontalAlignment="Left" Margin="124,28,0,0" VerticalAlignment="Top" Width="275" Height="26" Grid.Column="1"/>
+                                    <Label Content="Message" HorizontalAlignment="Left" Margin="124,49,0,0" VerticalAlignment="Top" Width="71" Height="28" Grid.Column="1" RenderTransformOrigin="0.491,1.533" ToolTip="Log this message when the Slow event key was pressed."/>
+                                    <Button IsDefault="True" Command="{Binding Commands[LogSlow]}" Content="Log Slow Event" Grid.Column="2" Margin="51,54,62,5" ToolTip="Log directly the slow event message to ETW."/>
+                                </Grid>
+                            </Expander>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Margin="5,0,0,0">Send Captured Data Over Network</TextBlock>
+                                <CheckBox Command="{Binding Commands[NetworkSendToggle]}"  Content="Start Sending" IsChecked="{Binding NetworkSendEnabled}"  Grid.Column="1"  Margin="5,0,0,0"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="138"/>
+                                    <ColumnDefinition Width="113"/>
+                                    <ColumnDefinition Width="200"/>
+                                </Grid.ColumnDefinitions>
+                            </Grid>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <GridSplitter HorizontalAlignment="Stretch" 
+                  VerticalAlignment="Top" 
+                  Grid.Row="1" ResizeBehavior="PreviousAndNext"
+                  Height="5" Background="#FFBCBCBC"/>
+                    <ListView Grid.Row="2" ItemsSource="{Binding ReceivedMessages}" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Clear" Click="ClearMessages"></MenuItem>
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Width="600"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Trace Collection">
+                <StackPanel>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column ="0" Margin="5,0,0,0">Local</TextBlock>
+                                <CheckBox Grid.Column="1" Content="Enable" Margin="5,0,0,0" IsChecked="{Binding LocalTraceEnabled}"/>
+                            </Grid>
+                        </GroupBox.Header>
+                        <ui:TraceControl DataContext="{Binding LocalTraceSettings}"></ui:TraceControl>
+                    </GroupBox>
+                    <GroupBox>
+                        <GroupBox.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock>Server</TextBlock>
+                                    <TextBlock Grid.Column ="0" Text="{Binding Host}" Margin="5,0,0,0"/>
+                                    <TextBlock Grid.Column ="0" Text="{Binding WCFPort}" Margin="5,0,0,0"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" Content="Enable" Margin="5,0,0,0" IsChecked="{Binding ServerTraceEnabled}"/>
+                            </Grid>
+                        </GroupBox.Header>
+                        <ui:TraceControl  DataContext="{Binding ServerTraceSettings}"></ui:TraceControl>
+                    </GroupBox>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button IsDefault="True" Content="_Start" Width="80" Command="{Binding Commands[StartTracing]}" Margin="10,0,0,0"></Button>
+                        <Button Content="S_top" Width="80"  Command="{Binding Commands[StopTracing]}" Margin="10,0,0,0"></Button>
+                        <Button Content="Can_cel" Width="80" Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"></Button>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Name="cTraceSessionsTab"  Header="Trace Sessions" GotFocus="TraceRefreshSelected">
+                <DockPanel>
+                    <Button Width="50" DockPanel.Dock="Top" Command="{Binding Commands[TraceRefresh]}">Refresh</Button>
+                    <StackPanel DockPanel.Dock="Top">
+                        <Expander Header="Local" IsExpanded="True">
+                            <ListBox Height="150" ItemsSource="{Binding TraceSessions}">
+                            </ListBox>
+                        </Expander>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Bottom">
+                        <Expander IsExpanded="True">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Remote Host: "/>
+                                    <Label Content="{Binding TraceServiceUrl}"/>
+                                </StackPanel>
+                            </Expander.Header>
+                            <ListBox  Height="150" ItemsSource="{Binding ServerTraceSessions}"></ListBox>
+                        </Expander>
+                    </StackPanel>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+
+    </DockPanel>
+</Window>

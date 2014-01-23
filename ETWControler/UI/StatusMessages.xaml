@@ -1,0 +1,23 @@
+﻿<Window x:Class="ETWControler.UI.StatusMessages"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="StatusMessages" Height="315.498" Width="613.284">
+    <Grid >
+        <ListBox Name="cList" ItemsSource="{Binding StatusMessages}" SelectionMode="Extended" ScrollViewer.CanContentScroll="False">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="Copy" Header="Copy"/>
+                    <MenuItem Command="Delete" Header="Clear"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+            <ListBox.CommandBindings>
+                <!--             <CommandBinding Command="Copy" Executed="CopyCommand"/> -->
+            </ListBox.CommandBindings>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                <TextBlock Text="{Binding Path=Message}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>
