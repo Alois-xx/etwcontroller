@@ -18,5 +18,7 @@ namespace ETWControler.Hooking
         LButtonUp,
         MButtonUp,
         RButtonUp,
+        WheelLeft,
+        WheelRight,
     }
 }

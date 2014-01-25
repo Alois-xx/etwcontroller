@@ -232,6 +232,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="eventRegister.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="ApplicationIcon.ico" />
     <Content Include="ETW\eventRegister.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

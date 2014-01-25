@@ -11,7 +11,6 @@ using System.Windows.Input;
 
 namespace ETWControler.ETW
 {
-
     /// <summary>
     /// ETW Provider for window and mouse hook messages.
     /// </summary>
@@ -36,12 +35,9 @@ namespace ETWControler.ETW
         /// <returns></returns>
         public static bool IsAlreadyRegistered()
         {
-            return File.Exists(CreateManifestPath());
-        }
-
-        static string CreateManifestPath()
-        {
-            return Path.Combine(Path.GetTempPath(), "HookEvents.man");
+            string fullExeName = Process.GetCurrentProcess().MainModule.FileName;
+            string manifestName = Path.ChangeExtension(fullExeName,null) + "." + typeof(HookEvents).Name + ".etwManifest.man";
+            return File.Exists(manifestName);
         }
 
         /// <summary>
@@ -49,22 +45,21 @@ namespace ETWControler.ETW
         /// does not work out well if you need to do a full rundown to dump the manifest into the ETW stream which currently only PerfView does.
         /// By registering it in the old fashioned way WPA does also display the event type as name and not the cryptic guid. 
         /// </summary>
-        public static void RegisterItself()
+        public static string RegisterItself()
         {
-            string manifest = EventSource.GenerateManifest(typeof(HookEvents), Assembly.GetExecutingAssembly().Location);
-            string manifestPath = CreateManifestPath();
-            File.WriteAllText(manifestPath, manifest);
             ProcessStartInfo info = new ProcessStartInfo()
             {
-                Arguments = String.Format("um \"{0}\"", manifestPath),
+                FileName = "eventregister",
+                Arguments = Assembly.GetExecutingAssembly().Location,
                 UseShellExecute = false,
+                RedirectStandardOutput = true,
                 CreateNoWindow = true,
-                FileName = "wevtutil",
             };
 
-            Process.Start(info).WaitForExit();
-            info.Arguments = String.Format("im \"{0}\"", manifestPath);
-            Process.Start(info).WaitForExit();
+            var register = Process.Start(info);
+            string output = register.StandardOutput.ReadToEnd();
+            register.WaitForExit();
+            return output;
         }
 
         [Event(1,Level=EventLevel.Informational, Opcode=EventOpcode.Info, Task=Tasks.MouseButtonDown)]

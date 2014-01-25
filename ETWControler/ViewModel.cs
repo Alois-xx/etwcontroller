@@ -349,7 +349,11 @@ namespace ETWControler
                         command.Execute();
                     }
                 })},
-                {"RegisterETWProvider", CreateCommand( o => HookEvents.RegisterItself()) },
+                {"RegisterETWProvider", CreateCommand( o => 
+                    {
+                        string output = HookEvents.RegisterItself();
+                        SetStatusMessage("Registering ETW provider: " + output);
+                    })},
                 {"ShowMessages", CreateCommand( o=> ShowMessages() )},
                 {"NetworkSendToggle", CreateCommand( o=> NetworkSendState.NetworkSendChangeState() )},
                 {"NetworkReceiveToggle", CreateCommand( o=> NetworkReceiveState.NetworkReceiveChangeState() )},
@@ -404,6 +408,10 @@ namespace ETWControler
             NetworkReceiveState = new NetworkReceiveState(this);
             WCFHost = new WCFHostServiceState(this);
             Hooker = new NetworkedHooker(this);
+            if( !HookEvents.IsAlreadyRegistered() )
+            {
+                Commands["RegisterETWProvider"].Execute(null);
+            }
         }
 
         /// <summary>

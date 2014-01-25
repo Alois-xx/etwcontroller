@@ -22,6 +22,7 @@ namespace ETWControler.Hooking
         public const int MBUTTONDOWN =    0x0207;
         public const int MBUTTONUP =      0x0208;
         public const int MBUTTONDBLCLK =  0x0209;
+        public const int MBUTTONLEFT  =   0x020E;
         public const int MOUSEWHEEL = 0x020A;
 
         public const int KEYDOWN = 0x0100;
@@ -76,6 +77,9 @@ namespace ETWControler.Hooking
 	            case MBUTTONUP:
                     pressed = MouseButton.MButtonUp;
 		            break;
+                case MBUTTONLEFT:
+                    pressed = MouseButton.WheelLeft;
+                    break;
 	            case RBUTTONUP:
                     pressed = MouseButton.RButtonUp;
 		            break;
