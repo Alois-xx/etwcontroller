@@ -117,11 +117,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Configuration.settings</DependentUpon>
     </Compile>
-    <Compile Include="ETW\Resource1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resource1.resx</DependentUpon>
-    </Compile>
     <Compile Include="Hooking\Hooker.cs" />
     <Compile Include="ETW\HookEvents.cs" />
     <Compile Include="Network\ITraceControlerService.cs" />
@@ -205,10 +200,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="ETW\Resource1.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -236,9 +227,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="ApplicationIcon.ico" />
-    <Content Include="ETW\eventRegister.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Resource Include="Doc\TraceEvent.ReadMe.txt" />
     <Resource Include="Doc\TraceEvent.ReleaseNotes.txt" />
   </ItemGroup>
