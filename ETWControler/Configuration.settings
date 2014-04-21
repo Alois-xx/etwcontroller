@@ -9,7 +9,7 @@
       <Value Profile="(Default)">localhost</Value>
     </Setting>
     <Setting Name="WCFPort" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">8090</Value>
+      <Value Profile="(Default)">8091</Value>
     </Setting>
     <Setting Name="SlowEventMessage" Type="System.String" Scope="User">
       <Value Profile="(Default)">Here it was slow</Value>
