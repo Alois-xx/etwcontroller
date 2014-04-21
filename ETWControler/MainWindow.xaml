@@ -4,6 +4,8 @@
         xmlns:l="clr-namespace:ETWControler"
         xmlns:h="clr-namespace:ETWControler.Hooking"
         xmlns:ui="clr-namespace:ETWControler.UI"
+        MinHeight="440"
+        MinWidth="640"
         Title="ETW Controler And Logger" Height="440" Width="640.5" Closing="Window_Closing">
     <Window.Resources>
         <ResourceDictionary>
@@ -21,7 +23,7 @@
                 <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
             </MenuItem>
         </Menu>
-        <StatusBar 
+        <StatusBar MaxHeight="100"
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Stretch" DockPanel.Dock="Bottom"
             >

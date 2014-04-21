@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETWControler", "ETWControler\ETWControler.csproj", "{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}"
 EndProject
@@ -11,6 +11,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{041E03
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETWControler_uTest", "ETWControler_uTest\ETWControler_uTest.csproj", "{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5F33753A-0BCC-4D40-9E1D-8DA597EB3636}"
+	ProjectSection(SolutionItems) = preProject
+		TestSettings.testsettings = TestSettings.testsettings
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
