@@ -9,8 +9,6 @@
 
     <Profile Id="HookEvents.Verbose.File" Name="HookEvents" Description="Console Traces" LoggingMode="File" DetailLevel="Verbose">
       <Collectors Operation="Add">
-        <SystemCollectorId Value="SystemCollector_WPRSystemCollectorInFile">
-        </SystemCollectorId>
         <EventCollectorId Value="EventCollector_MyEventSource">
           <EventProviders>
             <EventProviderId Value="HookEvents" />
