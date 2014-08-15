@@ -82,6 +82,14 @@ namespace ETWControler
             {
                 return String.Format("http://{0}:{1}/TraceControlerService", Host, WCFPort);
             }
+        } 
+
+        public string LocalTraceServiceUrl
+        {
+            get
+            {
+                return String.Format("http://localhost:{1}/TraceControlerService", Host, WCFPort);
+            }
         }
 
         public bool _CaptureMouseMove;
@@ -542,5 +550,34 @@ namespace ETWControler
             return new DelegateCommand(o);
         }
 
+
+
+        public void OpenFirewallPorts()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                // for WCF services opening 
+                const string ruleName = "ETWControler WCFPort";
+                string openWCFPort =
+                    String.Format("advfirewall firewall add Rule Name = \"{0}\" Dir = in action = allow protocol = TCP localport = {1}", ruleName, this.WCFPort);
+
+                new RedirectedProcess("netsh.exe", String.Format("Advfirewall Firewall delete Rule Name=\"{0}\"", ruleName)).Start();
+                var proc = new RedirectedProcess("netsh.exe", openWCFPort);
+                return proc.Start();
+            }).ContinueWith( ret => 
+                this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh ouputput: {1}", this.WCFPort, ret.Result.Item2.Trim())), this.UISheduler);
+
+            Task.Factory.StartNew( () =>
+             {
+                const string socketRuleName = "ETWControler SocketPort";
+                string openSocketPort =
+                    String.Format("advfirewall firewall add Rule Name = \"{0}\" Dir = in action = allow protocol = TCP localport = {1}", socketRuleName, this.PortNumber);
+
+                new RedirectedProcess("netsh.exe", String.Format("Advfirewall Firewall delete Rule Name=\"{0}\"", socketRuleName)).Start();
+                var proc = new RedirectedProcess("netsh.exe", openSocketPort);
+                return proc.Start();
+             }).ContinueWith(( ret =>
+                 this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh ouputput: {1}", this.PortNumber, ret.Result.Item2.Trim()))), this.UISheduler);
+        }
     }
 }

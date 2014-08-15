@@ -24,6 +24,7 @@ namespace ETWControler
             this.DataContext = this.Model;
             Model.UISheduler = TaskScheduler.FromCurrentSynchronizationContext();
             InitializeComponent();
+            Model.OpenFirewallPorts();
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

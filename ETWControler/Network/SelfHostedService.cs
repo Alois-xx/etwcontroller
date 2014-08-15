@@ -6,6 +6,7 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ETWControler.Network
 {
@@ -14,24 +15,34 @@ namespace ETWControler.Network
     /// </summary>
     class SelfHostedService
     {
-        EndpointAddress EndpointAddress;
+        EndpointAddress RemoteEndpointAddress;
+
+
+        /// <summary>
+        /// Host for an in process hosted WCF web service.
+        /// </summary>
+        public SelfHostedService()
+        {
+        }
 
         /// <summary>
         /// Host a service at given uri
         /// </summary>
         /// <param name="url"></param>
-        public SelfHostedService(string url)
+        public SelfHostedService(string remoteUrl)
         {
-            EndpointAddress = new EndpointAddress(new Uri(url));
+            RemoteEndpointAddress = new EndpointAddress(new Uri(remoteUrl));
         }
 
         /// <summary>
         /// Start hosting the service
         /// </summary>
+        /// <param name="locaUurl">Url under which the web service should be reachable. E.g. http://localhost:8091/TraceControlerService </param>
         /// <returns></returns>
-        public ServiceHost HostService() 
+        public ServiceHost HostService(string localUrl) 
         {
-            var hostedService = new ServiceHost(typeof(TraceControlerService), EndpointAddress.Uri);
+            var localEndpointAddress = new EndpointAddress(new Uri(localUrl));
+            var hostedService = new ServiceHost(typeof(TraceControlerService), localEndpointAddress.Uri);
 
             hostedService.AddServiceEndpoint(typeof(ITraceControlerService), CreateBinding(), "");
             ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
@@ -39,6 +50,7 @@ namespace ETWControler.Network
             hostedService.Description.Behaviors.Add(smb);
             //Start the Service
             hostedService.Open();
+
             return hostedService;
         }
 
@@ -51,7 +63,7 @@ namespace ETWControler.Network
         /// <returns></returns>
         public TReturn UseService<TReturn>(Func<ITraceControlerService, TReturn> code)
         {
-            var channel = ChannelFactory<ITraceControlerService>.CreateChannel(CreateBinding(), EndpointAddress);
+            var channel = ChannelFactory<ITraceControlerService>.CreateChannel(CreateBinding(), RemoteEndpointAddress);
             bool error = true;
             try
             {
@@ -83,7 +95,7 @@ namespace ETWControler.Network
         /// <param name="code"></param>
         public void UseService(Action<ITraceControlerService> code)
         {
-            var channel = ChannelFactory<ITraceControlerService>.CreateChannel(CreateBinding(), EndpointAddress);
+            var channel = ChannelFactory<ITraceControlerService>.CreateChannel(CreateBinding(), RemoteEndpointAddress);
             bool error = true;
             try
             {
@@ -108,8 +120,7 @@ namespace ETWControler.Network
         /// <returns></returns>
         static Binding CreateBinding()
         {
-
-         //   var binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
+          //  var binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
             var binding = new WSHttpBinding(SecurityMode.None);
             binding.ReceiveTimeout = TimeSpan.FromMinutes(10);
             binding.SendTimeout = TimeSpan.FromMinutes(10);

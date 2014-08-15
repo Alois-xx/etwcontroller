@@ -17,9 +17,6 @@
     <Setting Name="SlowEventHotkey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="WCFServerUri" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://localhost:8090/TraceControlerService</Value>
-    </Setting>
     <Setting Name="LocalTraceStart" Type="System.String" Scope="User">
       <Value Profile="(Default)">-start GeneralProfile</Value>
     </Setting>

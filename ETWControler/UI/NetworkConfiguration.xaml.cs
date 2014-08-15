@@ -39,6 +39,8 @@ namespace ETWControler.UI
             // Reset sender and receiver to connect to new host and or port
             Model.NetworkReceiveState.Restart();
             Model.NetworkSendState.RestartIfStarted();
+            Model.WCFHost.Restart();
+            Model.OpenFirewallPorts();
             this.Close();
         }
 

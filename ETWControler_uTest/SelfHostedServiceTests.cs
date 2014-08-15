@@ -14,11 +14,13 @@ namespace ETWControler_uTest
     [TestFixture]
     public class SelfHostedServiceTests
     {
+        const string WCFServerUri = "http://localhost:8090/TraceControlerService";
+
         [Test]
         public void HostServiceAndConnect()
         {
-            SelfHostedService server = new SelfHostedService(Configuration.Default.WCFServerUri);
-            using (var host = server.HostService())
+            SelfHostedService server = new SelfHostedService(WCFServerUri);
+            using (var host = server.HostService(WCFServerUri))
             {
                 var sw = Stopwatch.StartNew();
                 for (int i = 0; i < 1000; i++)
@@ -33,8 +35,8 @@ namespace ETWControler_uTest
         [Test]
         public void Server_Does_Disconnect()
         {
-            SelfHostedService server = new SelfHostedService(Configuration.Default.WCFServerUri);
-            var host = server.HostService();
+            SelfHostedService server = new SelfHostedService(WCFServerUri);
+            var host = server.HostService(WCFServerUri);
             for (int i = 0; i < 1000; i++)
             {
                 if (i == 500)

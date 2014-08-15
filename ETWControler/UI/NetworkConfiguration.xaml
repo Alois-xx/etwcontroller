@@ -12,20 +12,20 @@
     </Window.Resources>
     <GroupBox Header="Network Settings">
         <StackPanel>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="auto"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="20"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="20"/>
                     <RowDefinition Height="20"/>
                 </Grid.RowDefinitions>
-        <Label Margin="0,-5,0,0" Grid.Column="0">Remote Host</Label>
+                <Label Margin="0,-5,0,0" Grid.Column="0">Remote Host</Label>
                 <TextBox Grid.Column="1" Width="200" Text="{Binding Host}" ToolTip="Remote host to send the hooked keyboard and mouse events." KeyboardNavigation.TabIndex="0" />
-        <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="1">Port Number</Label>
+                <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="1">Port Number</Label>
                 <TextBox Grid.Column="1" Grid.Row="1" Width="200"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Over this port are the captured mouse and keyboard events sent." KeyboardNavigation.TabIndex="1" >
                     <TextBox.Text>
                         <Binding Path="PortNumber" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
@@ -47,8 +47,8 @@
                 </TextBox>
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Width="50" Click="Ok" IsDefault="True" KeyboardNavigation.TabIndex="3" >Ok</Button>
-                <Button Width="50" Margin="10,0,0,0" Click="Cancel" KeyboardNavigation.TabIndex="4" >Cancel</Button>
+                <Button Width="50" Click="Ok" IsDefault="True" KeyboardNavigation.TabIndex="3" Content="Ok" />
+                <Button Width="50" Margin="10,0,0,0" Click="Cancel" KeyboardNavigation.TabIndex="4" Content="Cancel" />
             </StackPanel>
         </StackPanel>
     </GroupBox>

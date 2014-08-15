@@ -32,7 +32,7 @@ namespace ETWControler.Commands
                 var service = new SelfHostedService(Model.TraceServiceUrl);
                 try
                 {
-                    Host = service.HostService();
+                    Host = service.HostService(Model.LocalTraceServiceUrl);
                 }
                 catch (AddressAlreadyInUseException)
                 {
@@ -41,8 +41,8 @@ namespace ETWControler.Commands
             }, Model)
             {
                 StartingError = "Could not start TraceControlerService service. Error: ",
-                Starting = "Starting TraceControlerService" + Model.TraceServiceUrl,
-                Started = "Started TraceContolerService at " + Model.TraceServiceUrl
+                Starting = "Starting TraceControlerService" + Model.LocalTraceServiceUrl,
+                Started = "Started TraceContolerService at " + Model.LocalTraceServiceUrl
             };
         }
 
@@ -81,6 +81,9 @@ namespace ETWControler.Commands
                 Host.Close();
                 Host = null;
             }
+
+            AsyncInitializer = CreateService();
+            AsyncInitializer.Execute();
         }
     }
 }
