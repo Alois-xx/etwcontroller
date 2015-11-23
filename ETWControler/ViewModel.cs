@@ -5,6 +5,7 @@ using ETWControler.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +17,11 @@ namespace ETWControler
 {
     public class ViewModel : NotifyBase
     {
+        // Firewall rule names which open the configured ports during startup of ETWControler and close
+        // them when it exits.
+        const string FirewallWCFRule = "ETWControler WCFPort";
+        const string FirewallSocketRule = "ETWControler SocketPort";
+
         public TaskScheduler UISheduler
         {
             get;
@@ -60,7 +66,11 @@ namespace ETWControler
         public bool CaptureKeyboard
         {
             get { return _CaptureKeyboard;  }
-            set { SetProperty<bool>(ref _CaptureKeyboard, value, "CaptureKeyboard"); }
+            set
+            {
+                SetProperty<bool>(ref _CaptureKeyboard, value, "CaptureKeyboard");
+                Hooker.Hooker.IsKeyboardHooked = CaptureKeyboard;
+            }
         }
 
         public bool _CaptureMouseButtonDown;
@@ -70,7 +80,11 @@ namespace ETWControler
         public bool CaptureMouseButtonDown
         {
             get { return _CaptureMouseButtonDown; }
-            set { SetProperty<bool>(ref _CaptureMouseButtonDown, value, "CaptureMouseButtonDown"); }
+            set
+            {
+                SetProperty<bool>(ref _CaptureMouseButtonDown, value, "CaptureMouseButtonDown");
+                Hooker.Hooker.IsMouseHooked = CaptureMouseButtonDown;
+            }
         }
 
         /// <summary>
@@ -195,6 +209,18 @@ namespace ETWControler
             set { SetProperty<string>(ref _SlowEventMessage, value, "SlowMessage"); }
         }
 
+
+        string _FastEventMessage;
+
+        /// <summary>
+        /// Message is logged when Fast event hot key was pressed to find out 
+        /// </summary>
+        public string FastEventMessage
+        {
+            get { return _FastEventMessage; }
+            set { SetProperty<string>(ref _FastEventMessage, value, "FastMessage"); }
+        }
+
         string _SlowEventHotkey;
 
         /// <summary>
@@ -204,6 +230,13 @@ namespace ETWControler
         {
             get { return _SlowEventHotkey;  }
             set { SetProperty<string>( ref _SlowEventHotkey, value, "SlowEventHotkey"); }
+        }
+
+        string _FastEventHotkey;
+        public string FastEventHotkey
+        {
+            get { return _FastEventHotkey; }
+            set { SetProperty<string>(ref _FastEventHotkey, value, "FastEventHotKey"); }
         }
 
         /// <summary>
@@ -242,6 +275,17 @@ namespace ETWControler
         {
             get { return _ErrorHasOccured; }
             set { SetProperty<bool>(ref _ErrorHasOccured, value); }
+        }
+
+
+        bool _IsKeyboardEncrypted = true;
+        public bool IsKeyBoardEncrypted
+        {
+            get { return _IsKeyboardEncrypted; }
+            set
+            {
+                SetProperty<bool>(ref _IsKeyboardEncrypted, value);
+            }
         }
 
 
@@ -304,12 +348,16 @@ namespace ETWControler
         {
             Dictionary<string, ICommand> commands = new Dictionary<string, ICommand>
             {
-                {"LogSlow", CreateCommand( o => 
+                {"LogSlow", CreateCommand( o =>
                 {
                     Hooker.LogSlowEvent();
                 })},
-                {"Network", CreateCommand( (o)=> 
-                                { 
+                {"LogFast", CreateCommand( o =>
+                {
+                    Hooker.LogFastEvent();
+                })},
+                {"Network", CreateCommand( (o)=>
+                                {
                                     var dlg = new NetworkConfiguration(this);
                                     dlg.ShowDialog();
                                 })},
@@ -321,7 +369,7 @@ namespace ETWControler
                 {"StartTracing", CreateCommand(
                 (o) =>
                 {
-                    if(!this.LocalTraceEnabled && !this.ServerTraceEnabled) 
+                    if(!this.LocalTraceEnabled && !this.ServerTraceEnabled)
                     {
                         MessageBox.Show("Please enable tracing at the remote host and/or on your local machine.");
                         return;
@@ -340,10 +388,10 @@ namespace ETWControler
                         command.Completed = (output) => ServerTraceSettings.ProcessStartComand(output);
                         command.Execute();
                     }
-                } 
+                }
                 )},
                 {"StopTracing", CreateCommand( o => StopTracing())},
-                {"CancelTracing", CreateCommand( o=> 
+                {"CancelTracing", CreateCommand( o=>
                 {
                     if (this.LocalTraceEnabled)
                     {
@@ -357,7 +405,7 @@ namespace ETWControler
                         command.Execute();
                     }
                 })},
-                {"RegisterETWProvider", CreateCommand( o => 
+                {"RegisterETWProvider", CreateCommand( o =>
                     {
                         string output = HookEvents.RegisterItself();
                         SetStatusMessage("Registering ETW provider: " + output);
@@ -366,11 +414,43 @@ namespace ETWControler
                 {"NetworkSendToggle", CreateCommand( o=> NetworkSendState.NetworkSendChangeState() )},
                 {"NetworkReceiveToggle", CreateCommand( o=> NetworkReceiveState.NetworkReceiveChangeState() )},
                 {"ClearStatusMessages", CreateCommand( o => StatusMessages.Clear() )},
+                {"ShowCommandLineOptions", CreateCommand( o=> ShowCommandLineOptions()) },
+                {"About", CreateCommand( _ => AboutBox()) },
 
             };
 
 
             return commands;
+        }
+
+
+        static readonly string CommandLineOptions = "ETWControler [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] [-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
+                                                    "\t-Hide                              Hide main window." + Environment.NewLine +
+                                                    "\t-CaptureKeyboard                   Capture keyboard events." + Environment.NewLine +
+                                                    "\t-ClearKeyboardEvents               By default the keys are all logged as SomeKey. If this is enabled the actual keyboard code is also logged." + Environment.NewLine +
+                                                    "\t                                   Be careful that you do not enter your password while clear keyboard logging is enabled!" + Environment.NewLine +
+                                                    "\t-CaptureMouseClick                 Capture muse click events." + Environment.NewLine +
+                                                    "\t-CaptureMouseMove                  Capture mouse mouse events. " + Environment.NewLine +
+                                                    "\t-SendToServer Server [Port1 Port2] Enable sending events to remote server. If Port1/2 are omitted the configured ports are used. " + Environment.NewLine +
+                                                    "\t-RegisterEtwProvider               Register the HookEvents ETW provider and then exit. This needs to be done only once e.g. during installation." + Environment.NewLine +
+                                                    "\t-UnRegisterEtwProvider             Unregister the HookEvents ETW provider and then exit." + Environment.NewLine +
+                                                    "\t" + Environment.NewLine +
+                                                    "Example:" + Environment.NewLine +
+                                                    "\tETWControler.exe -capturemouseclick -capturekeyboard -sendtoserver localhost" + Environment.NewLine +
+                                                    "This will eanble mouse click, encrypted keyboard tracing which will send to to your local machine again. If you want to hide the window you can add -hide." + Environment.NewLine + 
+                                                    "These commands are useful if you only want to use ETWControler as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
+
+        static readonly string About = String.Format("ETWControler (c) by Alois Kraus 2015 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
+        private void AboutBox()
+        {
+            var window = new HelpWindow("About", About);
+            window.Show();
+        }
+
+        private void ShowCommandLineOptions()
+        {
+            HelpWindow window = new HelpWindow("Command Line Options", CommandLineOptions, true);
+            window.Show();
         }
 
         /// <summary>
@@ -410,7 +490,7 @@ namespace ETWControler
         /// <summary>
         /// Initialize things which must happen on a UI thread.
         /// </summary>
-        public void InitUIDependantVariables()
+        public void InitUIDependantVariables(App args)
         {
             NetworkSendState = new NetworkSendState(this);
             NetworkReceiveState = new NetworkReceiveState(this);
@@ -419,6 +499,35 @@ namespace ETWControler
             if( !HookEvents.IsAlreadyRegistered() )
             {
                 Commands["RegisterETWProvider"].Execute(null);
+            }
+
+            // use settings from command line if present
+            CaptureKeyboard = args.CaptureKeyboard;
+            CaptureMouseButtonDown = args.CaptureMouseButtonDown;
+            CaptureMouseMove = args.CaptureMouseMove;
+            IsKeyBoardEncrypted = !args.IsKeyBoardNotEncrypted;
+
+            if (args.SendToServer != null)
+            {
+                this.Host = args.SendToServer;
+            }
+
+            if (args.SendToServerPort != null)
+            {
+                int portNumber = 0;
+                if (int.TryParse(args.SendToServerPort, out portNumber))
+                {
+                    this.PortNumber = portNumber;
+                }
+            }
+
+            if (args.SendtoServerSecondaryPort != null)
+            {
+                int secondaryPort = 0;
+                if (int.TryParse(args.SendtoServerSecondaryPort, out secondaryPort))
+                {
+                    this.WCFPort = secondaryPort;
+                }
             }
         }
 
@@ -513,6 +622,8 @@ namespace ETWControler
             this.Host = Configuration.Default.Host;
             this.SlowEventHotkey = Configuration.Default.SlowEventHotkey;
             this.SlowEventMessage = Configuration.Default.SlowEventMessage;
+            this.FastEventMessage = Configuration.Default.FastEventMessage;
+            this.FastEventHotkey = Configuration.Default.FastEventHotkey;
             this.LocalTraceSettings.TraceStart = Configuration.Default.LocalTraceStart;
             this.LocalTraceSettings.TraceStop = Configuration.Default.LocalTraceStop;
             this.ServerTraceSettings.TraceStart = Configuration.Default.ServerTraceStart;
@@ -526,18 +637,20 @@ namespace ETWControler
         /// </summary>
         internal void SaveSettings()
         {
-             Configuration.Default.PortNumber = this.PortNumber;
-             Configuration.Default.WCFPort = this.WCFPort;
-             Configuration.Default.Host = this.Host;
-             Configuration.Default.SlowEventHotkey = this.SlowEventHotkey;
-             Configuration.Default.SlowEventMessage = this.SlowEventMessage;
-             Configuration.Default.LocalTraceStart = this.LocalTraceSettings.TraceStart;
-             Configuration.Default.LocalTraceStop = this.LocalTraceSettings.TraceStop;
-             Configuration.Default.ServerTraceStart = this.ServerTraceSettings.TraceStart;
-             Configuration.Default.ServerTraceStop = this.ServerTraceSettings.TraceStop;
-             Configuration.Default.LocalTraceEnabled = this.LocalTraceEnabled;
-             Configuration.Default.ServerTraceEnabled = this.ServerTraceEnabled;
-             Configuration.Default.Save();
+            Configuration.Default.PortNumber = this.PortNumber;
+            Configuration.Default.WCFPort = this.WCFPort;
+            Configuration.Default.Host = this.Host;
+            Configuration.Default.SlowEventHotkey = this.SlowEventHotkey;
+            Configuration.Default.SlowEventMessage = this.SlowEventMessage;
+            Configuration.Default.FastEventHotkey = this.FastEventHotkey;
+            Configuration.Default.FastEventMessage = this.FastEventMessage;
+            Configuration.Default.LocalTraceStart = this.LocalTraceSettings.TraceStart;
+            Configuration.Default.LocalTraceStop = this.LocalTraceSettings.TraceStop;
+            Configuration.Default.ServerTraceStart = this.ServerTraceSettings.TraceStart;
+            Configuration.Default.ServerTraceStop = this.ServerTraceSettings.TraceStop;
+            Configuration.Default.LocalTraceEnabled = this.LocalTraceEnabled;
+            Configuration.Default.ServerTraceEnabled = this.ServerTraceEnabled;
+            Configuration.Default.Save();
         }
 
         /// <summary>
@@ -550,30 +663,36 @@ namespace ETWControler
             return new DelegateCommand(o);
         }
 
+        public void CloseFirwallPorts()
+        {
+            DeleteFirewallRule(FirewallWCFRule);
+            DeleteFirewallRule(FirewallSocketRule);
+        }
 
+        Tuple<int,string> DeleteFirewallRule(string ruleName)
+        {
+            var proc = new RedirectedProcess("netsh.exe", String.Format("Advfirewall Firewall delete Rule Name=\"{0}\"", ruleName));
+            return proc.Start();
+        }
 
         public void OpenFirewallPorts()
         {
             Task.Factory.StartNew(() =>
             {
-                // for WCF services opening 
-                const string ruleName = "ETWControler WCFPort";
-                string openWCFPort =
-                    String.Format("advfirewall firewall add Rule Name = \"{0}\" Dir = in action = allow protocol = TCP localport = {1}", ruleName, this.WCFPort);
+               DeleteFirewallRule(FirewallWCFRule);
+               string openWCFPort =
+                    String.Format("advfirewall firewall add Rule Name = \"{0}\" Dir = in action = allow protocol = TCP localport = {1}", FirewallWCFRule, this.WCFPort);
 
-                new RedirectedProcess("netsh.exe", String.Format("Advfirewall Firewall delete Rule Name=\"{0}\"", ruleName)).Start();
                 var proc = new RedirectedProcess("netsh.exe", openWCFPort);
                 return proc.Start();
             }).ContinueWith( ret => 
-                this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh ouputput: {1}", this.WCFPort, ret.Result.Item2.Trim())), this.UISheduler);
+                this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh output: {1}", this.WCFPort, ret.Result.Item2.Trim())), this.UISheduler);
 
             Task.Factory.StartNew( () =>
              {
-                const string socketRuleName = "ETWControler SocketPort";
+                DeleteFirewallRule(FirewallSocketRule);
                 string openSocketPort =
-                    String.Format("advfirewall firewall add Rule Name = \"{0}\" Dir = in action = allow protocol = TCP localport = {1}", socketRuleName, this.PortNumber);
-
-                new RedirectedProcess("netsh.exe", String.Format("Advfirewall Firewall delete Rule Name=\"{0}\"", socketRuleName)).Start();
+                    String.Format("advfirewall firewall add Rule Name = \"{0}\" Dir = in action = allow protocol = TCP localport = {1}", FirewallSocketRule, this.PortNumber);
                 var proc = new RedirectedProcess("netsh.exe", openSocketPort);
                 return proc.Start();
              }).ContinueWith(( ret =>

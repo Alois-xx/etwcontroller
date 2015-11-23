@@ -12,6 +12,7 @@ namespace ETWControler
     public partial class MainWindow : Window
     {
         Hooker HotKeyHook = new Hooker(); // Use extra hook for the definition of hotkeys
+        App App;
 
         public ViewModel Model
         {
@@ -20,29 +21,32 @@ namespace ETWControler
 
         public MainWindow()
         {
-            Model.InitUIDependantVariables();
+            App = Application.Current as App;
+
+            Model.InitUIDependantVariables(App);
             this.DataContext = this.Model;
             Model.UISheduler = TaskScheduler.FromCurrentSynchronizationContext();
             InitializeComponent();
+
+            if( App.HideWindow )
+            {
+                this.Hide();
+                this.ShowInTaskbar = false;
+            }
             Model.OpenFirewallPorts();
+            if( App.SendToServer != null)
+            {
+                Model.NetworkSendState.NetworkSendChangeState();
+            }
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
+            Model.CloseFirwallPorts();
         }
 
-        private void HookOrUnhookKeyboard(object sender, RoutedEventArgs e)
-        {
-            Model.Hooker.Hooker.IsKeyboardHooked = Model.CaptureKeyboard;
-        }
-
-        private void HookOrUnhookMouse(object sender, RoutedEventArgs e)
-        {
-            Model.Hooker.Hooker.IsMouseHooked = Model.CaptureMouseButtonDown;
-        }
-
-        private void cSignalButton_Click(object sender, RoutedEventArgs e)
+        private void DefineSlowHotkeyClick(object sender, RoutedEventArgs e)
         {
             HotKeyHook.OnMouseButton += (ETWControler.Hooking.MouseButton button, int x, int y) =>
             {
@@ -53,6 +57,22 @@ namespace ETWControler
             {
                 HotKeyHook.DisableHooks();
                 Model.SlowEventHotkey = key.ToString("G");
+            };
+
+            HotKeyHook.EnableHooks();
+        }
+
+        private void DefineFastHotkeyClick(object sender, RoutedEventArgs e)
+        {
+            HotKeyHook.OnMouseButton += (ETWControler.Hooking.MouseButton button, int x, int y) =>
+            {
+                HotKeyHook.DisableHooks();
+                Model.FastEventHotkey = button.ToString("G");
+            };
+            HotKeyHook.OnKeyDown += (Key key) =>
+            {
+                HotKeyHook.DisableHooks();
+                Model.FastEventHotkey = key.ToString("G");
             };
 
             HotKeyHook.EnableHooks();
@@ -87,5 +107,7 @@ namespace ETWControler
         {
             Model.Commands["ShowMessages"].Execute(null);
         }
+
+
     }
 }

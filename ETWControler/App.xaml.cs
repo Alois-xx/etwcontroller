@@ -13,7 +13,7 @@ namespace ETWControler
     /// </summary>
     public partial class App : Application
     {
-        public ViewModel Model = new ViewModel();
+        public ViewModel Model;
 
         public App()
         {
@@ -22,6 +22,127 @@ namespace ETWControler
             Dispatcher.UnhandledException += Dispatcher_UnhandledException;
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
         }
+
+
+        Queue<string> Args;
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            Args = new Queue<string>(e.Args);
+            string currentArg = null;
+            while( ( currentArg = GetNextArg()  ) !=  null )
+            {
+                switch(currentArg)
+                {
+                    case "-hide":
+                        HideWindow = true;
+                    break;
+
+                    case "-capturekeyboard":
+                        CaptureKeyboard = true;
+                    break;
+
+                    case "-capturemouseclick":
+                        CaptureMouseButtonDown = true;
+                        break;
+                    case "-capturemousemove":
+                        CaptureMouseMove = true;
+                        break;
+
+                    case "-sendtoserver":
+                        SendToServer = GetNextArgArgument();
+                        SendToServerPort = GetNextArgArgument();
+                        SendtoServerSecondaryPort = GetNextArgArgument();
+                    break;
+
+                    case "-clearkeyboardevents":
+                        IsKeyBoardNotEncrypted = true;
+                        break;
+
+                    case "-registeretwprovider":
+                        try
+                        {
+                            ETW.HookEvents.RegisterItself();
+                        }
+                        catch(Exception ex)
+                        {
+                            ShowError(ex);
+                        }
+                        Application.Current.Shutdown(100);
+                        break;
+                    case "-unregisteretwprovider":
+                        try
+                        {
+                            ETW.HookEvents.UnregisterItself();
+                        }
+                        catch (Exception ex)
+                        {
+                            ShowError(ex);
+                        }
+                        Application.Current.Shutdown(100);
+
+                        break;
+
+                    default:
+                        ParseError = String.Format("command line argument {0} was not expected", currentArg);
+                    break;
+                }
+
+                if( ParseError != null)
+                {
+                    break;
+                }
+            }
+
+            Model = new ViewModel();
+            base.OnStartup(e);
+        }
+
+        string GetNextArg()
+        {
+            if( Args.Count > 0 )
+            {
+                if( Args.Peek().StartsWith("-") )
+                {
+                    return Args.Dequeue().ToLower();
+                }
+            }
+
+            return null;
+        }
+
+        string GetNextArgArgument()
+        {
+            if (Args.Count > 0)
+            {
+                if (!Args.Peek().StartsWith("-"))
+                {
+                    return Args.Dequeue();
+                }
+            }
+
+            return null;
+        }
+
+
+        public string ParseError
+        {
+            get;
+            set;
+        }
+
+        public bool HideWindow
+        {
+            get; set;
+        }
+        public bool CaptureKeyboard { get; private set; }
+        public bool CaptureMouseButtonDown { get; private set; }
+        public bool CaptureMouseMove { get; private set; }
+        public string SendToServer { get; private set; }
+        public string SendToServerPort { get; private set; }
+        public bool IsKeyBoardNotEncrypted { get; private set; }
+        public bool RegisterETWProviderAndThenExit { get; private set; }
+        public string SendtoServerSecondaryPort { get; private set; }
 
         void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {

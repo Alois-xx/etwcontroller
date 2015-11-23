@@ -2,6 +2,7 @@
 using ETWControler.Hooking;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -23,9 +24,37 @@ namespace ETWControler
             private set;
         }
 
+        /// <summary>
+        /// These keys are still sent as cleartext so we can at least see when the user did press enter, the cursor keys and the F keys.
+        /// </summary>
+        HashSet<string> ClearKeys = new HashSet<string>()
+        {
+            "Up",
+            "Down",
+            "Left",
+            "Right",
+            "Return",
+            "F1",
+            "F2",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "F7",
+            "F8",
+            "F9",
+            "F10",
+            "F11",
+            "F12",
+            "LeftAlt",
+            "LeftShift",
+            "RightShift",
+            "RightAlt",
+            "Tab",
+            "Space"
+        };
+
         ViewModel Model;
-
-
 
         /// <summary>
         /// Each logged slowEvent gets its own number so we can later analyze slowevent 0,1,2 ... 
@@ -83,23 +112,35 @@ namespace ETWControler
             string message = String.Format("Mouse Button {0}, ({1},{2})", button, x, y);
 
             SendToNetwork(id, message);
-            if (strButton == Model.SlowEventHotkey)
+            LogEventIfKeyOrMouseMatches(strButton);
+        }
+
+
+        void LogEventIfKeyOrMouseMatches(string keyboardOrMouseButton)
+        {
+            if (keyboardOrMouseButton == Model.SlowEventHotkey)
             {
                 LogSlowEvent();
+            }
+            else if (keyboardOrMouseButton == Model.FastEventHotkey)
+            {
+                LogFastEvent();
             }
         }
 
         void Hooker_OnKeyDown(Key key)
         {
             string strKey = key.ToString("G");
+            // by default encrypt the logged keyboard key
+            if(this.Model.IsKeyBoardEncrypted && !ClearKeys.Contains(strKey))
+            {
+                strKey = "SomeKey";
+            }
             int id = CurrentId;
             HookEvents.ETWProvider.KeyDown(id, strKey);
             SendToNetwork(id, String.Format("KeyDown {0}", strKey));
 
-            if (Model.SlowEventHotkey == strKey)
-            {
-                LogSlowEvent();
-            }
+            LogEventIfKeyOrMouseMatches(key.ToString("G")); // to match we need the clear string of the keyboard event
         }
 
         public void LogSlowEvent()
@@ -107,6 +148,16 @@ namespace ETWControler
             string msg = String.Format("Slow Event[{0}]: {1}", SlowEventNumber, Model.SlowEventMessage);
             int id = CurrentId;
             HookEvents.ETWProvider.SlowMarker(id, msg);
+            SendToNetwork(id, msg);
+
+            SlowEventNumber++;
+        }
+
+        internal void LogFastEvent()
+        {
+            string msg = String.Format("Fast Event[{0}]: {1}", SlowEventNumber, Model.FastEventMessage);
+            int id = CurrentId;
+            HookEvents.ETWProvider.FastMarker(id, msg);
             SendToNetwork(id, msg);
 
             SlowEventNumber++;
@@ -133,5 +184,7 @@ namespace ETWControler
                 Model.NetworkSendEnabled = false;
             }
         }
+
+
     }
 }

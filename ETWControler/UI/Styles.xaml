@@ -3,22 +3,22 @@
                     xmlns:l="clr-namespace:ETWControler"
                     >
     <l:StringIsNullOrEmptyConverter x:Key="StringIsNullOrEmpty" />
-    <Style x:Key="enableMouseMoveHook" TargetType="{x:Type CheckBox}">
+    <Style x:Key="enableSlowMessage" TargetType="{x:Type TextBox}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding ElementName=cHookMouse, Path=IsChecked}" Value="True">
-                <Setter Property="CheckBox.IsEnabled" Value="True"/>
+            <DataTrigger Binding="{Binding ElementName=cSlowHotkyeTextBox, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="True">
+                <Setter Property="TextBox.IsEnabled" Value="False"/>
             </DataTrigger>
-            <DataTrigger Binding="{Binding ElementName=cHookMouse, Path=IsChecked}"  Value="False">
-                <Setter Property="CheckBox.IsEnabled" Value="False"/>
+            <DataTrigger Binding="{Binding ElementName=cSlowHotkyeTextBox, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="False">
+                <Setter Property="TextBox.IsEnabled" Value="True"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
-    <Style x:Key="enableSlowMessage" TargetType="{x:Type TextBox}">
+    <Style x:Key="enableFastMessage" TargetType="{x:Type TextBox}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding ElementName=cSignalKey, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="True">
+            <DataTrigger Binding="{Binding ElementName=cFastHotkeyTextBox, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="True">
                 <Setter Property="TextBox.IsEnabled" Value="False"/>
             </DataTrigger>
-            <DataTrigger Binding="{Binding ElementName=cSignalKey, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="False">
+            <DataTrigger Binding="{Binding ElementName=cFastHotkeyTextBox, Path=Text, Converter={StaticResource StringIsNullOrEmpty}}" Value="False">
                 <Setter Property="TextBox.IsEnabled" Value="True"/>
             </DataTrigger>
         </Style.Triggers>

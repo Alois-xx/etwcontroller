@@ -82,6 +82,10 @@ namespace ETWControler.Hooking
         {
             IsKeyboardHooked = false;
             IsMouseHooked = false;
+            OnMouseButton = null;
+            OnKeyDown = null;
+            OnMouseWheel = null;
+            OnMouseMove = null;
         }
 
         public void EnableHooks()
@@ -125,7 +129,10 @@ namespace ETWControler.Hooking
                     var key = KeyInterop.KeyFromVirtualKey((int)keyboardData.vkCode);
                     if (wInt == WM.KEYDOWN || wInt == WM.SYSKEYDOWN && OnKeyDown != null)
                     {
-                        OnKeyDown(key);
+                        if (OnKeyDown != null)
+                        {
+                            OnKeyDown(key);
+                        }
                     }
                     else
                     {
@@ -162,7 +169,6 @@ namespace ETWControler.Hooking
                         if (OnMouseMove != null)
                         {
                             OnMouseMove(mouseData.pt.x, mouseData.pt.y);
-                           
                         }
                         else
                         {
@@ -171,11 +177,17 @@ namespace ETWControler.Hooking
                     }
                     else if (wParami == WM.MOUSEWHEEL && OnMouseWheel != null)
                     {
-                        OnMouseWheel(wheelDelta, mouseData.pt.x, mouseData.pt.y);
+                        if (OnMouseWheel != null)
+                        {
+                            OnMouseWheel(wheelDelta, mouseData.pt.x, mouseData.pt.y);
+                        }
                     }
                     else if( OnMouseButton != null)
                     {
-                        OnMouseButton(mouseButton, mouseData.pt.x, mouseData.pt.y);
+                        if (OnMouseButton != null)
+                        {
+                            OnMouseButton(mouseButton, mouseData.pt.x, mouseData.pt.y);
+                        }
                     }
                 }
             }

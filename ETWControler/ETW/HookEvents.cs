@@ -25,7 +25,7 @@ namespace ETWControler.ETW
         /// <summary>
         /// ctor
         /// </summary>
-        HookEvents():base(true)
+        HookEvents() : base(true)
         {
         }
 
@@ -36,7 +36,7 @@ namespace ETWControler.ETW
         public static bool IsAlreadyRegistered()
         {
             string fullExeName = Process.GetCurrentProcess().MainModule.FileName;
-            string manifestName = Path.ChangeExtension(fullExeName,null) + "." + typeof(HookEvents).Name + ".etwManifest.man";
+            string manifestName = Path.ChangeExtension(fullExeName, null) + "." + typeof(HookEvents).Name + ".etwManifest.man";
             return File.Exists(manifestName);
         }
 
@@ -51,6 +51,23 @@ namespace ETWControler.ETW
             {
                 FileName = "eventregister",
                 Arguments = Assembly.GetExecutingAssembly().Location,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+            };
+
+            var register = Process.Start(info);
+            string output = register.StandardOutput.ReadToEnd();
+            register.WaitForExit();
+            return output;
+        }
+
+        public static string UnregisterItself()
+        {
+            ProcessStartInfo info = new ProcessStartInfo()
+            {
+                FileName = "eventregister",
+                Arguments = "-uninstall " + Assembly.GetExecutingAssembly().Location,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
@@ -121,6 +138,16 @@ namespace ETWControler.ETW
             WriteEvent(6, EventNumber, NetworkMessage);
         }
 
+        /// <summary>
+        /// Write a fast event which is fired when the hotkey (mouse or keyboard) is pressed to signal a fast condition noticed by the user.
+        /// </summary>
+        /// <param name="SlowMessage">Message describing the observed slowness</param>
+        [Event(7, Level = EventLevel.LogAlways, Opcode = EventOpcode.Info, Task = Tasks.Fast)]
+        public void FastMarker(int EventNumber, string FastMesage)
+        {
+            WriteEvent(7, EventNumber, FastMesage);
+        }
+
         class Tasks 
         {
             public const EventTask Slow = (EventTask)0x1;
@@ -130,7 +157,7 @@ namespace ETWControler.ETW
 
             public const EventTask KeyDown = (EventTask)        0x5;
             public const EventTask RemoteReceived = (EventTask) 0x6;
-
+            public const EventTask Fast = (EventTask)0x7;
         }
     }
 

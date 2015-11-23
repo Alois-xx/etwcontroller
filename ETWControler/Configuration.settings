@@ -15,7 +15,7 @@
       <Value Profile="(Default)">Here it was slow</Value>
     </Setting>
     <Setting Name="SlowEventHotkey" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">Insert</Value>
     </Setting>
     <Setting Name="LocalTraceStart" Type="System.String" Scope="User">
       <Value Profile="(Default)">-start GeneralProfile</Value>
@@ -34,6 +34,12 @@
     </Setting>
     <Setting Name="ServerTraceEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="FastEventMessage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Here it was fast again</Value>
+    </Setting>
+    <Setting Name="FastEventHotkey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Snapshot</Value>
     </Setting>
   </Settings>
 </SettingsFile>

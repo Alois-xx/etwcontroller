@@ -1,0 +1,15 @@
+﻿<Window x:Class="ETWControler.UI.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ETWControler.UI"
+        mc:Ignorable="d"
+        Title="Help" Height="150" Width="800" MinHeight="100" MinWidth="600" SizeToContent="Height">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <RichTextBox Grid.Row="0"  Name="cText" IsReadOnly="True" />
+    </Grid>
+</Window>

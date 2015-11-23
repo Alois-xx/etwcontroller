@@ -6,7 +6,7 @@
         xmlns:ui="clr-namespace:ETWControler.UI"
         MinHeight="440"
         MinWidth="640"
-        Title="ETW Controler And Logger" Height="440" Width="640.5" Closing="Window_Closing">
+        Title="ETW Controler And Logger" Height="440" Width="773.5" Closing="Window_Closing">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -22,6 +22,11 @@
                 <MenuItem Header="Network" Command="{Binding Commands[Network]}"/>
                 <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
             </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="Command line options" Command="{Binding Commands[ShowCommandLineOptions]}"/>
+                <MenuItem Header="About" Command="{Binding Commands[About]}"/>
+            </MenuItem>
+
         </Menu>
         <StatusBar MaxHeight="100"
             HorizontalAlignment="Stretch"
@@ -64,47 +69,65 @@
             <TabItem Header="Network And Capturing">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="130"/>
+                        <RowDefinition Height="150"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ScrollViewer>
-                        <ItemsControl>
-                            <Expander Header="Capture Keyboard And Mouse" IsExpanded="True" Grid.Row="0" Expanded="Expander_Expanded">
-                                <Grid Height="82">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="58" />
-                                        <ColumnDefinition Width="399"/>
-                                        <ColumnDefinition Width="200" />
-                                    </Grid.ColumnDefinitions>
-                                    <CheckBox x:Name="cHookKeyboard" Content="Capture Keyboard" HorizontalAlignment="Left" Margin="6,8,0,0" VerticalAlignment="Top" IsChecked="{Binding CaptureKeyboard}" Checked="HookOrUnhookKeyboard" Unchecked="HookOrUnhookKeyboard" Height="15" Width="146" Grid.ColumnSpan="2" ToolTip="Log all deyboard down events to ETW."/>
-                                    <CheckBox x:Name="cHookMouse" Content="Capture Mouse Clicks" HorizontalAlignment="Left" Margin="6,28,0,0" VerticalAlignment="Top" IsChecked="{Binding CaptureMouseButtonDown}" Width="158" Height="16" Checked="HookOrUnhookMouse" Unchecked="HookOrUnhookMouse" Grid.ColumnSpan="2" ToolTip="Log all mouse button down events to ETW."/>
-                                    <CheckBox x:Name="cCaptureMouseMove" Content="Capture Mouse Move" Style="{StaticResource enableMouseMoveHook}" HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseMove}" Margin="28,49,0,0" VerticalAlignment="Top" Width="150" Height="15" Grid.ColumnSpan="2" ToolTip="Log all mouse move events to ETW. There can be many of them!"/>
-                                    <Button  Style="{StaticResource GlassButton}" Width="28" Height="23" Background="#FF1DB97A"  Margin="124,3,0,0" x:Name="cSignalButton" Content="Slow" HorizontalAlignment="Left" VerticalAlignment="Top"  Click="cSignalButton_Click" ToolTip="Define hotkey to log a slow event with Slow Message text below." RenderTransformOrigin="0.15,3.217" Grid.Column="1"/>
-                                    <TextBox x:Name="cSignalKey" HorizontalAlignment="Left" Height="25" Margin="157,3,0,0" TextWrapping="Wrap" Text="{Binding SlowEventHotkey}" VerticalAlignment="Top" Width="130" IsEnabled="False" Grid.Column="1" ToolTip="Press the Slow Button to define a hotkey for the slow event."/>
-                                    <TextBox x:Name="cSlowMessageText"  Text="{Binding SlowEventMessage}"  Style="{StaticResource enableSlowMessage}" Height="25" Margin="183,54,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="258" Grid.Column="1" Grid.ColumnSpan="2" ToolTip="Log this message when the Slow event key was pressed." HorizontalAlignment="Left" />
-                                    <Label Content="Log Slow Event When Key Is Pressed" HorizontalAlignment="Left" Margin="124,28,0,0" VerticalAlignment="Top" Width="275" Height="26" Grid.Column="1"/>
-                                    <Label Content="Message" HorizontalAlignment="Left" Margin="124,49,0,0" VerticalAlignment="Top" Width="71" Height="28" Grid.Column="1" RenderTransformOrigin="0.491,1.533" ToolTip="Log this message when the Slow event key was pressed."/>
-                                    <Button IsDefault="True" Command="{Binding Commands[LogSlow]}" Content="Log Slow Event" Grid.Column="2" Margin="51,54,62,5" ToolTip="Log directly the slow event message to ETW."/>
-                                </Grid>
-                            </Expander>
-                            <Grid>
+                    <Expander Header="Capture keyboard and mouse" IsExpanded="True" Grid.Row="0" Expanded="Expander_Expanded" >
+                        <Grid Height="120">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="90"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Capture keyboard" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureKeyboard}" Height="15" ToolTip="Log all deyboard down events to ETW."/>
+                            <CheckBox Grid.Row="0" Grid.Column="1" Content="Capture mouse clicks" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureMouseButtonDown}" Height="16" Grid.ColumnSpan="2" ToolTip="Log all mouse button down events to ETW."/>
+                            <CheckBox Grid.Row="0" Grid.Column="3" Content="Capture mouse move"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseMove}"  VerticalAlignment="Top" Height="15" Grid.ColumnSpan="2" ToolTip="Log all mouse move events to ETW. There can be many of them!"/>
+                            <CheckBox Grid.Row="1" Grid.Column="0"  Content="Encrypt keyboard keys" IsChecked="{Binding IsKeyBoardEncrypted}" ToolTip="Enabled by default so you do not record passwords or other sensitive information by accident. Only a generic SomeKey mesage is logged if checked. But the keys F1-F10, Enter, Space, Alt, Tab, Shift and the cursor keys are still preserved." />
+                            <Grid Grid.Row="2" Grid.ColumnSpan="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="30"/>
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="250"/>
+                                    <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Margin="5,0,0,0">Send Captured Data Over Network</TextBlock>
-                                <CheckBox Command="{Binding Commands[NetworkSendToggle]}"  Content="Start Sending" IsChecked="{Binding NetworkSendEnabled}"  Grid.Column="1"  Margin="5,0,0,0"/>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Log Slow message when key is pressed" HorizontalAlignment="Left"  Height="28"  ToolTip="Log this message when the Slow event key was pressed."/>
+                                <Button  Grid.Row="0" Grid.Column="1" Style="{StaticResource GlassButton}" Width="28" Height="23" Background="#FF1DB97A"  Content="Slow" HorizontalAlignment="Left" VerticalAlignment="Top"  Click="DefineSlowHotkeyClick" ToolTip="Define hotkey to log a Slow event with message text to the right." />
+                                <TextBox Grid.Row="0" Grid.Column="2" Height="25" Width="130" TextWrapping="Wrap" Name="cSlowHotkyeTextBox" Text="{Binding SlowEventHotkey}"  IsEnabled="False"  ToolTip="Press the Slow Button to define a hotkey for the slow event."/>
+                                <TextBox Grid.Row="0" Grid.Column="3" Width="240" HorizontalAlignment="Left" Height="25" Text="{Binding SlowEventMessage}"  Style="{StaticResource enableSlowMessage}" ToolTip="Log this message when the Slow event key was pressed."  />
+                                <Button Grid.Row="0" Grid.Column="4" Width="50" HorizontalAlignment="Left" Height="25" IsDefault="True" Command="{Binding Commands[LogSlow]}" Content="Log" ToolTip="Log directly the slow event message to ETW."/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="Log Fast message when key is pressed" HorizontalAlignment="Left"  Height="28"  ToolTip="Log this message when the Fast event key was pressed."/>
+                                <Button  Grid.Row="1" Grid.Column="1" Style="{StaticResource GlassButton}" Width="28" Height="23" Background="#FF1DB97A"  Content="Fast" HorizontalAlignment="Left" VerticalAlignment="Top"  Click="DefineFastHotkeyClick" ToolTip="Define hotkey to log a Fast event with message text to the right." />
+                                <TextBox Grid.Row="1" Grid.Column="2" Height="25" Width="130" TextWrapping="Wrap" Name="cFastHotkeyTextBox" Text="{Binding FastEventHotkey}"  IsEnabled="False"  ToolTip="Press the Fast button to define a hotkey for the Fast event."/>
+                                <TextBox Grid.Row="1" Grid.Column="3" Width="240" HorizontalAlignment="Left" Height="25" Text="{Binding FastEventMessage}"  Style="{StaticResource enableFastMessage}" ToolTip="Log this message when the Fast event key was pressed."  />
+                                <Button Grid.Row="1" Grid.Column="4" Width="50" HorizontalAlignment="Left" Height="25"  Command="{Binding Commands[LogFast]}" Content="Log" ToolTip="Log directly the slow event message to ETW."/>
+
+
+                                <Grid Grid.Row="2" Grid.ColumnSpan="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="250"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="150"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Margin="5,0,0,0">Send captured data over network</TextBlock>
+                                    <CheckBox Grid.Column="1"  Command="{Binding Commands[NetworkSendToggle]}"  Content="Start sending" IsChecked="{Binding NetworkSendEnabled}"   Margin="5,0,0,0"/>
+                                </Grid>
                             </Grid>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="138"/>
-                                    <ColumnDefinition Width="113"/>
-                                    <ColumnDefinition Width="200"/>
-                                </Grid.ColumnDefinitions>
-                            </Grid>
-                        </ItemsControl>
-                    </ScrollViewer>
+                        </Grid>
+                    </Expander>
+
                     <GridSplitter HorizontalAlignment="Stretch" 
                   VerticalAlignment="Top" 
                   Grid.Row="1" ResizeBehavior="PreviousAndNext"
