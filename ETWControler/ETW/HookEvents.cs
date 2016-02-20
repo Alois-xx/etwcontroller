@@ -50,7 +50,7 @@ namespace ETWControler.ETW
             ProcessStartInfo info = new ProcessStartInfo()
             {
                 FileName = "eventregister",
-                Arguments = Assembly.GetExecutingAssembly().Location,
+                Arguments = String.Format("\"{0}\"", Assembly.GetExecutingAssembly().Location),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
@@ -67,7 +67,7 @@ namespace ETWControler.ETW
             ProcessStartInfo info = new ProcessStartInfo()
             {
                 FileName = "eventregister",
-                Arguments = "-uninstall " + Assembly.GetExecutingAssembly().Location,
+                Arguments = "-uninstall " + String.Format("\"{0}\"", Assembly.GetExecutingAssembly().Location),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
