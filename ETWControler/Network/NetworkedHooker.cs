@@ -1,11 +1,13 @@
 ﻿using ETWControler.ETW;
 using ETWControler.Hooking;
+using ETWControler.Screenshots;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ETWControler
@@ -55,6 +57,11 @@ namespace ETWControler
         };
 
         ViewModel Model;
+        int ConcurrentScreenshots = 0;
+
+        ScreenshotRecorder Recorder = null;
+
+
 
         /// <summary>
         /// Each logged slowEvent gets its own number so we can later analyze slowevent 0,1,2 ... 
@@ -79,12 +86,38 @@ namespace ETWControler
                 HookEvents.RegisterItself();
             }
 
+            Model.PropertyChanged += (a, b) =>
+            {
+                if (b.PropertyName == ViewModel.CaptureScreenShotsProperty)
+                {
+                    if (Recorder != null)
+                    {
+                        Recorder.Dispose();
+                        Recorder = null;
+                    }
+
+                    if (Model.CaptureScreenShots == true)
+                    {
+                        EnableRecorder();
+                    }
+                }
+            };
+
+            if( Model.CaptureScreenShots )
+            {
+                EnableRecorder();
+            }
+
             Hooker.OnKeyDown += Hooker_OnKeyDown;
             Hooker.OnMouseButton += Hooker_OnMouseButton;
             Hooker.OnMouseMove += Hooker_OnMouseMove;
             Hooker.OnMouseWheel += Hooker_OnMouseWheel;
         }
 
+        private void EnableRecorder()
+        {
+            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory);
+        }
 
         void Hooker_OnMouseWheel(int wheelDelta, int x, int y)
         {
@@ -111,9 +144,36 @@ namespace ETWControler
             HookEvents.ETWProvider.MouseButton(id, strButton, x, y);
             string message = String.Format("Mouse Button {0}, ({1},{2})", button, x, y);
 
+            if( strButton.Contains("Down") && Model.CaptureScreenShots && Recorder != null)
+            {
+                Task.Factory.StartNew<string>(() =>
+                {
+                    if (Interlocked.Increment(ref ConcurrentScreenshots) == 1) // prevent too many concurrent screenshots
+                   {
+                        try
+                        {
+                            return Recorder.TakeScreenshot(x, y, id.ToString(), String.Format("{0}After500ms", id));
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref ConcurrentScreenshots);
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }).ContinueWith(screenshotTask =>
+                {
+                    Model.ReceivedMessages.Add(String.Format("Saved Screenshot to {0}", screenshotTask.Result));
+
+                }, CancellationToken.None, TaskContinuationOptions.None, Model.UISheduler);
+            }
+
             SendToNetwork(id, message);
             LogEventIfKeyOrMouseMatches(strButton);
         }
+
 
 
         void LogEventIfKeyOrMouseMatches(string keyboardOrMouseButton)
@@ -138,6 +198,7 @@ namespace ETWControler
             }
             int id = CurrentId;
             HookEvents.ETWProvider.KeyDown(id, strKey);
+
             SendToNetwork(id, String.Format("KeyDown {0}", strKey));
 
             LogEventIfKeyOrMouseMatches(key.ToString("G")); // to match we need the clear string of the keyboard event

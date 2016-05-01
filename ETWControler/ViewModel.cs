@@ -5,6 +5,7 @@ using ETWControler.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -105,6 +106,16 @@ namespace ETWControler
                 return String.Format("http://localhost:{1}/TraceControlerService", Host, WCFPort);
             }
         }
+
+        public const string CaptureScreenShotsProperty = "CaptureScreenShots";
+
+        public bool _CaptureScreenShots;
+        public bool CaptureScreenShots
+        {
+            get { return _CaptureScreenShots; }
+            set { SetProperty<bool>(ref _CaptureScreenShots, value, CaptureScreenShotsProperty); }
+        }
+        
 
         public bool _CaptureMouseMove;
         /// <summary>
@@ -335,6 +346,17 @@ namespace ETWControler
             set;
         }
 
+
+        public string ScreenshotDirectory { get { return Environment.ExpandEnvironmentVariables(ScreenshotDirectoryUnexpanded); } }
+
+        public string ScreenshotDirectoryUnexpanded { get; set; }
+
+        /// <summary>
+        /// True if MainWindow ctor did run without an exception. This flag is used 
+        /// to decide if early errors are shown in an extra message box or the status bar
+        /// </summary>
+        public bool MainWindowInitialized { get; internal set; }
+
         static Brush Red = new SolidColorBrush(Color.FromRgb(255, 0, 0));
         static Brush Black = new SolidColorBrush(Color.FromRgb(0, 0, 0));
         TraceControlerService LocalTraceControler;
@@ -431,6 +453,8 @@ namespace ETWControler
                                                     "\t                                   Be careful that you do not enter your password while clear keyboard logging is enabled!" + Environment.NewLine +
                                                     "\t-CaptureMouseClick                 Capture muse click events." + Environment.NewLine +
                                                     "\t-CaptureMouseMove                  Capture mouse mouse events. " + Environment.NewLine +
+                                      String.Format("\t-DisableCaptureScreenshots         Disables the save a screenshot feature where for each mouse click to the directory {0} or specify an explicit locaton with -ScreenshotDir xxx", Configuration.Default.ScreenshotDirectory) + Environment.NewLine +
+                                                    "\t-ScreenshotDir xxxx                Directory to where the screenshots are saved if -CaptureScreenshots is set" + Environment.NewLine  +
                                                     "\t-SendToServer Server [Port1 Port2] Enable sending events to remote server. If Port1/2 are omitted the configured ports are used. " + Environment.NewLine +
                                                     "\t-RegisterEtwProvider               Register the HookEvents ETW provider and then exit. This needs to be done only once e.g. during installation." + Environment.NewLine +
                                                     "\t-UnRegisterEtwProvider             Unregister the HookEvents ETW provider and then exit." + Environment.NewLine +
@@ -505,6 +529,9 @@ namespace ETWControler
             CaptureKeyboard = args.CaptureKeyboard;
             CaptureMouseButtonDown = args.CaptureMouseButtonDown;
             CaptureMouseMove = args.CaptureMouseMove;
+            ScreenshotDirectoryUnexpanded = (args.ScreenshotDirectory ?? Configuration.Default.ScreenshotDirectory);
+            CaptureScreenShots = args.CaptureScreenshots;
+
             IsKeyBoardEncrypted = !args.IsKeyBoardNotEncrypted;
 
             if (args.SendToServer != null)

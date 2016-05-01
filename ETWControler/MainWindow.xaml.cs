@@ -38,6 +38,8 @@ namespace ETWControler
             {
                 Model.NetworkSendState.NetworkSendChangeState();
             }
+
+            Model.MainWindowInitialized = true;
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

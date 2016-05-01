@@ -100,24 +100,20 @@
     <Reference Include="Microsoft.Diagnostics.Tracing.EventSource, Version=1.0.16.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Diagnostics.Tracing.EventSource.1.0.16\lib\net40\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Diagnostics.Tracing.TraceEvent, Version=1.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Diagnostics.Tracing.TraceEvent.1.0.5\lib\net40\Microsoft.Diagnostics.Tracing.TraceEvent.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -147,11 +143,12 @@
     <Compile Include="Network\NetworkProtocolType.cs" />
     <Compile Include="Network\SelfHostedService.cs" />
     <Compile Include="RedirectedProcess.cs" />
+    <Compile Include="Screenshots\ScreenshotRecorder.cs" />
     <Compile Include="UI\HelpWindow.xaml.cs">
       <DependentUpon>HelpWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\NetworkConfiguration.xaml.cs">
-      <DependentUpon>NetworkConfiguration.xaml</DependentUpon>
+    <Compile Include="UI\Configuration.xaml.cs">
+      <DependentUpon>Configuration.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\NotifyBase.cs" />
     <Compile Include="UI\OutputWindow.xaml.cs">
@@ -193,7 +190,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\NetworkConfiguration.xaml">
+    <Page Include="UI\Configuration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -253,6 +250,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+    <None Include="Resources\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
+    <None Include="Resources\Microsoft.Diagnostics.Tracing.EventSource.dll" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="ApplicationIcon.ico" />

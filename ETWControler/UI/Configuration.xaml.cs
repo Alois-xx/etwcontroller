@@ -41,6 +41,8 @@ namespace ETWControler.UI
             Model.NetworkSendState.RestartIfStarted();
             Model.WCFHost.Restart();
             Model.OpenFirewallPorts();
+            Configuration.Default.ScreenshotDirectory = Model.ScreenshotDirectoryUnexpanded;
+            Task.Factory.StartNew(() => Configuration.Default.Save());
             this.Close();
         }
 

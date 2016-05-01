@@ -41,5 +41,8 @@
     <Setting Name="FastEventHotkey" Type="System.String" Scope="User">
       <Value Profile="(Default)">Snapshot</Value>
     </Setting>
+    <Setting Name="ScreenshotDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%temp%\ETWControlerScreenshots</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

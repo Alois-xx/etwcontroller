@@ -1,8 +1,10 @@
-﻿using System;
+﻿using ETWControler.Properties;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -21,8 +23,35 @@ namespace ETWControler
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Dispatcher.UnhandledException += Dispatcher_UnhandledException;
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            CaptureScreenshots = true;
         }
 
+        /// <summary>
+        /// Embedd external assemblies in exe so we can deploy a single executable without the fear that if several
+        /// tools share the same assembly in different versions that one tool will break.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            Assembly lret = null;
+
+            string name = new AssemblyName(args.Name).Name.Replace('.', '_');
+
+            // Get from Resources the generated properties which must match a missing assembly which we have embedded.
+            foreach (var property in typeof(Resources).GetProperties(System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.Public|BindingFlags.NonPublic))
+            {
+                if(property.Name == name)
+                {
+                    var assemblyBytes = (byte[])property.GetValue(null, null);
+                    lret = Assembly.Load(assemblyBytes);
+                }
+            }
+
+            return lret;
+        }
 
         Queue<string> Args;
 
@@ -36,11 +65,18 @@ namespace ETWControler
                 {
                     case "-hide":
                         HideWindow = true;
-                    break;
+                        break;
+
+                    case "-disablecapturescreenshots":
+                        CaptureScreenshots = false;
+                        break;
+                    case "-screenshotdir":
+                        ScreenshotDirectory = GetNextArgArgument();
+                        break;
 
                     case "-capturekeyboard":
                         CaptureKeyboard = true;
-                    break;
+                        break;
 
                     case "-capturemouseclick":
                         CaptureMouseButtonDown = true;
@@ -53,7 +89,7 @@ namespace ETWControler
                         SendToServer = GetNextArgArgument();
                         SendToServerPort = GetNextArgArgument();
                         SendtoServerSecondaryPort = GetNextArgArgument();
-                    break;
+                        break;
 
                     case "-clearkeyboardevents":
                         IsKeyBoardNotEncrypted = true;
@@ -84,14 +120,9 @@ namespace ETWControler
                         break;
 
                     default:
-                        ParseError = String.Format("command line argument {0} was not expected", currentArg);
-                    break;
+                        throw new InvalidOperationException(String.Format("Command line argument {0} was not expected", currentArg));
                 }
 
-                if( ParseError != null)
-                {
-                    break;
-                }
             }
 
             Model = new ViewModel();
@@ -124,13 +155,6 @@ namespace ETWControler
             return null;
         }
 
-
-        public string ParseError
-        {
-            get;
-            set;
-        }
-
         public bool HideWindow
         {
             get; set;
@@ -143,21 +167,42 @@ namespace ETWControler
         public bool IsKeyBoardNotEncrypted { get; private set; }
         public bool RegisterETWProviderAndThenExit { get; private set; }
         public string SendtoServerSecondaryPort { get; private set; }
+        public bool CaptureScreenshots { get; internal set; }
+        public string ScreenshotDirectory { get; private set; }
 
         void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Model.StatusMessages.Add(new UI.StatusMessage { MessageText = "Unobserved Task Exception", Data = e.Exception });
+            if (Model != null && Model.MainWindowInitialized)
+            {
+                Model.StatusMessages.Add(new UI.StatusMessage { MessageText = "Unobserved Task Exception", Data = e.Exception });
+            }
+            else
+            {
+                ShowError(e.Exception);
+                Environment.Exit(500);
+            }
         }
 
         void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            Model.StatusMessages.Add(new UI.StatusMessage { MessageText = "Exception in Dispatcher", Data = e.Exception });
-            e.Handled = true;
+            if (Model != null && Model.MainWindowInitialized)
+            {
+                Model.StatusMessages.Add(new UI.StatusMessage { MessageText = "Exception in Dispatcher", Data = e.Exception });
+                e.Handled = true;
+            }
+            else
+            {
+                ShowError(e.Exception);
+                Environment.Exit(500);
+            }
         }
 
         void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Model.StatusMessages.Add(new UI.StatusMessage { MessageText = "Unhandled", Data = e.ExceptionObject });
+            if (Model != null && Model.MainWindowInitialized)
+            {
+                Model.StatusMessages.Add(new UI.StatusMessage { MessageText = "Unhandled", Data = e.ExceptionObject });
+            }
             ShowError((Exception) e.ExceptionObject);
         }
 

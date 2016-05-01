@@ -148,6 +148,17 @@ namespace ETWControler.ETW
             WriteEvent(7, EventNumber, FastMesage);
         }
 
+        /// <summary>
+        /// Write a fast event which is fired when the hotkey (mouse or keyboard) is pressed to signal a fast condition noticed by the user.
+        /// </summary>
+        /// <param name="SlowMessage">Message describing the observed slowness</param>
+        [Event(8, Level = EventLevel.LogAlways, Opcode = EventOpcode.Info, Task = Tasks.Screenshot)]
+        public void Screenshot(string ScreenshotDescription, string ScreenshotFileName)
+        {
+            WriteEvent(8, ScreenshotDescription, ScreenshotFileName);
+        }
+
+
         class Tasks 
         {
             public const EventTask Slow = (EventTask)0x1;
@@ -158,6 +169,8 @@ namespace ETWControler.ETW
             public const EventTask KeyDown = (EventTask)        0x5;
             public const EventTask RemoteReceived = (EventTask) 0x6;
             public const EventTask Fast = (EventTask)0x7;
+            public const EventTask Screenshot = (EventTask)0x8;
+
         }
     }
 
