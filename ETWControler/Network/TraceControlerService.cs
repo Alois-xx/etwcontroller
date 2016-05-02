@@ -35,7 +35,16 @@ namespace ETWControler
         /// <returns>stdout and stderr of executed command when it has finished.</returns>
         public Tuple<int,string> ExecuteWPRCommand(string wpaArgs)
         {
-            RedirectedProcess proc = new RedirectedProcess("wpr.exe", Environment.ExpandEnvironmentVariables(wpaArgs));
+            RedirectedProcess proc = null;
+            wpaArgs = Environment.ExpandEnvironmentVariables(wpaArgs);
+            if (wpaArgs.StartsWith(ViewModel.CustomCommandPrefix))
+            {
+                proc = new RedirectedProcess("cmd.exe", $"/C {wpaArgs.Substring(ViewModel.CustomCommandPrefix.Length)}");
+            }
+            else
+            {
+                proc = new RedirectedProcess("wpr.exe", wpaArgs);
+            }
             var lret = proc.Start(ThisExeStartDirectory);
             return lret;
         }

@@ -21,13 +21,13 @@
       <Value Profile="(Default)">-start GeneralProfile</Value>
     </Setting>
     <Setting Name="LocalTraceStop" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-stop c:\temp\etwcontroler.etl</Value>
+      <Value Profile="(Default)">-stop $FileName</Value>
     </Setting>
     <Setting Name="ServerTraceStart" Type="System.String" Scope="User">
       <Value Profile="(Default)">-start GeneralProfile</Value>
     </Setting>
     <Setting Name="ServerTraceStop" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-stop c:\temp\etwServercontroler.etl</Value>
+      <Value Profile="(Default)">-stop $FileName</Value>
     </Setting>
     <Setting Name="LocalTraceEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -43,6 +43,15 @@
     </Setting>
     <Setting Name="ScreenshotDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">%temp%\ETWControlerScreenshots</Value>
+    </Setting>
+    <Setting Name="LocalTraceCancel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-cancel</Value>
+    </Setting>
+    <Setting Name="ServerTraceCancel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-cancel</Value>
+    </Setting>
+    <Setting Name="TraceFileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c:\temp\etwControler%COMPUTERNAME%.etl</Value>
     </Setting>
   </Settings>
 </SettingsFile>

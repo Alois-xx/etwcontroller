@@ -1,30 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ETWControler.UI
 {
     /// <summary>
-    /// Interaction logic for NetworkConfiguration.xaml
+    /// Interaction logic for ETWControlerConfiguration.xaml
     /// </summary>
-    public partial class NetworkConfiguration : Window
+    public partial class ETWControlerConfiguration : Window
     {
         ViewModel Model;
         string BackupHost;
         int BackupPortNumber;
         int BackupWCFPort;
 
-        public NetworkConfiguration(ViewModel model)
+        public ETWControlerConfiguration(ViewModel model)
         {
             BackupHost = model.Host;
             BackupPortNumber = model.PortNumber;

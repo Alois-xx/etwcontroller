@@ -18,6 +18,11 @@ namespace ETWControler.UI
     {
         const int Wpr_Code_NoTraceRunning = -984076288;
 
+        OutputWindow OutputWindow;
+
+        ViewModel RootModel;
+
+
         string _TraceStart;
         /// <summary>
         /// WPR trace start command line arguments
@@ -25,7 +30,7 @@ namespace ETWControler.UI
         public string TraceStart
         {
             get { return _TraceStart; }
-            set { SetProperty<string>(ref _TraceStart, value, "TraceStart"); }
+            set { SetProperty<string>(ref _TraceStart, value); }
         }
 
         string _TraceStop;
@@ -35,7 +40,24 @@ namespace ETWControler.UI
         public string TraceStop
         {
             get { return _TraceStop; }
-            set { SetProperty<string>(ref _TraceStop, value, "TraceStop"); }
+            set { SetProperty<string>(ref _TraceStop, value); }
+        }
+
+        public string TraceStopFullCommandLine
+        {
+            get
+            {
+                string lret = TraceStop;
+                lret = lret.Replace("$FileName", RootModel.UnexpandedTraceFileName);
+                return lret;
+            }
+        }
+
+        string _TraceCancel;
+        public string TraceCancel
+        {
+            get { return _TraceCancel; }
+            set { SetProperty<string>(ref _TraceCancel, value); }
         }
 
         /// <summary>
@@ -45,8 +67,15 @@ namespace ETWControler.UI
         {
             get
             {
-                string ownManifest = Path.Combine("ETW", "HookEvents.wprp");
-                return TraceStart + " -start " + ownManifest;
+                // some day we might specify the output file already with the start command ... 
+                string lret = TraceStart.Replace("$FileName", RootModel.UnexpandedTraceFileName);
+
+                if (!lret.StartsWith(ViewModel.CustomCommandPrefix)) // its still WPR
+                {
+                    string ownManifest = Path.Combine("ETW", "HookEvents.wprp");
+                    lret += " -start " + ownManifest;
+                }
+                return lret;
             }
         }
         TraceStates _TraceStates;
@@ -95,20 +124,22 @@ namespace ETWControler.UI
             private set;
         }
 
-        OutputWindow OutputWindow;
 
-        public TraceControlViewModel(bool isRemoteState)
+
+        public TraceControlViewModel(ViewModel rootModel, bool isRemoteState)
         {
+            RootModel = rootModel;
             IsRemoteState = isRemoteState;
             CommandOutputs = new ObservableCollection<string>();
 
             ShowCommand = new DelegateCommand((o) =>
                 {
-                    if (OutputWindow == null)
+                    if (OutputWindow == null )
                     {
                         OutputWindow = new OutputWindow();
                         OutputWindow.Title += IsRemoteState ? " (Server)" : " (Local)";
                         OutputWindow.DataContext = this;
+                        OutputWindow.Closed += (a, b) => OutputWindow = null;
                     }
                     OutputWindow.Show();
                     OutputWindow.Activate();
@@ -116,7 +147,7 @@ namespace ETWControler.UI
 
             OpenTraceCommand = new DelegateCommand((o) =>
             {
-                string outFile = GetOutputFileName();
+                string outFile = RootModel.TraceFileName;
                 if (outFile != null)
                 {
                     var startInfo = new ProcessStartInfo("wpa.exe",  Environment.ExpandEnvironmentVariables(outFile))
@@ -125,32 +156,7 @@ namespace ETWControler.UI
                     Process.Start(startInfo);
                 }
             }, 
-            () => !IsRemoteState && GetOutputFileName() != null && File.Exists(GetOutputFileName())); // dynamically update the button enabled state if the output file does exist.
-        }
-
-        /// <summary>
-        /// Parse from the TraceStop command line arguments the future etl output file name
-        /// </summary>
-        /// <returns></returns>
-        string GetOutputFileName()
-        {
-            string lret = null;
-            const string StopCmdArg = "-stop";
-
-            if (!String.IsNullOrEmpty(TraceStop))
-            {
-                int stopIdx = TraceStop.IndexOf(StopCmdArg, StringComparison.OrdinalIgnoreCase);
-                if( stopIdx != -1) // parse -stop "outputfile" "optional tracedescription"
-                {
-                    string fileAndDescription = TraceStop.Substring(stopIdx + StopCmdArg.Length);
-                    lret = fileAndDescription.Split(new char[] { '"' }, StringSplitOptions.RemoveEmptyEntries)
-                                                        .Select(x=>x.Trim())
-                                                        .Where(x=>!String.IsNullOrEmpty(x))
-                                                        .FirstOrDefault();
-                }
-            }
-
-            return lret;
+            () => !IsRemoteState && RootModel.TraceFileName != null && File.Exists(RootModel.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
         }
 
         /// <summary>
@@ -159,7 +165,7 @@ namespace ETWControler.UI
         /// <param name="wprCommandOutput"></param>
         internal void ProcessStopCommand(Tuple<int, string> wprCommandOutput)
         {
-            AddLogEntry(TraceStop, wprCommandOutput, CommandOutputs);
+            AddLogEntry(TraceStopFullCommandLine, wprCommandOutput, CommandOutputs);
             OpenTraceCommand.RaiseCanExecuteChanged();
             if (wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) // Trace not running
             {
@@ -199,7 +205,7 @@ namespace ETWControler.UI
             {
                 this.TraceStates = TraceStates.Stopped;
             }
-            AddLogEntry("-cancel", wprCommandOutput, CommandOutputs);
+            AddLogEntry(this.TraceCancel, wprCommandOutput, CommandOutputs);
         }
 
         void AddLogEntry(string command, Tuple<int, string> wprCommandResult, Collection<string> log)
@@ -207,9 +213,9 @@ namespace ETWControler.UI
             // remove empty lines
             string[] strippedOutput = wprCommandResult.Item2.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            string logMessage = String.Format("{0}: wpr {1}{2}{3}", 
+            string logMessage = String.Format("{0}: {1}{2}{3}", 
                                             DateTime.Now.ToString("hh:mm:ss.fff"),
-                                            command, 
+                                            command.StartsWith(ViewModel.CustomCommandPrefix) ? command.Substring(ViewModel.CustomCommandPrefix.Length) : "wpr " + command, 
                                             Environment.NewLine,
                                             String.Join(Environment.NewLine, strippedOutput.Where(x=>!String.IsNullOrEmpty(x))));
             log.Add(logMessage);

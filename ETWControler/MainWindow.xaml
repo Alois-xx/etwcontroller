@@ -6,7 +6,7 @@
         xmlns:ui="clr-namespace:ETWControler.UI"
         MinHeight="440"
         MinWidth="640"
-        Title="ETW Controler And Logger" Height="440" Width="773.5" Closing="Window_Closing">
+        Title="ETW Controler And Logger" Height="500" Width="773.5" Closing="Window_Closing">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -152,12 +152,20 @@
                     <GroupBox>
                         <GroupBox.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="25"/>
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="450"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column ="0" Margin="5,0,0,0">Local</TextBlock>
-                                <CheckBox Grid.Column="1" Content="Enable" Margin="5,0,0,0" IsChecked="{Binding LocalTraceEnabled}"/>
+                                <Label Grid.Row="0" >$FileName</Label>
+                                <TextBox Grid.Row="0" Grid.Column="1"  Text="{Binding UnexpandedTraceFileName}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column ="0" Margin="5,0,0,0">Local Host</TextBlock>
+                                <CheckBox Grid.Row="2"  Grid.Column="1" Content="Enable" Margin="5,0,0,0" IsChecked="{Binding LocalTraceEnabled}"/>
                             </Grid>
                         </GroupBox.Header>
                         <ui:TraceControl DataContext="{Binding LocalTraceSettings}"></ui:TraceControl>
@@ -179,10 +187,10 @@
                         </GroupBox.Header>
                         <ui:TraceControl  DataContext="{Binding ServerTraceSettings}"></ui:TraceControl>
                     </GroupBox>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button IsDefault="True" Content="_Start" Width="80" Command="{Binding Commands[StartTracing]}" Margin="10,0,0,0"></Button>
                         <Button Content="S_top" Width="80"  Command="{Binding Commands[StopTracing]}" Margin="10,0,0,0"></Button>
-                        <Button Content="Can_cel" Width="80" Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"></Button>
+                        <Button Content="Can_cel" Width="80" Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </TabItem>

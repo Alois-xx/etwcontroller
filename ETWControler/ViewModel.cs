@@ -23,6 +23,8 @@ namespace ETWControler
         const string FirewallWCFRule = "ETWControler WCFPort";
         const string FirewallSocketRule = "ETWControler SocketPort";
 
+        public const string CustomCommandPrefix = "::";
+
         public TaskScheduler UISheduler
         {
             get;
@@ -72,6 +74,17 @@ namespace ETWControler
                 SetProperty<bool>(ref _CaptureKeyboard, value, "CaptureKeyboard");
                 Hooker.Hooker.IsKeyboardHooked = CaptureKeyboard;
             }
+        }
+
+        public string UnexpandedTraceFileName
+        {
+            get { return Configuration.Default.TraceFileName;  }
+            set { Configuration.Default.TraceFileName = value; }
+        }
+
+        public string TraceFileName
+        {
+            get {  return Environment.ExpandEnvironmentVariables(UnexpandedTraceFileName); }
         }
 
         public bool _CaptureMouseButtonDown;
@@ -380,7 +393,7 @@ namespace ETWControler
                 })},
                 {"Network", CreateCommand( (o)=>
                                 {
-                                    var dlg = new NetworkConfiguration(this);
+                                    var dlg = new ETWControlerConfiguration(this);
                                     dlg.ShowDialog();
                                 })},
                 {"TraceRefresh", CreateCommand( (o) =>
@@ -417,12 +430,12 @@ namespace ETWControler
                 {
                     if (this.LocalTraceEnabled)
                     {
-                        var output = LocalTraceControler.ExecuteWPRCommand("-cancel");
+                        var output = LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceCancel);
                         LocalTraceSettings.ProcessCancelCommand(output);
                     }
                     if (this.ServerTraceEnabled)
                     {
-                        var command = WCFHost.CreateExecuteWPRCommand("-cancel");
+                        var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceCancel);
                         command.Completed = (output) => ServerTraceSettings.ProcessCancelCommand(output);
                         command.Execute();
                     }
@@ -482,8 +495,8 @@ namespace ETWControler
         /// </summary>
         public ViewModel()
         {
-            LocalTraceSettings = new TraceControlViewModel(false);
-            ServerTraceSettings = new TraceControlViewModel(true);
+            LocalTraceSettings = new TraceControlViewModel(this, false);
+            ServerTraceSettings = new TraceControlViewModel(this, true);
             _ReceivedMessages = new ObservableCollection<string>();
             _ServerTraceSessions = new string[]{ "Not yet read."};
             _TraceSessions = new string[] {"Not yet read."};
@@ -627,13 +640,13 @@ namespace ETWControler
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
                 // stop tracing asynchronously so we do not need to wait until local trace collection has stopped (while blocking the UI)
-                Task.Factory.StartNew< Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStop))
+                Task.Factory.StartNew< Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStopFullCommandLine))
                             .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UISheduler);
             }
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Stopping;
-                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStop);
+                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStopFullCommandLine);
                 command.Completed = (output) => ServerTraceSettings.ProcessStopCommand(output);
                 command.Execute();
             }
@@ -653,8 +666,10 @@ namespace ETWControler
             this.FastEventHotkey = Configuration.Default.FastEventHotkey;
             this.LocalTraceSettings.TraceStart = Configuration.Default.LocalTraceStart;
             this.LocalTraceSettings.TraceStop = Configuration.Default.LocalTraceStop;
+            this.LocalTraceSettings.TraceCancel = Configuration.Default.LocalTraceCancel;
             this.ServerTraceSettings.TraceStart = Configuration.Default.ServerTraceStart;
             this.ServerTraceSettings.TraceStop = Configuration.Default.ServerTraceStop;
+            this.ServerTraceSettings.TraceCancel = Configuration.Default.ServerTraceCancel;
             this.ServerTraceEnabled = Configuration.Default.ServerTraceEnabled;
             this.LocalTraceEnabled = Configuration.Default.LocalTraceEnabled;
         }
@@ -677,6 +692,9 @@ namespace ETWControler
             Configuration.Default.ServerTraceStop = this.ServerTraceSettings.TraceStop;
             Configuration.Default.LocalTraceEnabled = this.LocalTraceEnabled;
             Configuration.Default.ServerTraceEnabled = this.ServerTraceEnabled;
+            Configuration.Default.LocalTraceCancel = LocalTraceSettings.TraceCancel;
+            Configuration.Default.ServerTraceCancel = ServerTraceSettings.TraceCancel;
+            Configuration.Default.TraceFileName = this.UnexpandedTraceFileName;
             Configuration.Default.Save();
         }
 

@@ -97,7 +97,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-stop c:\\temp\\etwcontroler.etl")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-stop $FileName")]
         public string LocalTraceStop {
             get {
                 return ((string)(this["LocalTraceStop"]));
@@ -121,7 +121,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-stop c:\\temp\\etwServercontroler.etl")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-stop $FileName")]
         public string ServerTraceStop {
             get {
                 return ((string)(this["ServerTraceStop"]));
@@ -188,6 +188,42 @@ namespace ETWControler {
             }
             set {
                 this["ScreenshotDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-cancel")]
+        public string LocalTraceCancel {
+            get {
+                return ((string)(this["LocalTraceCancel"]));
+            }
+            set {
+                this["LocalTraceCancel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-cancel")]
+        public string ServerTraceCancel {
+            get {
+                return ((string)(this["ServerTraceCancel"]));
+            }
+            set {
+                this["ServerTraceCancel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("c:\\temp\\etwControler%COMPUTERNAME%.etl")]
+        public string TraceFileName {
+            get {
+                return ((string)(this["TraceFileName"]));
+            }
+            set {
+                this["TraceFileName"] = value;
             }
         }
     }
