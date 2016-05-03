@@ -226,5 +226,28 @@ namespace ETWControler {
                 this["TraceFileName"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Preset>
+    <Name>Default</Name>
+    <TraceStartCommand>-start GeneralProfile</TraceStartCommand>
+    <TraceStopCommand>-stop $FileName</TraceStopCommand>
+    <TraceCancelCommand>-cancel</TraceCancelCommand>
+  </Preset>
+  <Preset>
+    <Name>Default and .NET</Name>
+    <TraceStartCommand>-start GeneralProfile -start DotNET</TraceStartCommand>
+    <TraceStopCommand>-stop $FileName</TraceStopCommand>
+    <TraceCancelCommand>-cancel</TraceCancelCommand>
+  </Preset>
+</ArrayOfPreset>")]
+        public ETWControler.UI.Preset[] Presets {
+            get {
+                return ((ETWControler.UI.Preset[])(this["Presets"]));
+            }
+        }
     }
 }

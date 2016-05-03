@@ -15,7 +15,7 @@ namespace ETWControler
     /// <summary>
     /// Captures mouse/keybaord events and log them locally and send them over the network to a configures host.
     /// </summary>
-    public class NetworkedHooker
+    public class NetworkedHooker : IDisposable
     {
         /// <summary>
         /// Hook which captures all keyboard and mouse events
@@ -148,24 +148,26 @@ namespace ETWControler
             {
                 Task.Factory.StartNew<string>(() =>
                 {
-                    if (Interlocked.Increment(ref ConcurrentScreenshots) == 1) // prevent too many concurrent screenshots
-                   {
-                        try
+                    int newConcurrentScreenshotCount = Interlocked.Increment(ref ConcurrentScreenshots);
+                    
+                    try
+                    {
+                        if (newConcurrentScreenshotCount == 1) // prevent too many concurrent screenshots
                         {
                             return Recorder.TakeScreenshot(x, y, id.ToString(), String.Format("{0}After500ms", id));
                         }
-                        finally
-                        {
-                            Interlocked.Decrement(ref ConcurrentScreenshots);
-                        }
                     }
-                    else
+                    finally
                     {
-                        return null;
+                        Interlocked.Decrement(ref ConcurrentScreenshots);
                     }
+                    return null;
                 }).ContinueWith(screenshotTask =>
                 {
-                    Model.ReceivedMessages.Add(String.Format("Saved Screenshot to {0}", screenshotTask.Result));
+                    if (screenshotTask.Result != null)
+                    {
+                        Model.ReceivedMessages.Add(String.Format("Saved Screenshot to {0}", screenshotTask.Result));
+                    }
 
                 }, CancellationToken.None, TaskContinuationOptions.None, Model.UISheduler);
             }
@@ -246,6 +248,12 @@ namespace ETWControler
             }
         }
 
-
+        public void Dispose()
+        {
+            if( Hooker != null )
+            {
+                Hooker.Dispose();
+            }
+        }
     }
 }

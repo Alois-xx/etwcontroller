@@ -90,6 +90,8 @@ namespace ETWControler
         {
             Model.CloseStatusMessageWindow();
             Model.SaveSettings();
+            HotKeyHook.Dispose(); // Ensure that we close all hooks or we will randomly crash during application shutdown when managed code is tried to run although the clr has been already shut down.
+            Model.Dispose();
         }
 
         private void TraceRefreshSelected(object sender, RoutedEventArgs e)

@@ -23,34 +23,7 @@ namespace ETWControler
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Dispatcher.UnhandledException += Dispatcher_UnhandledException;
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             CaptureScreenshots = true;
-        }
-
-        /// <summary>
-        /// Embedd external assemblies in exe so we can deploy a single executable without the fear that if several
-        /// tools share the same assembly in different versions that one tool will break.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        private System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            Assembly lret = null;
-
-            string name = new AssemblyName(args.Name).Name.Replace('.', '_');
-
-            // Get from Resources the generated properties which must match a missing assembly which we have embedded.
-            foreach (var property in typeof(Resources).GetProperties(System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.Public|BindingFlags.NonPublic))
-            {
-                if(property.Name == name)
-                {
-                    var assemblyBytes = (byte[])property.GetValue(null, null);
-                    lret = Assembly.Load(assemblyBytes);
-                }
-            }
-
-            return lret;
         }
 
         Queue<string> Args;

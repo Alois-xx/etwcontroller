@@ -38,6 +38,8 @@
             </TextBox>
             <Button Width="100" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR comamnds." Command="{Binding ShowCommand}">Show Output</Button>
             <Button Width="100" Margin="10,0,0,0" ToolTip="Open the output etl file when present with WPA." Command="{Binding OpenTraceCommand}">Open Trace</Button>
+            <Label Margin="10,0,0,0">Presets</Label>
+            <ComboBox ItemsSource="{Binding Presets}"  SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"></ComboBox>
         </StackPanel>
         <Grid Margin="0,5,0,0">
             <Grid.ColumnDefinitions>

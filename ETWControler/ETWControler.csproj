@@ -51,6 +51,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -103,12 +104,12 @@
     <Reference Include="Microsoft.Diagnostics.Tracing.EventSource, Version=1.0.16.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Diagnostics.Tracing.EventSource.1.0.16\lib\net40\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Diagnostics.Tracing.TraceEvent, Version=1.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Diagnostics.Tracing.TraceEvent.1.0.5\lib\net40\Microsoft.Diagnostics.Tracing.TraceEvent.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -157,6 +158,7 @@
     <Compile Include="UI\OutputWindow.xaml.cs">
       <DependentUpon>OutputWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Preset.cs" />
     <Compile Include="UI\StatusMessage.cs" />
     <Compile Include="UI\StatusMessages.xaml.cs">
       <DependentUpon>StatusMessages.xaml</DependentUpon>
@@ -237,6 +239,7 @@
     <None Include="Configuration.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Configuration.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </None>
     <None Include="ETW\HookEvents.wprp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

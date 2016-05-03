@@ -33,6 +33,28 @@ namespace ETWControler.UI
             set { SetProperty<string>(ref _TraceStart, value); }
         }
 
+
+        public Preset[] Presets
+        {
+            get { return Configuration.Default.Presets; }
+        }
+
+        Preset _Preset = null;
+        public Preset SelectedPreset
+        {
+            get { return _Preset; }
+            set
+            {
+                SetProperty<Preset>(ref _Preset, value);
+                if( value != null)
+                {
+                    TraceStart = value.TraceStartCommand;
+                    TraceStop = value.TraceStopCommand;
+                    TraceCancel = value.TraceCancelCommand;
+                }
+            }
+        }
+
         string _TraceStop;
         /// <summary>
         /// WPR trace stop command line arguments
@@ -215,7 +237,8 @@ namespace ETWControler.UI
 
             string logMessage = String.Format("{0}: {1}{2}{3}", 
                                             DateTime.Now.ToString("hh:mm:ss.fff"),
-                                            command.StartsWith(ViewModel.CustomCommandPrefix) ? command.Substring(ViewModel.CustomCommandPrefix.Length) : "wpr " + command, 
+                                            Environment.ExpandEnvironmentVariables(command.StartsWith(ViewModel.CustomCommandPrefix) ? 
+                                                                                   command.Substring(ViewModel.CustomCommandPrefix.Length) : "wpr " + command), 
                                             Environment.NewLine,
                                             String.Join(Environment.NewLine, strippedOutput.Where(x=>!String.IsNullOrEmpty(x))));
             log.Add(logMessage);

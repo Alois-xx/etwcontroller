@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="StatusMessages" Height="315.498" Width="613.284">
     <Grid >
-        <ListBox Name="cList" ItemsSource="{Binding StatusMessages}" SelectionMode="Extended" ScrollViewer.CanContentScroll="False">
+        <ListBox Name="cList" ItemsSource="{Binding StatusMessages}" SelectionMode="Extended" >
             <ListBox.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="Copy" Header="Copy"/>

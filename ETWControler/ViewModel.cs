@@ -16,7 +16,7 @@ using System.Windows.Media;
 
 namespace ETWControler
 {
-    public class ViewModel : NotifyBase
+    public class ViewModel : NotifyBase, IDisposable
     {
         // Firewall rule names which open the configured ports during startup of ETWControler and close
         // them when it exits.
@@ -742,6 +742,15 @@ namespace ETWControler
                 return proc.Start();
              }).ContinueWith(( ret =>
                  this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh ouputput: {1}", this.PortNumber, ret.Result.Item2.Trim()))), this.UISheduler);
+        }
+
+        public void Dispose()
+        {
+            if( Hooker != null )
+            {
+                Hooker.Dispose();
+                Hooker = null;
+            }
         }
     }
 }

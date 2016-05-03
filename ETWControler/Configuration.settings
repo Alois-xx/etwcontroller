@@ -53,5 +53,22 @@
     <Setting Name="TraceFileName" Type="System.String" Scope="User">
       <Value Profile="(Default)">c:\temp\etwControler%COMPUTERNAME%.etl</Value>
     </Setting>
+    <Setting Name="Presets" Type="ETWControler.UI.Preset[]" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Default&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;-start GeneralProfile&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;-stop $FileName&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;-cancel&lt;/TraceCancelCommand&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Default and .NET&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;-start GeneralProfile -start DotNET&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;-stop $FileName&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;-cancel&lt;/TraceCancelCommand&gt;
+  &lt;/Preset&gt;
+&lt;/ArrayOfPreset&gt;</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

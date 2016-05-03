@@ -59,25 +59,5 @@ namespace ETWControler.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Microsoft_Diagnostics_Tracing_EventSource {
-            get {
-                object obj = ResourceManager.GetObject("Microsoft_Diagnostics_Tracing_EventSource", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Microsoft_Diagnostics_Tracing_TraceEvent {
-            get {
-                object obj = ResourceManager.GetObject("Microsoft_Diagnostics_Tracing_TraceEvent", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }
