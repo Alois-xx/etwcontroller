@@ -70,7 +70,7 @@ namespace ETWControler.UI
             get
             {
                 string lret = TraceStop;
-                lret = lret.Replace("$FileName", RootModel.UnexpandedTraceFileName);
+                lret = lret.Replace("$FileName", RootModel.UnexpandedCountedTraceFileName);
                 return lret;
             }
         }
@@ -89,8 +89,11 @@ namespace ETWControler.UI
         {
             get
             {
+                string traceFileName = RootModel.UnexpandedCountedTraceFileName;
+
                 // some day we might specify the output file already with the start command ... 
-                string lret = TraceStart.Replace("$FileName", RootModel.UnexpandedTraceFileName);
+                string lret = TraceStart.Replace("$FileName", traceFileName);
+
 
                 if (!lret.StartsWith(ViewModel.CustomCommandPrefix)) // its still WPR
                 {

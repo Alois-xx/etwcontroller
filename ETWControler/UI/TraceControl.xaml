@@ -50,7 +50,7 @@
                 <RowDefinition Height="25"></RowDefinition>
             </Grid.RowDefinitions>
             <Label Content="Start Comand" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceStart}"  ToolTip="Enter here the WPR command line arguments to start tracing." Margin="0,0,0,0"/>
+            <TextBox Grid.Column="1" Text="{Binding TraceStart}"  ToolTip="Enter here the WPR command line arguments to start tracing. Custom script must start with ::" Margin="0,0,0,0"/>
         </Grid>
         <Grid Margin="0,5,0,0" >
             <Grid.ColumnDefinitions>
@@ -61,18 +61,18 @@
                 <RowDefinition Height="25"></RowDefinition>
             </Grid.RowDefinitions>
             <Label Content="Stop Command" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file."/>
+            <TextBox Grid.Column="1" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file. Custom script command must start with ::"/>
         </Grid>
         <Grid Margin="0,5,0,0" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="439"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <Label Content="Cancel Command" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file."/>
+            <TextBox Grid.Column="1" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line to cancel tracing. Custom script command must start with ::"/>
         </Grid>
         <Grid>
             <Grid.RowDefinitions>

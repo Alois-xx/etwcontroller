@@ -82,9 +82,28 @@ namespace ETWControler
             set { Configuration.Default.TraceFileName = value; }
         }
 
+        public int TraceFileCounter = 0;
+
+        public string UnexpandedCountedTraceFileName
+        {
+            get
+            {
+                string lret = UnexpandedTraceFileName;
+                if (AppendIndexToOutputFileName)
+                {
+                    string dir = Path.GetDirectoryName(lret);
+                    string file = Path.GetFileNameWithoutExtension(lret);
+                    lret = Path.Combine(dir, $"{file}_{TraceFileCounter}{Path.GetExtension(lret)}");
+                }
+                return lret;
+            }
+        }
+
+        public int TraceCounter = 0;
+
         public string TraceFileName
         {
-            get {  return Environment.ExpandEnvironmentVariables(UnexpandedTraceFileName); }
+            get {  return Environment.ExpandEnvironmentVariables(UnexpandedCountedTraceFileName); }
         }
 
         public bool _CaptureMouseButtonDown;
@@ -166,6 +185,20 @@ namespace ETWControler
         {
             get { return _LocalTraceEnabled; }
             set { SetProperty<bool>(ref _LocalTraceEnabled, value, "LocalTraceEnabled"); }
+        }
+
+        bool _AppendIndexToOutputFileName = true;
+
+        /// <summary>
+        /// Append to file name a unique counter starting with 1 which is incremented for every trace start.
+        /// </summary>
+        public bool AppendIndexToOutputFileName
+        {
+            get { return _AppendIndexToOutputFileName; }
+            set
+            {
+                SetProperty<bool>(ref _AppendIndexToOutputFileName, value);
+            }
         }
 
         bool _ServerTraceEnabled;
@@ -391,7 +424,7 @@ namespace ETWControler
                 {
                     Hooker.LogFastEvent();
                 })},
-                {"Network", CreateCommand( (o)=>
+                {"Config", CreateCommand( (o)=>
                                 {
                                     var dlg = new ETWControlerConfiguration(this);
                                     dlg.ShowDialog();
@@ -409,6 +442,8 @@ namespace ETWControler
                         MessageBox.Show("Please enable tracing at the remote host and/or on your local machine.");
                         return;
                     }
+
+                    this.TraceFileCounter++; // Increment file counter for every trace start so we get unique files names within the current trace session of ETWControler
 
                     if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
                     {

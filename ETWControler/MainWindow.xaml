@@ -19,7 +19,7 @@
     <DockPanel LastChildFill="True">
         <Menu Grid.Row="0"  DockPanel.Dock="Top">
             <MenuItem Header="Configuration">
-                <MenuItem Header="Network" Command="{Binding Commands[Network]}"/>
+                <MenuItem Header="Configuration" Command="{Binding Commands[Config]}"/>
                 <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
             </MenuItem>
             <MenuItem Header="Help">
@@ -160,9 +160,12 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition Width="450"/>
+                                    <ColumnDefinition Width="100"/>
                                 </Grid.ColumnDefinitions>
                                 <Label Grid.Row="0" >$FileName</Label>
                                 <TextBox Grid.Row="0" Grid.Column="1"  Text="{Binding UnexpandedTraceFileName}"/>
+                                <CheckBox Grid.Row="0" Grid.Column="2" Margin="5,0,0,0" IsChecked="{Binding AppendIndexToOutputFileName}" Content="Append Index"
+                                          ToolTip="Append a counter to the output file name to prevent overwriting old trace data by accident in the current trace session."/>
 
                                 <TextBlock Grid.Row="2" Grid.Column ="0" Margin="5,0,0,0">Local Host</TextBlock>
                                 <CheckBox Grid.Row="2"  Grid.Column="1" Content="Enable" Margin="5,0,0,0" IsChecked="{Binding LocalTraceEnabled}"/>
