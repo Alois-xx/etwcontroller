@@ -68,13 +68,18 @@ namespace ETWControler
         /// </summary>
         int SlowEventNumber;
 
-        int _CurrentId;
+        volatile int _CurrentId;
         /// <summary>
         /// Each captured keyboard or mouse event gets an id to be able to find e.g. keyboard event 500 where the slowdown did happen.
         /// </summary>
         int CurrentId
         {
             get { return Interlocked.Increment(ref _CurrentId); }
+        }
+
+        public void ResetId()
+        {
+            _CurrentId = 0;
         }
 
         public NetworkedHooker(ViewModel model)
@@ -116,7 +121,7 @@ namespace ETWControler
 
         private void EnableRecorder()
         {
-            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory);
+            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory, Configuration.Default.ForcedScreenshotIntervalinMs);
         }
 
         void Hooker_OnMouseWheel(int wheelDelta, int x, int y)

@@ -70,5 +70,8 @@
   &lt;/Preset&gt;
 &lt;/ArrayOfPreset&gt;</Value>
     </Setting>
+    <Setting Name="ForcedScreenshotIntervalinMs" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

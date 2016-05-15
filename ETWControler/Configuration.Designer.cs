@@ -249,5 +249,17 @@ namespace ETWControler {
                 return ((ETWControler.UI.Preset[])(this["Presets"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
+        public int ForcedScreenshotIntervalinMs {
+            get {
+                return ((int)(this["ForcedScreenshotIntervalinMs"]));
+            }
+            set {
+                this["ForcedScreenshotIntervalinMs"] = value;
+            }
+        }
     }
 }

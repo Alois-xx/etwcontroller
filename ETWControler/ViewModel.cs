@@ -1,6 +1,7 @@
 ﻿using ETWControler.Commands;
 using ETWControler.ETW;
 using ETWControler.Network;
+using ETWControler.Screenshots;
 using ETWControler.UI;
 using System;
 using System.Collections.Generic;
@@ -443,6 +444,8 @@ namespace ETWControler
                         return;
                     }
 
+                    this.Hooker.ResetId();
+
                     this.TraceFileCounter++; // Increment file counter for every trace start so we get unique files names within the current trace session of ETWControler
 
                     if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
@@ -671,6 +674,12 @@ namespace ETWControler
         /// </summary>
         void StopTracing()
         {
+            if (this.CaptureScreenShots) // create html report also if no tracing was active perhaps someone finds this functionality in itself useful
+            {
+                var htmlReportGenerator = new HtmlReportGenerator(this.ScreenshotDirectory);
+                htmlReportGenerator.GenerateReport();
+            }
+
             if (this.LocalTraceEnabled) 
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
