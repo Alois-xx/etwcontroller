@@ -85,7 +85,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-start GeneralProfile")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile")]
         public string LocalTraceStart {
             get {
                 return ((string)(this["LocalTraceStart"]));
@@ -97,7 +97,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-stop $FileName")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -stop $FileName  $ScreenshotDir")]
         public string LocalTraceStop {
             get {
                 return ((string)(this["LocalTraceStop"]));
@@ -109,7 +109,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-start GeneralProfile")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile")]
         public string ServerTraceStart {
             get {
                 return ((string)(this["ServerTraceStart"]));
@@ -121,7 +121,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-stop $FileName")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -stop $FileName  $ScreenshotDir")]
         public string ServerTraceStop {
             get {
                 return ((string)(this["ServerTraceStop"]));
@@ -181,7 +181,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("%temp%\\ETWControlerScreenshots")]
+        [global::System.Configuration.DefaultSettingValueAttribute("c:temp\\ETWControlerScreenshots")]
         public string ScreenshotDirectory {
             get {
                 return ((string)(this["ScreenshotDirectory"]));
@@ -193,7 +193,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-cancel")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -cancel")]
         public string LocalTraceCancel {
             get {
                 return ((string)(this["LocalTraceCancel"]));
@@ -205,7 +205,7 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-cancel")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -cancel")]
         public string ServerTraceCancel {
             get {
                 return ((string)(this["ServerTraceCancel"]));
@@ -227,29 +227,6 @@ namespace ETWControler {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
-<ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <Preset>
-    <Name>Default</Name>
-    <TraceStartCommand>-start GeneralProfile</TraceStartCommand>
-    <TraceStopCommand>-stop $FileName</TraceStopCommand>
-    <TraceCancelCommand>-cancel</TraceCancelCommand>
-  </Preset>
-  <Preset>
-    <Name>Default and .NET</Name>
-    <TraceStartCommand>-start GeneralProfile -start DotNET</TraceStartCommand>
-    <TraceStopCommand>-stop $FileName</TraceStopCommand>
-    <TraceCancelCommand>-cancel</TraceCancelCommand>
-  </Preset>
-</ArrayOfPreset>")]
-        public ETWControler.UI.Preset[] Presets {
-            get {
-                return ((ETWControler.UI.Preset[])(this["Presets"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("2000")]
@@ -259,6 +236,30 @@ namespace ETWControler {
             }
             set {
                 this["ForcedScreenshotIntervalinMs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"
+                    <ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+                        <Preset>
+                            <Name>Default</Name>
+                            <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile</TraceStartCommand>
+                            <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
+                            <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
+                        </Preset>
+                        <Preset>
+                            <Name>Default and .NET</Name>
+                            <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET</TraceStartCommand>
+                            <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
+                            <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
+                        </Preset>
+                    </ArrayOfPreset>
+                ")]
+        public ETWControler.UI.Preset[] Presets {
+            get {
+                return ((ETWControler.UI.Preset[])(this["Presets"]));
             }
         }
     }

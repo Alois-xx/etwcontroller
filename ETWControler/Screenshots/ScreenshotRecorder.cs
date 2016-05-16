@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.ComponentModel;
 
 namespace ETWControler.Screenshots
 {
@@ -32,10 +34,15 @@ namespace ETWControler.Screenshots
         /// </summary>
         System.Threading.Timer ForcedScreenshotTimer;
 
-        const int MaxScreenshotsToSaveBeforeDeletingOldest = 100;
+        /// <summary>
+        /// Deletes oldest files every 5 minutes to prevent filling up the disk
+        /// </summary>
+        System.Threading.Timer FileCleanupTimer;
 
-        // Remember the last MaxScreenshotsToSaveBeforeDeletingOldest screenshots and delete the oldest ones to prevent filling up the hard disk
-        Queue<string> TakenScreenshots = new Queue<string>();
+        /// <summary>
+        /// Keep only the last 100 screenshots and delete older ones
+        /// </summary>
+        const int KeepNNewestScreenShots = 100;
 
         /// <summary>
         /// Throttle the rate at which we capture secondary screenshots to observe the reaction of the UI to the click event
@@ -52,6 +59,43 @@ namespace ETWControler.Screenshots
         /// </summary>
         TimeSpan ForcedRecordTimeSpan;
 
+
+        private bool IsDisposed;
+
+        internal static void ClearFiles(string screenshotDirectory, int keepNewestNFiles=0)
+        {
+            // Delete old files from previous runs
+            foreach (var jpg in Directory.GetFiles(screenshotDirectory, "*.jpg")
+                                         .Select(x=> new FileInfo(x))
+                                         .OrderByDescending(x=>x.CreationTime)
+                                         .Skip(keepNewestNFiles))
+            {
+                try
+                {
+                    File.Delete(jpg.FullName);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError($"Could not delete screenshot file {jpg} because of {ex}");
+                }
+            }
+
+            // Ensure that all files in screenshot directory are deleted so no old remanents 
+            // are kept in newere traces if screenshot capture is turned off
+            string report = Path.Combine(screenshotDirectory, HtmlReportGenerator.HtmlReportFileName);
+            if (File.Exists(report))
+            {
+                try
+                {
+                    File.Delete(report);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError($"Could not delete report file {report} because of {ex}");
+                }
+            }
+        }
+
         /// <summary>
         /// Create a screenshot recroder which stores its screenshots to that directory.
         /// </summary>
@@ -62,26 +106,21 @@ namespace ETWControler.Screenshots
             ScreenshotDirectory = screenshotDirectory;
             Directory.CreateDirectory(ScreenshotDirectory); // Ensure that dir exists
 
-            // Delete old files from previous runs
-            foreach (var jpg in Directory.GetFiles(ScreenshotDirectory, "*.jpg"))
-            {
-                try
-                {
-                    File.Delete(jpg);
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError(String.Format("Could not delete screenshot file {0} because of {1}", jpg, ex));
-                }
-            }
+            ClearFiles(ScreenshotDirectory);
 
             if (forcedScreenShotAfterMs > 99)  // one screenshot needs about 100ms. If one configures less than that we assume a configuration error
             {
                 ForcedRecordTimeSpan = TimeSpan.FromMilliseconds(forcedScreenShotAfterMs);
                 ForcedScreenshotTimer = new System.Threading.Timer(OnScreenshotTimerExpired, null, 0, forcedScreenShotAfterMs);
             }
+
+            FileCleanupTimer = new System.Threading.Timer(OnCleanupOldestFiles, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
         }
 
+        void OnCleanupOldestFiles(object o)
+        {
+            ClearFiles(ScreenshotDirectory, KeepNNewestScreenShots);   
+        }
 
         void OnScreenshotTimerExpired(object o)
         {
@@ -94,9 +133,16 @@ namespace ETWControler.Screenshots
 
         public void Dispose()
         {
+            IsDisposed = true;
             ForcedScreenshotTimer.Change(0, Timeout.Infinite);
             ForcedScreenshotTimer.Dispose();
             ForcedScreenshotTimer = null;
+
+            FileCleanupTimer.Change(0, Timeout.Infinite);
+            FileCleanupTimer.Dispose();
+            FileCleanupTimer = null;
+
+            ClearFiles(ScreenshotDirectory);
         }
 
 
@@ -108,49 +154,59 @@ namespace ETWControler.Screenshots
         /// <param name="clickY">Screen y-cooridnate of click event or -1 if not available.</param>
         /// <param name="suffix">This suffix is appended to screenshot file name</param>
         /// <param name="suffixOfSecondScreenshot">If non null a second screenshot is taken with this suffix after 500ms.</param>
-        /// <returns>Saved screenshot file name</returns>
-        public string TakeScreenshot(int clickX, int clickY, string suffix, string suffixOfSecondScreenshot)
+        /// <returns>Saved screenshot file name in the string tuple or the exception.</returns>
+        public KeyValuePair<string,Exception> TakeScreenshot(int clickX, int clickY, string suffix, string suffixOfSecondScreenshot)
         {
-            // Determine the size of the "virtual screen", which includes all monitors.
-            int screenLeft = SystemInformation.VirtualScreen.Left;
-            int screenTop = SystemInformation.VirtualScreen.Top;
-            int screenWidth = SystemInformation.VirtualScreen.Width;
-            int screenHeight = SystemInformation.VirtualScreen.Height;
+            try
+            { 
+                if( IsDisposed)
+                {
+                    return new KeyValuePair<string, Exception>(null, null);
+                }
+                // Determine the size of the "virtual screen", which includes all monitors.
+                int screenLeft = SystemInformation.VirtualScreen.Left;
+                int screenTop = SystemInformation.VirtualScreen.Top;
+                int screenWidth = SystemInformation.VirtualScreen.Width;
+                int screenHeight = SystemInformation.VirtualScreen.Height;
 
-            // Create a bitmap of the appropriate size to receive the screenshot.
-            using (Bitmap bmp = new Bitmap(screenWidth, screenHeight))
+                // Create a bitmap of the appropriate size to receive the screenshot.
+                using (Bitmap bmp = new Bitmap(screenWidth, screenHeight))
+                {
+                    var now = DateTime.Now;
+                    // Draw the screenshot into our bitmap.
+                    using (Graphics g = Graphics.FromImage(bmp))
+                    {
+                        g.CopyFromScreen(screenLeft, screenTop, 0, 0, bmp.Size);
+                    }
+
+                    TimeStampBitmap(now, bmp);
+
+                    if (clickX != -1 && clickY != -1)
+                    {
+                        MarkMouseClick(clickX, clickY, bmp);
+                    }
+
+                    string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
+                    bmp.Save(savePath, ImageFormat.Jpeg);
+                    HookEvents.ETWProvider.Screenshot(suffix, savePath);
+
+                    if(!IsDisposed && !String.IsNullOrEmpty(suffixOfSecondScreenshot))
+                    {
+                        Task.Factory.StartNew(() => TakeAnotherScreenshot(suffixOfSecondScreenshot), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+                    }
+
+                    // Update creation time to actual screenshot snapshot time so 
+                    // we can use the file creation date as snapshot time to sort them during report generation
+                    var fileInfo = new FileInfo(savePath);
+                    fileInfo.CreationTime = now;
+
+                    return new KeyValuePair<string,Exception>(savePath, null);
+                  }
+            }
+            catch(Win32Exception ex)
             {
-                var now = DateTime.Now;
-                // Draw the screenshot into our bitmap.
-                using (Graphics g = Graphics.FromImage(bmp))
-                {
-                    g.CopyFromScreen(screenLeft, screenTop, 0, 0, bmp.Size);
-                }
-
-                TimeStampBitmap(now, bmp);
-
-                if (clickX != -1 && clickY != -1)
-                {
-                    MarkMouseClick(clickX, clickY, bmp);
-                }
-
-                string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
-                bmp.Save(savePath, ImageFormat.Jpeg);
-                HookEvents.ETWProvider.Screenshot(suffix, savePath);
-
-                AddSavedFileAndRollOverOldesFiles(savePath);
-
-                if( !String.IsNullOrEmpty(suffixOfSecondScreenshot) )
-                {
-                    Task.Factory.StartNew(() => TakeAnotherScreenshot(suffixOfSecondScreenshot), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
-                }
-
-                // Update creation time to actual screenshot snapshot time so 
-                // we can use the file creation date as snapshot time to sort them during report generation
-                var fileInfo = new FileInfo(savePath);
-                fileInfo.CreationTime = now;
-
-                return savePath;
+                Trace.TraceWarning($"Could not take screenshot due to {ex}.");
+                return new KeyValuePair<string, Exception>(null, ex);
             }
         }
 
@@ -165,29 +221,9 @@ namespace ETWControler.Screenshots
             // throttle creation of new screenshots after a click to one screenshot every 500ms
             if (DateTime.Now - LastOtherScreenshot > SecondScreenshotTimerAfterClick)
             {
-                string file = TakeScreenshot(-1, -1, suffix, null);
-                ETW.HookEvents.ETWProvider.Screenshot(suffix, file);
+                TakeScreenshot(-1, -1, suffix, null);
             }
             LastOtherScreenshot = DateTime.Now;
-        }
-
-        private void AddSavedFileAndRollOverOldesFiles(string savePath)
-        {
-            lock(TakenScreenshots)
-            {
-                TakenScreenshots.Enqueue(savePath);
-                while (TakenScreenshots.Count > MaxScreenshotsToSaveBeforeDeletingOldest)
-                {
-                    try
-                    {
-                        File.Delete(TakenScreenshots.Dequeue());
-                    }
-                    catch (Exception ex)
-                    {
-                        Trace.TraceError(String.Format("Could not delete oldest screenshot file {0} because limit of 100 screenshots was reached. {1}", savePath, ex));
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -213,14 +249,21 @@ namespace ETWControler.Screenshots
         /// </summary>
         /// <param name="time"></param>
         /// <param name="bmp"></param>
-        void TimeStampBitmap(DateTime time, Bitmap bmp)
+        internal void TimeStampBitmap(DateTime time, Bitmap bmp)
         {
             Point pos = new Point((int)(bmp.Width * 0.9), 20);
             Size size = new Size(100, 25);
 
             using (var g = Graphics.FromImage(bmp))
             {
-                g.FillRectangle(TransparentRed, new Rectangle(pos, size));
+                // Brush objects are not thread safe or and will lead to InvalidOperatonExceptions 
+                // with System.InvalidOperationException: The object is currently in use elsewhere. 
+                // See http://stackoverflow.com/questions/1060280/invalidoperationexception-object-is-currently-in-use-elsewhere-red-cross
+                // The font on the other hand seems to be ok
+                lock (TransparentRed)  
+                {
+                    g.FillRectangle(TransparentRed, new Rectangle(pos, size));
+                }
                 g.DrawString(time.ToString("HH:mm:ss.fff"), StampFont, Brushes.Yellow, pos.X, pos.Y);
             }
         }

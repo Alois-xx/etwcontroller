@@ -18,16 +18,16 @@
       <Value Profile="(Default)">Insert</Value>
     </Setting>
     <Setting Name="LocalTraceStart" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-start GeneralProfile</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile</Value>
     </Setting>
     <Setting Name="LocalTraceStop" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-stop $FileName</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName  $ScreenshotDir</Value>
     </Setting>
     <Setting Name="ServerTraceStart" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-start GeneralProfile</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile</Value>
     </Setting>
     <Setting Name="ServerTraceStop" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-stop $FileName</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName  $ScreenshotDir</Value>
     </Setting>
     <Setting Name="LocalTraceEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -42,36 +42,37 @@
       <Value Profile="(Default)">Snapshot</Value>
     </Setting>
     <Setting Name="ScreenshotDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">%temp%\ETWControlerScreenshots</Value>
+      <Value Profile="(Default)">c:temp\ETWControlerScreenshots</Value>
     </Setting>
     <Setting Name="LocalTraceCancel" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-cancel</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -cancel</Value>
     </Setting>
     <Setting Name="ServerTraceCancel" Type="System.String" Scope="User">
-      <Value Profile="(Default)">-cancel</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -cancel</Value>
     </Setting>
     <Setting Name="TraceFileName" Type="System.String" Scope="User">
       <Value Profile="(Default)">c:\temp\etwControler%COMPUTERNAME%.etl</Value>
     </Setting>
-    <Setting Name="Presets" Type="ETWControler.UI.Preset[]" Scope="Application">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;Preset&gt;
-    &lt;Name&gt;Default&lt;/Name&gt;
-    &lt;TraceStartCommand&gt;-start GeneralProfile&lt;/TraceStartCommand&gt;
-    &lt;TraceStopCommand&gt;-stop $FileName&lt;/TraceStopCommand&gt;
-    &lt;TraceCancelCommand&gt;-cancel&lt;/TraceCancelCommand&gt;
-  &lt;/Preset&gt;
-  &lt;Preset&gt;
-    &lt;Name&gt;Default and .NET&lt;/Name&gt;
-    &lt;TraceStartCommand&gt;-start GeneralProfile -start DotNET&lt;/TraceStartCommand&gt;
-    &lt;TraceStopCommand&gt;-stop $FileName&lt;/TraceStopCommand&gt;
-    &lt;TraceCancelCommand&gt;-cancel&lt;/TraceCancelCommand&gt;
-  &lt;/Preset&gt;
-&lt;/ArrayOfPreset&gt;</Value>
-    </Setting>
     <Setting Name="ForcedScreenshotIntervalinMs" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="Presets" Type="ETWControler.UI.Preset[]" Scope="Application">
+      <Value Profile="(Default)">
+                    &lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+                        &lt;Preset&gt;
+                            &lt;Name&gt;Default&lt;/Name&gt;
+                            &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile&lt;/TraceStartCommand&gt;
+                            &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+                            &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
+                        &lt;/Preset&gt;
+                        &lt;Preset&gt;
+                            &lt;Name&gt;Default and .NET&lt;/Name&gt;
+                            &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET&lt;/TraceStartCommand&gt;
+                            &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+                            &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
+                        &lt;/Preset&gt;
+                    &lt;/ArrayOfPreset&gt;
+                </Value>
     </Setting>
   </Settings>
 </SettingsFile>

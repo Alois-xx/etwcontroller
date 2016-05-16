@@ -12,6 +12,8 @@ namespace ETWControler.Screenshots
     /// </summary>
     class HtmlReportGenerator
     {
+        public const string HtmlReportFileName = "Report.html";
+
         FileInfo[] JpgsByCreationDate;
         string ScreenshotDirectory;
 
@@ -41,7 +43,7 @@ namespace ETWControler.Screenshots
         /// <returns>Generated report file name</returns>
         public string GenerateReport()
         {
-            string htmlFile = Path.Combine(ScreenshotDirectory, "Report.html");
+            string htmlFile = Path.Combine(ScreenshotDirectory, HtmlReportFileName);
 
             using (var stream = new FileStream(htmlFile, FileMode.Create))
             {

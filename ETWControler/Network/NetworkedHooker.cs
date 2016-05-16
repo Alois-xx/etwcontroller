@@ -80,6 +80,7 @@ namespace ETWControler
         public void ResetId()
         {
             _CurrentId = 0;
+            ScreenshotRecorder.ClearFiles(Model.ScreenshotDirectory);
         }
 
         public NetworkedHooker(ViewModel model)
@@ -108,7 +109,7 @@ namespace ETWControler
                 }
             };
 
-            if( Model.CaptureScreenShots )
+            if( Model.CaptureScreenShots ) // default is to enable it
             {
                 EnableRecorder();
             }
@@ -151,7 +152,7 @@ namespace ETWControler
 
             if( strButton.Contains("Down") && Model.CaptureScreenShots && Recorder != null)
             {
-                Task.Factory.StartNew<string>(() =>
+                Task.Factory.StartNew<KeyValuePair<string,Exception>>(() =>
                 {
                     int newConcurrentScreenshotCount = Interlocked.Increment(ref ConcurrentScreenshots);
                     
@@ -166,12 +167,16 @@ namespace ETWControler
                     {
                         Interlocked.Decrement(ref ConcurrentScreenshots);
                     }
-                    return null;
+                    return new KeyValuePair<string, Exception>(null,null);
                 }).ContinueWith(screenshotTask =>
                 {
-                    if (screenshotTask.Result != null)
+                    if (screenshotTask.Result.Key != null)
                     {
-                        Model.ReceivedMessages.Add(String.Format("Saved Screenshot to {0}", screenshotTask.Result));
+                        Model.ReceivedMessages.Add($"Saved Screenshot to {screenshotTask.Result}");
+                    }
+                    if(screenshotTask.Result.Value != null)
+                    {
+                        Model.ReceivedMessages.Add($"Got Exception while taking screenshot {screenshotTask.Result.Value}");
                     }
 
                 }, CancellationToken.None, TaskContinuationOptions.None, Model.UISheduler);

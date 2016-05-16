@@ -20,17 +20,17 @@
                 </TextBox.Background>
                 <TextBox.Resources>
                     <Storyboard x:Key="TraceRunningAnimation" Storyboard.TargetProperty="Background.Color">
-                        <ColorAnimation  Duration="0:0:0.5"  
+                        <ColorAnimation  Duration="0:0:2.0"  
                                                 AutoReverse="True"  RepeatBehavior="Forever" 
                                                 From="White" To="Green" />
                     </Storyboard>
                     <Storyboard x:Key="TraceStoppingAnimation" Storyboard.TargetProperty="Background.Color">
-                        <ColorAnimation  Duration="0:0:0.5" IsAdditive="False"
+                        <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
                                                 RepeatBehavior="Forever" AutoReverse="True" 
                                                 From="White" To="Blue" />
                     </Storyboard>
                     <Storyboard x:Key="TraceStartingAnimation" Storyboard.TargetProperty="Background.Color">
-                        <ColorAnimation  Duration="0:0:0.5" IsAdditive="False"
+                        <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
                                                 RepeatBehavior="Forever" AutoReverse="True" 
                                                 From="White" To="Yellow" />
                     </Storyboard>

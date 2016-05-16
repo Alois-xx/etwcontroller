@@ -483,6 +483,11 @@ namespace ETWControler
                         string output = HookEvents.RegisterItself();
                         SetStatusMessage("Registering ETW provider: " + output);
                     })},
+                {"ConfigReset", CreateCommand( _ => {
+                    Configuration.Default.Reset();
+                    Configuration.Default.Save();
+                    LoadSettings();
+                })}, 
                 {"ShowMessages", CreateCommand( o=> ShowMessages() )},
                 {"NetworkSendToggle", CreateCommand( o=> NetworkSendState.NetworkSendChangeState() )},
                 {"NetworkReceiveToggle", CreateCommand( o=> NetworkReceiveState.NetworkReceiveChangeState() )},

@@ -251,11 +251,20 @@
     <None Include="Doc\_TraceEventProgrammersGuide.docx" />
     <None Include="Doc\_EventSourceUsersGuide.docx" />
     <None Include="Doc\_EventRegisterUsersGuide.docx" />
+    <None Include="Scripts\xxWPR.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Scripts\7z.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Scripts\7z.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
     <None Include="Resources\Microsoft.Diagnostics.Tracing.EventSource.dll" />

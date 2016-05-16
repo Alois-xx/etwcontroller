@@ -71,6 +71,7 @@ namespace ETWControler.UI
             {
                 string lret = TraceStop;
                 lret = lret.Replace("$FileName", RootModel.UnexpandedCountedTraceFileName);
+                lret = lret.Replace("$ScreenshotDir", RootModel.ScreenshotDirectory);
                 return lret;
             }
         }

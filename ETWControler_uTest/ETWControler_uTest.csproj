@@ -67,6 +67,7 @@
     <Compile Include="MessageSenderReceiverTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedirectedProcessTests.cs" />
+    <Compile Include="ScreenshotRecorderTests.cs" />
     <Compile Include="SelfHostedServiceTests.cs" />
     <Compile Include="TestHelper\TempDir.cs" />
     <Compile Include="TraceControlerServiceTests.cs" />

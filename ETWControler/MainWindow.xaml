@@ -21,6 +21,7 @@
             <MenuItem Header="Configuration">
                 <MenuItem Header="Configuration" Command="{Binding Commands[Config]}"/>
                 <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
+                <MenuItem Header="Reset Configuration" Command="{Binding Commands[ConfigReset]}" ToolTip="Reset any user configured values to the defaults of ETWControler in its current version. This can help to see updated settings provided by a newer version of ETWControler."/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Command line options" Command="{Binding Commands[ShowCommandLineOptions]}"/>
