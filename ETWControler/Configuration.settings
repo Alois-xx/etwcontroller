@@ -56,6 +56,15 @@
     <Setting Name="ForcedScreenshotIntervalinMs" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2000</Value>
     </Setting>
+    <Setting Name="CaptureKeyboard" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CaptureMouseButtonDown" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="JpgCompressionLevel" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
     <Setting Name="Presets" Type="ETWControler.UI.Preset[]" Scope="Application">
       <Value Profile="(Default)">
                     &lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;

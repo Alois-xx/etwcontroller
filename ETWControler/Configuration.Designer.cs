@@ -239,6 +239,42 @@ namespace ETWControler {
             }
         }
         
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool CaptureKeyboard {
+            get {
+                return ((bool)(this["CaptureKeyboard"]));
+            }
+            set {
+                this["CaptureKeyboard"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool CaptureMouseButtonDown {
+            get {
+                return ((bool)(this["CaptureMouseButtonDown"]));
+            }
+            set {
+                this["CaptureMouseButtonDown"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int JpgCompressionLevel {
+            get {
+                return ((int)(this["JpgCompressionLevel"]));
+            }
+            set {
+                this["JpgCompressionLevel"] = value;
+            }
+        }
+        
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(@"

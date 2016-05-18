@@ -31,6 +31,13 @@ namespace ETWControler
         protected override void OnStartup(StartupEventArgs e)
         {
             Args = new Queue<string>(e.Args);
+
+            if( Args.Count == 0) // if no args are supplied use the default or user configured values
+            {
+                CaptureKeyboard = Configuration.Default.CaptureKeyboard;
+                CaptureMouseButtonDown = Configuration.Default.CaptureMouseButtonDown;
+            }
+
             string currentArg = null;
             while( ( currentArg = GetNextArg()  ) !=  null )
             {

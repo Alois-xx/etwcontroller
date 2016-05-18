@@ -40,7 +40,7 @@ namespace ETWControler
         public int PortNumber
         {
             get { return _PortNumber; }
-            set { SetProperty<int>(ref _PortNumber, value, "PortNumber"); }
+            set { SetProperty<int>(ref _PortNumber, value); }
         }
 
         string _Host;
@@ -50,7 +50,7 @@ namespace ETWControler
         public string Host
         {
             get { return _Host; }
-            set { SetProperty<string>(ref _Host, value, "Host"); }
+            set { SetProperty<string>(ref _Host, value); }
         }
 
         public int _WCFPort;
@@ -60,7 +60,7 @@ namespace ETWControler
         public int WCFPort
         {
             get { return _WCFPort; }
-            set { SetProperty<int>(ref _WCFPort, value, "WCFPort"); }
+            set { SetProperty<int>(ref _WCFPort, value); }
         }
 
         public bool _CaptureKeyboard;
@@ -72,8 +72,18 @@ namespace ETWControler
             get { return _CaptureKeyboard;  }
             set
             {
-                SetProperty<bool>(ref _CaptureKeyboard, value, "CaptureKeyboard");
+                SetProperty<bool>(ref _CaptureKeyboard, value);
                 Hooker.Hooker.IsKeyboardHooked = CaptureKeyboard;
+            }
+        }
+
+        int _JpgCompessionLevel;
+        public int JpgCompressionLevel
+        {
+            get { return _JpgCompessionLevel;  }
+            set
+            {
+                SetProperty<int>(ref _JpgCompessionLevel, value);
             }
         }
 
@@ -116,7 +126,7 @@ namespace ETWControler
             get { return _CaptureMouseButtonDown; }
             set
             {
-                SetProperty<bool>(ref _CaptureMouseButtonDown, value, "CaptureMouseButtonDown");
+                SetProperty<bool>(ref _CaptureMouseButtonDown, value);
                 Hooker.Hooker.IsMouseHooked = CaptureMouseButtonDown;
             }
         }
@@ -157,7 +167,7 @@ namespace ETWControler
         public bool CaptureMouseMove
         {
             get { return _CaptureMouseMove; }
-            set { SetProperty<bool>(ref _CaptureMouseMove, value, "CaptureMouseMove"); }
+            set { SetProperty<bool>(ref _CaptureMouseMove, value); }
         }
 
         /// <summary>
@@ -185,7 +195,7 @@ namespace ETWControler
         public bool LocalTraceEnabled
         {
             get { return _LocalTraceEnabled; }
-            set { SetProperty<bool>(ref _LocalTraceEnabled, value, "LocalTraceEnabled"); }
+            set { SetProperty<bool>(ref _LocalTraceEnabled, value); }
         }
 
         bool _AppendIndexToOutputFileName = true;
@@ -209,7 +219,7 @@ namespace ETWControler
         public bool ServerTraceEnabled
         {
             get { return _ServerTraceEnabled; }
-            set { SetProperty<bool>(ref _ServerTraceEnabled, value, "ServerTraceEnabled"); }
+            set { SetProperty<bool>(ref _ServerTraceEnabled, value); }
         }
 
 
@@ -220,7 +230,7 @@ namespace ETWControler
         public bool NetworkSendEnabled
         {
             get { return _NetworkSendEnabled; }
-            set { SetProperty<bool>(ref _NetworkSendEnabled, value, "NetworkSendEnabled"); }
+            set { SetProperty<bool>(ref _NetworkSendEnabled, value); }
         }
 
         ObservableCollection<string> _ReceivedMessages;
@@ -230,7 +240,7 @@ namespace ETWControler
         public ObservableCollection<string> ReceivedMessages
         {
             get { return _ReceivedMessages; }
-            set { SetProperty<ObservableCollection<string>>(ref _ReceivedMessages, value, "ReceivedMessages"); }
+            set { SetProperty<ObservableCollection<string>>(ref _ReceivedMessages, value); }
         }
 
         string _StatusText;
@@ -242,7 +252,7 @@ namespace ETWControler
             get { return _StatusText; }
             set 
             {
-                SetProperty<string>(ref _StatusText, value, "StatusText"); 
+                SetProperty<string>(ref _StatusText, value); 
             }
         }
 
@@ -253,7 +263,7 @@ namespace ETWControler
         public Brush StatusColor
         {
             get { return _StatusColor; }
-            set { SetProperty<Brush>(ref _StatusColor, value, "StatusColor"); }
+            set { SetProperty<Brush>(ref _StatusColor, value); }
         }
 
         string _SlowEventMessage;
@@ -264,7 +274,7 @@ namespace ETWControler
         public string SlowEventMessage
         {
             get { return _SlowEventMessage; }
-            set { SetProperty<string>(ref _SlowEventMessage, value, "SlowMessage"); }
+            set { SetProperty<string>(ref _SlowEventMessage, value); }
         }
 
 
@@ -276,7 +286,7 @@ namespace ETWControler
         public string FastEventMessage
         {
             get { return _FastEventMessage; }
-            set { SetProperty<string>(ref _FastEventMessage, value, "FastMessage"); }
+            set { SetProperty<string>(ref _FastEventMessage, value); }
         }
 
         string _SlowEventHotkey;
@@ -287,14 +297,14 @@ namespace ETWControler
         public string SlowEventHotkey
         {
             get { return _SlowEventHotkey;  }
-            set { SetProperty<string>( ref _SlowEventHotkey, value, "SlowEventHotkey"); }
+            set { SetProperty<string>( ref _SlowEventHotkey, value); }
         }
 
         string _FastEventHotkey;
         public string FastEventHotkey
         {
             get { return _FastEventHotkey; }
-            set { SetProperty<string>(ref _FastEventHotkey, value, "FastEventHotKey"); }
+            set { SetProperty<string>(ref _FastEventHotkey, value); }
         }
 
         /// <summary>
@@ -354,7 +364,7 @@ namespace ETWControler
         public string[] TraceSessions
         {
             get { return _TraceSessions; }
-            set { SetProperty<string[]>(ref _TraceSessions, value, "TraceSessions"); }
+            set { SetProperty<string[]>(ref _TraceSessions, value); }
         }
 
         string[] _ServerTraceSessions;
@@ -364,7 +374,7 @@ namespace ETWControler
         public string[] ServerTraceSessions
         {
             get { return _ServerTraceSessions; }
-            set { SetProperty<string[]>(ref _ServerTraceSessions, value, "ServerTraceSessions"); }
+            set { SetProperty<string[]>(ref _ServerTraceSessions, value); }
         }
 
         /// <summary>
@@ -520,7 +530,7 @@ namespace ETWControler
                                                     "This will eanble mouse click, encrypted keyboard tracing which will send to to your local machine again. If you want to hide the window you can add -hide." + Environment.NewLine + 
                                                     "These commands are useful if you only want to use ETWControler as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
 
-        static readonly string About = String.Format("ETWControler (c) by Alois Kraus 2015 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
+        static readonly string About = String.Format("ETWControler (c) by Alois Kraus 2015-2016 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
         private void AboutBox()
         {
             var window = new HelpWindow("About", About);
@@ -709,6 +719,7 @@ namespace ETWControler
             this.PortNumber = Configuration.Default.PortNumber;
             this.WCFPort = Configuration.Default.WCFPort;
             this.Host = Configuration.Default.Host;
+            this.JpgCompressionLevel = Configuration.Default.JpgCompressionLevel;
             this.SlowEventHotkey = Configuration.Default.SlowEventHotkey;
             this.SlowEventMessage = Configuration.Default.SlowEventMessage;
             this.FastEventMessage = Configuration.Default.FastEventMessage;
@@ -731,10 +742,13 @@ namespace ETWControler
             Configuration.Default.PortNumber = this.PortNumber;
             Configuration.Default.WCFPort = this.WCFPort;
             Configuration.Default.Host = this.Host;
+            Configuration.Default.JpgCompressionLevel = this.JpgCompressionLevel;
             Configuration.Default.SlowEventHotkey = this.SlowEventHotkey;
             Configuration.Default.SlowEventMessage = this.SlowEventMessage;
-            Configuration.Default.FastEventHotkey = this.FastEventHotkey;
             Configuration.Default.FastEventMessage = this.FastEventMessage;
+            Configuration.Default.FastEventHotkey = this.FastEventHotkey;
+            Configuration.Default.CaptureKeyboard = this.CaptureKeyboard;
+            Configuration.Default.CaptureMouseButtonDown = this.CaptureMouseButtonDown;
             Configuration.Default.LocalTraceStart = this.LocalTraceSettings.TraceStart;
             Configuration.Default.LocalTraceStop = this.LocalTraceSettings.TraceStop;
             Configuration.Default.ServerTraceStart = this.ServerTraceSettings.TraceStart;

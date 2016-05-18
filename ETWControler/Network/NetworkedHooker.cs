@@ -122,7 +122,7 @@ namespace ETWControler
 
         private void EnableRecorder()
         {
-            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory, Configuration.Default.ForcedScreenshotIntervalinMs);
+            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory, Configuration.Default.ForcedScreenshotIntervalinMs, Model.JpgCompressionLevel);
         }
 
         void Hooker_OnMouseWheel(int wheelDelta, int x, int y)
@@ -160,7 +160,7 @@ namespace ETWControler
                     {
                         if (newConcurrentScreenshotCount == 1) // prevent too many concurrent screenshots
                         {
-                            return Recorder.TakeScreenshot(x, y, id.ToString(), String.Format("{0}After500ms", id));
+                            return Recorder.TakeScreenshot(x, y, id.ToString(), $"{id}After500ms");
                         }
                     }
                     finally
@@ -210,6 +210,18 @@ namespace ETWControler
             }
             int id = CurrentId;
             HookEvents.ETWProvider.KeyDown(id, strKey);
+
+            if (Model.CaptureScreenShots && Recorder != null) // Many actions start with enter take a screenshot from Enter as well. 
+            {
+                switch (key)
+                {
+                    case Key.Enter:
+                        Recorder.TakeScreenshot(-1, -1, $"{id}_Enter", $"{id}After500ms");
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             SendToNetwork(id, String.Format("KeyDown {0}", strKey));
 

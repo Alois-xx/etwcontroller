@@ -26,7 +26,7 @@ namespace ETWControler_uTest
         {
             using (var tmp = TempDir.Create())
             {
-                using (ScreenshotRecorder rec = new ScreenshotRecorder(tmp.Name, 500))
+                using (ScreenshotRecorder rec = new ScreenshotRecorder(tmp.Name, 500,100))
                 {
                     Barrier b = new Barrier(4);
                     Action acc = () =>

@@ -40,6 +40,11 @@ namespace ETWControler.Screenshots
         System.Threading.Timer FileCleanupTimer;
 
         /// <summary>
+        /// Do not a forced screenshot if since this time a screenshot was already captured
+        /// </summary>
+        const int MinimumScreenshotTimeInMs = 99;
+
+        /// <summary>
         /// Keep only the last 100 screenshots and delete older ones
         /// </summary>
         const int KeepNNewestScreenShots = 100;
@@ -55,10 +60,26 @@ namespace ETWControler.Screenshots
         TimeSpan SecondScreenshotTimerAfterClick = TimeSpan.FromMilliseconds(500);
 
         /// <summary>
-        /// Time after which a screenshot is taken regardless if the user did click around or not
+        /// Define JPG compression level
         /// </summary>
-        TimeSpan ForcedRecordTimeSpan;
+        EncoderParameters EncoderParameters;
 
+        ImageCodecInfo JpgEncoder;
+
+        private ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
 
         private bool IsDisposed;
 
@@ -101,20 +122,30 @@ namespace ETWControler.Screenshots
         /// </summary>
         /// <param name="screenshotDirectory">Directory will be created if it does not yet exist.</param>
         /// <param name="forcedScreenShotAfterMs">If > 99ms it will create after forcedScreenShotAfterMs a screenshot if no other screenshot was taken during that period of time.</param>
-        public ScreenshotRecorder(string screenshotDirectory, int forcedScreenShotAfterMs)
+        /// <param name="jpgCompressionLevel">Can be a value from 0-100. 100 is lossless</param>
+        public ScreenshotRecorder(string screenshotDirectory, int forcedScreenShotAfterMs, int jpgCompressionLevel)
         {
             ScreenshotDirectory = screenshotDirectory;
             Directory.CreateDirectory(ScreenshotDirectory); // Ensure that dir exists
 
             ClearFiles(ScreenshotDirectory);
 
-            if (forcedScreenShotAfterMs > 99)  // one screenshot needs about 100ms. If one configures less than that we assume a configuration error
+            if (forcedScreenShotAfterMs > MinimumScreenshotTimeInMs)  // one screenshot needs about 100ms. If one configures less than that we assume a configuration error
             {
-                ForcedRecordTimeSpan = TimeSpan.FromMilliseconds(forcedScreenShotAfterMs);
+                Debug.Print($"Forced Screenshot timer: {forcedScreenShotAfterMs}");
                 ForcedScreenshotTimer = new System.Threading.Timer(OnScreenshotTimerExpired, null, 0, forcedScreenShotAfterMs);
             }
 
             FileCleanupTimer = new System.Threading.Timer(OnCleanupOldestFiles, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+
+
+            // Setup objects to save JPGs with a configured compression level
+            System.Drawing.Imaging.Encoder encoder = System.Drawing.Imaging.Encoder.Quality;
+            EncoderParameter encoderParameter = new EncoderParameter(encoder, (long) jpgCompressionLevel);
+            EncoderParameters = new EncoderParameters(1);
+            EncoderParameters.Param[0] = encoderParameter;
+
+            JpgEncoder = GetEncoder(ImageFormat.Jpeg);
         }
 
         void OnCleanupOldestFiles(object o)
@@ -125,9 +156,10 @@ namespace ETWControler.Screenshots
         void OnScreenshotTimerExpired(object o)
         {
             var now = DateTime.Now;
-            if(now - LastOtherScreenshot > ForcedRecordTimeSpan)
+            Debug.Print($"Timer expired {now.ToString("mm:ss")}, diff: {(now-LastOtherScreenshot).TotalMilliseconds}ms");
+            if( (now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
             {
-                TakeAnotherScreenshot($"_Forced_{now.ToString("HH.mm.ss.fff")}", false);
+                TakeAnotherScreenshot($"Forced_{now.ToString("HH.mm.ss.fff")}", false);
             }
         }
 
@@ -187,7 +219,7 @@ namespace ETWControler.Screenshots
                     }
 
                     string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
-                    bmp.Save(savePath, ImageFormat.Jpeg);
+                    bmp.Save(savePath, JpgEncoder, EncoderParameters);
                     HookEvents.ETWProvider.Screenshot(suffix, savePath);
 
                     if(!IsDisposed && !String.IsNullOrEmpty(suffixOfSecondScreenshot))
