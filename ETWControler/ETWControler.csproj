@@ -139,6 +139,8 @@
     </Compile>
     <Compile Include="Hooking\Hooker.cs" />
     <Compile Include="ETW\HookEvents.cs" />
+    <Compile Include="IMessageBoxDisplay.cs" />
+    <Compile Include="MessageBoxDisplay.cs" />
     <Compile Include="Network\ITraceControlerService.cs" />
     <Compile Include="Network\NetworkedHooker.cs" />
     <Compile Include="Network\MessageReceiver.cs" />
@@ -175,6 +177,7 @@
     <Compile Include="UI\TraceStates.cs" />
     <Compile Include="ViewModel.cs" />
     <Compile Include="Hooking\WM.cs" />
+    <Compile Include="ViewModelFrozenData.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -234,6 +237,15 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="ETW\default.stacktags">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\GC.wprp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\Simple.wpaProfile">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
@@ -242,10 +254,10 @@
       <LastGenOutput>Configuration.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
-    <None Include="ETW\HookEvents.wprp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="ETW\HookEvents.wprp">
       <SubType>Designer</SubType>
-    </None>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
     <None Include="Doc\_TraceEventProgrammersGuide.docx" />
@@ -259,6 +271,15 @@
     <Content Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
+    </Content>
+    <Content Include="ETW\GC.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\HookRegions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\JIT.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Scripts\7z.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

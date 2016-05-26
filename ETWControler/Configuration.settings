@@ -82,5 +82,8 @@
   &lt;/Preset&gt;
 &lt;/ArrayOfPreset&gt;</Value>
     </Setting>
+    <Setting Name="TraceOpenCmdLine" Type="System.String" Scope="User">
+      <Value Profile="(Default)">wpa -i $FileName -profile ETW\Simple.wpaProfile</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

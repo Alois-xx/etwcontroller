@@ -96,12 +96,6 @@ namespace ETWControler
             {
                 if (b.PropertyName == ViewModel.CaptureScreenShotsProperty)
                 {
-                    if (Recorder != null)
-                    {
-                        Recorder.Dispose();
-                        Recorder = null;
-                    }
-
                     if (Model.CaptureScreenShots == true)
                     {
                         EnableRecorder();
@@ -120,9 +114,15 @@ namespace ETWControler
             Hooker.OnMouseWheel += Hooker_OnMouseWheel;
         }
 
-        private void EnableRecorder()
+        public void EnableRecorder()
         {
-            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory, Configuration.Default.ForcedScreenshotIntervalinMs, Model.JpgCompressionLevel);
+            if (Recorder != null)
+            {
+                Recorder.Dispose();
+                Recorder = null;
+            }
+
+            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory, Model.ForcedScreenshotIntervalinMs, Model.JpgCompressionLevel);
         }
 
         void Hooker_OnMouseWheel(int wheelDelta, int x, int y)
@@ -253,14 +253,14 @@ namespace ETWControler
         /// disable the sending checkbox to prevent further attempts to send data.
         /// </summary>
         /// <param name="message"></param>
-        void SendToNetwork(int eventId, string message)
+        async void SendToNetwork(int eventId, string message)
         {
             try
             {
                 Model.ReceivedMessages.Add(String.Format("Local[{0}]: {1}", eventId, message));
                 if (Model.NetworkSendState.Sender != null)
                 {
-                    Model.NetworkSendState.Sender.Send(String.Format("{0}~{1}",eventId, message));
+                    await Model.NetworkSendState.Sender.SendAsync(String.Format("{0}~{1}",eventId, message));
                 }
             }
             catch (Exception ex)

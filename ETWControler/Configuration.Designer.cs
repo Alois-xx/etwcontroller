@@ -297,5 +297,17 @@ namespace ETWControler {
                 return ((ETWControler.UI.Preset[])(this["Presets"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("wpa -i $FileName -profile ETW\\Simple.wpaProfile")]
+        public string TraceOpenCmdLine {
+            get {
+                return ((string)(this["TraceOpenCmdLine"]));
+            }
+            set {
+                this["TraceOpenCmdLine"] = value;
+            }
+        }
     }
 }

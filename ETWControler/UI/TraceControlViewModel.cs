@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -22,6 +23,8 @@ namespace ETWControler.UI
 
         ViewModel RootModel;
 
+        internal const string TraceFileNameVariable = "$FileName";
+        internal const string ScreenShotVariable = "$ScreenshotDir";
 
         string _TraceStart;
         /// <summary>
@@ -70,13 +73,16 @@ namespace ETWControler.UI
             get
             {
                 string lret = TraceStop;
-                lret = lret.Replace("$FileName", RootModel.UnexpandedCountedTraceFileName);
-                lret = lret.Replace("$ScreenshotDir", RootModel.ScreenshotDirectory);
+                lret = lret.Replace(TraceFileNameVariable, RootModel.UnexpandedCountedTraceFileName);
+                lret = lret.Replace(ScreenShotVariable, RootModel.ScreenshotDirectory);
                 return lret;
             }
         }
 
         string _TraceCancel;
+        /// <summary>
+        /// WPR or script command line 
+        /// </summary>
         public string TraceCancel
         {
             get { return _TraceCancel; }
@@ -93,8 +99,7 @@ namespace ETWControler.UI
                 string traceFileName = RootModel.UnexpandedCountedTraceFileName;
 
                 // some day we might specify the output file already with the start command ... 
-                string lret = TraceStart.Replace("$FileName", traceFileName);
-
+                string lret = TraceStart.Replace(TraceFileNameVariable, traceFileName);
 
                 if (!lret.StartsWith(ViewModel.CustomCommandPrefix)) // its still WPR
                 {
@@ -173,41 +178,83 @@ namespace ETWControler.UI
 
             OpenTraceCommand = new DelegateCommand((o) =>
             {
-                string outFile = RootModel.TraceFileName;
+                string outFile = RootModel.StopData.TraceFileName;
                 if (outFile != null)
                 {
-                    var startInfo = new ProcessStartInfo("wpa.exe",  Environment.ExpandEnvironmentVariables(outFile))
+                    var exe = ExtractExecName(RootModel.TraceOpenCmdLine);
+                    var options = RootModel.TraceOpenCmdLine.Substring(exe.Length);
+                    options = Environment.ExpandEnvironmentVariables(options.Replace(TraceFileNameVariable, outFile));
+                    var startInfo = new ProcessStartInfo(exe,  options)
                     {
+                        WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
                     };
                     Process.Start(startInfo);
+                    AddLogEntry(ViewModel.CustomCommandPrefix + exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
                 }
             }, 
-            () => !IsRemoteState && RootModel.TraceFileName != null && File.Exists(RootModel.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
+            () => !IsRemoteState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
         }
 
+        /// <summary>
+        /// Extract from a command line string the executable name which can be quoted or not.
+        /// </summary>
+        /// <param name="cmdLine"></param>
+        /// <returns></returns>
+        internal static string ExtractExecName(string cmdLine)
+        {
+            Func<char, bool> charFilter = ch => !Char.IsWhiteSpace(ch);
+
+            // treat exe names with quotation marks which can contain spaces correctly
+            if(cmdLine.StartsWith("\""))
+            {
+                int charCount = 0;
+                bool bMatch = true;
+                charFilter = ch =>
+                {
+                    bMatch = charCount < 2;
+
+                    if (ch == '"')
+                    {
+                        charCount++;
+                    }
+
+                    return bMatch;
+                };
+            }
+
+            var exe = new string(cmdLine.TakeWhile(charFilter).ToArray());
+            return exe;
+        }
         /// <summary>
         /// Set trace state, add to log and show an error message box when tracing could not be stopped.
         /// </summary>
         /// <param name="wprCommandOutput"></param>
         internal void ProcessStopCommand(Tuple<int, string> wprCommandOutput)
         {
-            AddLogEntry(TraceStopFullCommandLine, wprCommandOutput, CommandOutputs);
+            AddLogEntry(RootModel.StopData.TraceStopFullCommandLine, wprCommandOutput, CommandOutputs);
             OpenTraceCommand.RaiseCanExecuteChanged();
-            if (wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) // Trace not running
+            if (wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) 
             {
-                TraceStates = TraceStates.Stopped;
+                // Trace not running
             }
             else
             {
-                MessageBox.Show(String.Format("Error occured: {0}", wprCommandOutput.Item2), "Error");
+                RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
+
+            if( !File.Exists(RootModel.StopData.TraceFileName))
+            {
+                RootModel.MessageBoxDisplay.ShowMessage($"Error: Output file {RootModel.StopData.TraceFileName} was not found!", "Error");
+            }
+
+            TraceStates = TraceStates.Stopped;
         }
 
         /// <summary>
         /// Set trace state, add to log and show an error message box when tracing could not be started
         /// </summary>
         /// <param name="wprCommandOutput"></param>
-        internal void ProcessStartComand(Tuple<int, string> wprCommandOutput)
+        internal void ProcessStartCommand(Tuple<int, string> wprCommandOutput)
         {
             AddLogEntry(TraceStartFullCommandLine, wprCommandOutput, CommandOutputs);
 
@@ -217,7 +264,7 @@ namespace ETWControler.UI
             }
             else
             {
-                MessageBox.Show(String.Format("Error occured: {0}", wprCommandOutput.Item2), "Error");
+                RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
         }
 

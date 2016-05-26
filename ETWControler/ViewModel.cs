@@ -6,8 +6,10 @@ using ETWControler.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -50,7 +52,12 @@ namespace ETWControler
         public string Host
         {
             get { return _Host; }
-            set { SetProperty<string>(ref _Host, value); }
+            set
+            {
+                SetProperty<string>(ref _Host, value);
+                TraceServiceUrl = null; // force updated of dependent values
+                LocalTraceServiceUrl = null;
+             }
         }
 
         public int _WCFPort;
@@ -60,7 +67,12 @@ namespace ETWControler
         public int WCFPort
         {
             get { return _WCFPort; }
-            set { SetProperty<int>(ref _WCFPort, value); }
+            set
+            {
+                SetProperty<int>(ref _WCFPort, value);
+                TraceServiceUrl = null; // force updated of dependent values
+                LocalTraceServiceUrl = null;
+            }
         }
 
         public bool _CaptureKeyboard;
@@ -87,14 +99,45 @@ namespace ETWControler
             }
         }
 
+        int _ForcedScreenshotIntervalinMs;
+
+        public int ForcedScreenshotIntervalinMs
+        {
+            get { return _ForcedScreenshotIntervalinMs; }
+            set
+            {
+                bool bSetFromefault = _ForcedScreenshotIntervalinMs == 0 ? true : false;
+                SetProperty<int>(ref _ForcedScreenshotIntervalinMs, value);
+                if( !bSetFromefault ) // update screenshot interval and restart screen recording
+                {
+                    if( Hooker!=null && CaptureScreenShots )
+                    {
+                        Hooker.EnableRecorder();
+                    }
+                }
+                
+            }
+        }
+
         public string UnexpandedTraceFileName
         {
             get { return Configuration.Default.TraceFileName;  }
             set { Configuration.Default.TraceFileName = value; }
         }
 
-        public int TraceFileCounter = 0;
+        int _TraceFileCounter = 1;
+        public int TraceFileCounter
+        {
+            get { return _TraceFileCounter; }
+            set
+            {
+                SetProperty<int>(ref _TraceFileCounter, value);
+            }
+        }
 
+        /// <summary>
+        /// Trace output file name with optional Index appended but still not yet expanded environment variables
+        /// </summary>
         public string UnexpandedCountedTraceFileName
         {
             get
@@ -110,8 +153,20 @@ namespace ETWControler
             }
         }
 
-        public int TraceCounter = 0;
+        /// <summary>
+        /// Captured during trace stop of current viewmodel state to keep a copy 
+        /// of relevant viewmodel properties around which can change later. E.g. trace output file name
+        /// This is needed by the Open trace file button and other things.
+        /// </summary>
+        public ViewModelFrozenData StopData
+        {
+            get;
+            set;
+        }
 
+        /// <summary>
+        /// Fully expanded counted output file name
+        /// </summary>
         public string TraceFileName
         {
             get {  return Environment.ExpandEnvironmentVariables(UnexpandedCountedTraceFileName); }
@@ -140,13 +195,25 @@ namespace ETWControler
             {
                 return String.Format("http://{0}:{1}/TraceControlerService", Host, WCFPort);
             }
+            set
+            {
+                RefreshProperty();
+            }
         } 
 
+
+        /// <summary>
+        /// Local Web service hosting URL
+        /// </summary>
         public string LocalTraceServiceUrl
         {
             get
             {
-                return String.Format("http://localhost:{1}/TraceControlerService", Host, WCFPort);
+                return String.Format("http://localhost:{0}/TraceControlerService", WCFPort);
+            }
+            set
+            {
+                RefreshProperty();
             }
         }
 
@@ -356,6 +423,15 @@ namespace ETWControler
             }
         }
 
+        string _TraceOpenCmdLine;
+        public string TraceOpenCmdLine
+        {
+            get { return _TraceOpenCmdLine; }
+            set
+            {
+                SetProperty<string>(ref _TraceOpenCmdLine, value);
+            }
+        }
 
         string[] _TraceSessions;
         /// <summary>
@@ -450,25 +526,38 @@ namespace ETWControler
                 {
                     if(!this.LocalTraceEnabled && !this.ServerTraceEnabled)
                     {
-                        MessageBox.Show("Please enable tracing at the remote host and/or on your local machine.");
+                        MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.","Warning");
                         return;
                     }
 
                     this.Hooker.ResetId();
 
-                    this.TraceFileCounter++; // Increment file counter for every trace start so we get unique files names within the current trace session of ETWControler
-
                     if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
                     {
                         LocalTraceSettings.TraceStates = TraceStates.Starting;
+
+                        if( File.Exists(TraceFileName))
+                        {
+                            try
+                            {
+                                File.Delete(TraceFileName);
+                            }
+                            catch(Exception ex)
+                            {
+                                MessageBoxDisplay.ShowMessage($"Could not delete old trace file {TraceFileName}. Is the file still open in WPA? Full error: {ex}", "Error");
+                                LocalTraceSettings.TraceStates = TraceStates.Stopped;
+                                return;
+                            }
+                        }
+
                         Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStartFullCommandLine))
-                                    .ContinueWith(t => LocalTraceSettings.ProcessStartComand(t.Result), UISheduler);
+                                    .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UISheduler);
                     }
                     if (this.ServerTraceEnabled)
                     {
                         ServerTraceSettings.TraceStates = TraceStates.Starting;
                         var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStartFullCommandLine);
-                        command.Completed = (output) => ServerTraceSettings.ProcessStartComand(output);
+                        command.Completed = (output) => ServerTraceSettings.ProcessStartCommand(output);
                         command.Execute();
                     }
                 }
@@ -543,11 +632,17 @@ namespace ETWControler
             window.Show();
         }
 
+        public IMessageBoxDisplay MessageBoxDisplay
+        {
+            get;
+        }
+
         /// <summary>
         /// Initialize the default values for the ViewModel and load the settings from disc.
         /// </summary>
-        public ViewModel()
+        public ViewModel(IMessageBoxDisplay messageBoxDisplay)
         {
+            MessageBoxDisplay = messageBoxDisplay;
             LocalTraceSettings = new TraceControlViewModel(this, false);
             ServerTraceSettings = new TraceControlViewModel(this, true);
             _ReceivedMessages = new ObservableCollection<string>();
@@ -580,11 +675,12 @@ namespace ETWControler
         /// <summary>
         /// Initialize things which must happen on a UI thread.
         /// </summary>
-        public void InitUIDependantVariables(App args)
+        public void InitUIDependantVariables(App args, TaskScheduler scheduler)
         {
-            NetworkSendState = new NetworkSendState(this);
-            NetworkReceiveState = new NetworkReceiveState(this);
-            WCFHost = new WCFHostServiceState(this);
+            UISheduler = scheduler;
+            NetworkSendState = new NetworkSendState(this, UISheduler);
+            NetworkReceiveState = new NetworkReceiveState(this, UISheduler);
+            WCFHost = new WCFHostServiceState(this, UISheduler);
             Hooker = new NetworkedHooker(this);
             if( !HookEvents.IsAlreadyRegistered() )
             {
@@ -687,7 +783,7 @@ namespace ETWControler
         /// <summary>
         /// stop tracing command 
         /// </summary>
-        void StopTracing()
+        internal void StopTracing()
         {
             if (this.CaptureScreenShots) // create html report also if no tracing was active perhaps someone finds this functionality in itself useful
             {
@@ -695,20 +791,28 @@ namespace ETWControler
                 htmlReportGenerator.GenerateReport();
             }
 
+            StopData = new ViewModelFrozenData
+            {
+                TraceStopFullCommandLine = LocalTraceSettings.TraceStopFullCommandLine,
+                TraceFileName = TraceFileName,
+            };
+
             if (this.LocalTraceEnabled) 
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
                 // stop tracing asynchronously so we do not need to wait until local trace collection has stopped (while blocking the UI)
-                Task.Factory.StartNew< Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStopFullCommandLine))
+                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(StopData.TraceStopFullCommandLine))
                             .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UISheduler);
             }
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Stopping;
-                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStopFullCommandLine);
+                var command = WCFHost.CreateExecuteWPRCommand(StopData.TraceStopFullCommandLine);
                 command.Completed = (output) => ServerTraceSettings.ProcessStopCommand(output);
                 command.Execute();
             }
+             
+            this.TraceFileCounter++;
         }
 
         /// <summary>
@@ -716,9 +820,11 @@ namespace ETWControler
         /// </summary>
         void LoadSettings()
         {
+            this.TraceOpenCmdLine = Configuration.Default.TraceOpenCmdLine;
             this.PortNumber = Configuration.Default.PortNumber;
             this.WCFPort = Configuration.Default.WCFPort;
             this.Host = Configuration.Default.Host;
+            this.ForcedScreenshotIntervalinMs = Configuration.Default.ForcedScreenshotIntervalinMs;
             this.JpgCompressionLevel = Configuration.Default.JpgCompressionLevel;
             this.SlowEventHotkey = Configuration.Default.SlowEventHotkey;
             this.SlowEventMessage = Configuration.Default.SlowEventMessage;
@@ -742,6 +848,9 @@ namespace ETWControler
             Configuration.Default.PortNumber = this.PortNumber;
             Configuration.Default.WCFPort = this.WCFPort;
             Configuration.Default.Host = this.Host;
+            Configuration.Default.ScreenshotDirectory = ScreenshotDirectoryUnexpanded;
+            Configuration.Default.TraceOpenCmdLine = TraceOpenCmdLine;
+            Configuration.Default.ForcedScreenshotIntervalinMs = this.ForcedScreenshotIntervalinMs;
             Configuration.Default.JpgCompressionLevel = this.JpgCompressionLevel;
             Configuration.Default.SlowEventHotkey = this.SlowEventHotkey;
             Configuration.Default.SlowEventMessage = this.SlowEventMessage;

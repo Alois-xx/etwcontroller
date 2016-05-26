@@ -30,10 +30,12 @@ namespace ETWControler.Commands
             get;
             set;
         }
+        public TaskScheduler Scheduler { get; private set; }
 
-        public NetworkSendState(ViewModel model)
+        public NetworkSendState(ViewModel model, TaskScheduler scheduler)
         {
             Model = model;
+            Scheduler = scheduler;
         }
 
         public void RestartIfStarted()
@@ -79,7 +81,7 @@ namespace ETWControler.Commands
             {
                 Sender = new MessageSender(Model.Host, Model.PortNumber, NetworkProtocolType.TCP);
             },
-            Model)
+            Model, Scheduler)
             {
                 Started =  String.Format("Connected to {0}", Model.Host),
                 Starting = String.Format("Connecting to server {0}:{1} ...", Model.Host, Model.PortNumber),
@@ -98,7 +100,7 @@ namespace ETWControler.Commands
                     Sender = null;
                 }
             },
-            Model)
+            Model, Scheduler)
             {
                 Started = String.Format("Closed connection to {0}", Model.Host),
                 Starting = String.Format("Closing connection to {0}:{1}", Model.Host, Model.PortNumber),

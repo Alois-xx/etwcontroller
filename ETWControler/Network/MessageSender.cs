@@ -147,6 +147,18 @@ namespace ETWControler.Network
         }
 
         /// <summary>
+        /// Fake async version to not block hooked keyboard in case of sloppy network. 
+        /// Otherwise the input processing of the complete machine hangs until the network packets
+        /// get through it or never if the remote machine does not respond or the remote host is configured wrong.
+        /// </summary>
+        /// <param name="message">message to send.</param>
+        /// <returns></returns>
+        public Task SendAsync(string message)
+        {
+            return Task.Run(() => Send(message));
+        }
+
+        /// <summary>
         /// Read response from the server that the message has arrived and it has been processed.
         /// </summary>
         private void ReadAcknowledge()

@@ -16,10 +16,12 @@ namespace ETWControler.Commands
         volatile ServiceHost Host;
         public AsyncUICommand<string[]> GetTraceSessions;
         public AsyncUICommand<string> ExecuteWPRCommand;
+        TaskScheduler Scheduler;
 
-        public WCFHostServiceState(ViewModel model)
+        public WCFHostServiceState(ViewModel model, TaskScheduler scheduler)
         {
             Model = model;
+            Scheduler = scheduler;
             GetTraceSessions = CreateGetTraceSessions();
             AsyncInitializer = CreateService();
             AsyncInitializer.Execute();
@@ -38,7 +40,7 @@ namespace ETWControler.Commands
                 {
                     // Server already running inside another instance 
                 }
-            }, Model)
+            }, Model, Scheduler)
             {
                 StartingError = "Could not start TraceControlerService service. Error: ",
                 Starting = "Starting TraceControlerService" + Model.LocalTraceServiceUrl,
@@ -52,7 +54,7 @@ namespace ETWControler.Commands
             {
                 SelfHostedService service = new SelfHostedService(Model.TraceServiceUrl);
                 return service.UseService<string[]>(webservice => webservice.GetTraceSessions());
-            }, Model)
+            }, Model, Scheduler)
             {
                 Starting = "Fetching active trace sessions from server",
                 Started = "Fetched Trace Sessions",
@@ -66,7 +68,7 @@ namespace ETWControler.Commands
             {
                 SelfHostedService service = new SelfHostedService(Model.TraceServiceUrl);
                 return service.UseService<Tuple<int,string>>(webservice => webservice.ExecuteWPRCommand(wprArgs));
-            }, Model)
+            }, Model, Scheduler)
             {
                 Starting = String.Format("Execute on host {0}: wpr.exe {1}", Model.Host, wprArgs),
                 Started = "WPR completed on host" + Model.Host,

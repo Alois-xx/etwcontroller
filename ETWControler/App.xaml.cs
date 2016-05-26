@@ -105,7 +105,7 @@ namespace ETWControler
 
             }
 
-            Model = new ViewModel();
+            Model = new ViewModel(new MessageBoxDisplay());
             base.OnStartup(e);
         }
 

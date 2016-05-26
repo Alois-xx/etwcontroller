@@ -33,6 +33,7 @@ namespace ETWControler.Commands
             get;
             set;
         }
+        public TaskScheduler Scheduler { get; private set; }
 
         public void Restart()
         {
@@ -55,7 +56,7 @@ namespace ETWControler.Commands
                     Receiver = new MessageReceiver(Model.PortNumber, NetworkProtocolType.TCP);
                     Receiver.OnMessageReceived += Receiver_OnMessageReceived;
                 },
-                                                    Model)
+            Model, Scheduler)
             {
                 Started = String.Format("Server started at port {0}", Model.PortNumber),
                 Starting = String.Format("Starting server at port {0}", Model.PortNumber),
@@ -76,7 +77,7 @@ namespace ETWControler.Commands
                     Receiver.Dispose();
                     Receiver = null;
                 }
-            }, Model)
+            }, Model, Scheduler)
             {
                 Starting = String.Format("Closing server port {0}", Model.PortNumber),
                 Started = String.Format("Closed server port {0}", Model.PortNumber),
@@ -85,9 +86,10 @@ namespace ETWControler.Commands
             StopCommand.Execute();
         }
 
-        public NetworkReceiveState(ViewModel model)
+        public NetworkReceiveState(ViewModel model, TaskScheduler scheduler)
         {
             Model = model;
+            Scheduler = scheduler;
             CreateAndExecuteStartCommand();
         }
 

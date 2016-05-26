@@ -23,9 +23,8 @@ namespace ETWControler
         {
             App = Application.Current as App;
 
-            Model.InitUIDependantVariables(App);
+            Model.InitUIDependantVariables(App, TaskScheduler.FromCurrentSynchronizationContext());
             this.DataContext = this.Model;
-            Model.UISheduler = TaskScheduler.FromCurrentSynchronizationContext();
             InitializeComponent();
 
             if( App.HideWindow )

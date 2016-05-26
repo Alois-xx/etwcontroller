@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created by Alois Kraus. Free for public use. 
+  This enrichted stack tag file captures some of the most common .NET issues which would be very hard to spot otherwise and serves as
+  platform to add your methods of your application to this file. Once you have found an issue in your application after a long analysis you
+  can stuff the CPU consumption bugs of the lowest methods in the call stack in this file and give it a tag. 
+  When you hit this CPU issue next time you can see that if this stack tag consumes significant CPU again that you have the same issue again.
+  To make it work you need to overwrite the file
+    C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\Catalog\default.stacktags
+  with your file or be sure to remove the default file used by WPA.
+  The reason behind this is that otherwise the default file will steal nearly all CPU activity caused by JIT compiler and GC and list it as GC or JIT or TypeLoader tags but your more
+  specific application level tags will never show up. 
+  Lets suppose you have a call stack like
+  
+    Main()
+	F1()
+	F2()
+	ScaleImage()        Tag=ScaleImageProblem
+	garbage::collect()  Tag=GC  
+	
+	Now WPA will walk from the bottom and find that the default stack tag for GC will match first. Then your tag higher up in the call stack will never show up!
+	To work around this you need to overwrite the default stacktag file so it does not steal the stacks which are relevant to your tagging. 
+	Or you make sure that you remove the default stacktag file always in your list under Trace - Trace Properties - Stack Tag Definitions
+	
+	As a general rule to get a useful stacktag file you should tag methods as high as possible in the call stack to prevent that you "steal" methods from other tags which might
+	be conflicting with your tagging lower in the call stack. 
+	
+	When you idenfity a method be sure to add both definitions for NGenned and JITed to the tag file
+	
+	The JITed methods have :: between class and method name but no arguments:
+		PresentationFramework.dll!System.Windows.Markup.WpfXamlLoader::Load	
+	Whereas NGenned code has . between class and metehod name and the full list of types in the pdb. You need to be careful when you
+	create stack tag file to get the same tags for JITed and NGenned code.
+		System.ni.dll!System.Text.RegularExpressions.RegexRunner.Scan(System.Text.RegularExpressions.Regex, System.String, Int32, Int32, Int32, Int32, Boolean, System.TimeSpan)
+-->
+<Tag Name="">
+<Tag Name="Kernel">
+	<Tag Name="Trend Micro Virus Scanner">
+		<Entrypoint Module="VSApiNt.sys" Method="*"/>
+	</Tag>
+	<Tag Name="Compress Memory Pages">
+		<Entrypoint Module="ntoskrnl.exe" Method="RtlCompressBufferXpressLz*"/>
+		<Entrypoint Module="ntoskrnl.exe" Method="StDmPageAdd*"/>
+	</Tag>
+	<Tag Name="ETW Stackwalks">
+		<Entrypoint Module="ntoskrnl.exe" Method="EtwpTraceStackWalk*"/>
+		<Entrypoint Module="clr.dll" Method="EtwCallout*"/>
+	</Tag>	
+</Tag>
+<Tag Name="Exception Dispatch" Priority="1000" >
+	<Entrypoint Module="KernelBase.dll" Method="RaiseException*" />
+</Tag>
+<Tag Name="WMI">
+	<Tag Name="Query Process Memory">
+		<Entrypoint Module="ntdll.dll" Method="NtQueryVirtualMemory*"/>
+		<Entrypoint Module="perfproc.dll" Method="GetSystemVaData*"/>
+	</Tag>
+	<Tag Name="Query Process Information">
+		<Entrypoint Module="perfproc.dll" Method="CollectSysProcessObjectData*"/>
+	</Tag>
+</Tag>
+  <Tag Name=".NET">
+	<Tag Name="UI Thread Callbacks">
+		<Entrypoint Module="System.Windows.Forms.dll" Method="*Control::InvokeMarshaledCallbackHelper*"/>
+		<Entrypoint Module="System.Windows.Forms.ni.dll" Method="*Control.InvokeMarshaledCallbackHelper*"/>
+		<Tag Name="Timer Callbacks">
+			<Entrypoint Module="System.Windows.Forms.ni.dll" Method="System.Windows.Forms.Timer.OnTick*"/>
+			<Entrypoint Module="System.Windows.Forms.dll" Method="System.Windows.Forms.Timer::OnTick*"/>
+		</Tag>
+		<Tag Name="UI Automation Overhead">
+			<Entrypoint Module="ole32.dll" Method="ThreadWndProc*"/>
+			<Entrypoint Module="oleacc.dll" Method="LresultFromObject*"/>
+			<Entrypoint Module="win32k.sys" Method="NtUserPeekMessage*"/>
+		</Tag>
+	</Tag>
+  
+ 	<Tag Name="WCF">
+		<Tag Name="Read">
+			<Entrypoint Module="System.ServiceModel.ni.dll" Method="*System.ServiceModel.Channels.PipeConnection.OnAsyncReadComplete*"/>
+			<Entrypoint Module="System.ServiceModel.ni.dll" Method="*System.ServiceModel.Channels.PipeConnection::OnAsyncReadComplete*"/>
+		</Tag>
+	</Tag>
+
+	<Tag Name="WPF">
+		<Tag Name="Measure">
+			<Entrypoint Module="PresentationCore.ni.dll" Method="*System.Windows.UIElement.Measure*"/>
+			<Entrypoint Module="PresentationCore.dll" Method="*System.Windows.UIElement::Measure*"/>
+		</Tag>
+		<Tag Name="XamlServices Transform">
+				<Entrypoint Module="System.Xaml.dll" Method="System.Xaml.XamlServices::Transform*"/>
+				<Entrypoint Module="System.Xaml.ni.dll" Method="System.Xaml.XamlServices.Transform*"/>
+		</Tag>
+		<Tag Name="RenderThread">
+			<Entrypoint Module="wpfgfx_v0400.dll" Method="CPartitionThread::RenderPartition*"/>
+		</Tag>
+	</Tag>
+	<Tag Name="GDI">
+		<Entrypoint Module="GdiPlus.dll" Method="*GpGraphics::DrvDrawImage*"/>
+	</Tag>
+
+	<Tag Name="Induced GC">
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.GC.Collect(*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.GC::Collect*"/>
+	</Tag>
+
+	<Tag Name="Finalization">
+		<Entrypoint Module="clr.dll" Method="Thread::DoExtraWorkForFinalizer*"/>
+		<Entrypoint Module="clr.dll" Method="WKS::FinalizeAllObjects*"/>
+	</Tag>
+	<Tag Name="Get Process Infos">
+		<Entrypoint Module="System.ni.dll" Method="System.Diagnostics.NtProcessInfoHelper.GetProcessInfos*"/>
+		<Entrypoint Module="System.dll" Method="System.Diagnostics.NtProcessInfoHelper::GetProcessInfos*"/>
+		<Entrypoint Module="System.ni.dll" Method="System.Diagnostics.Process.GetProcessById*"/>
+		<Entrypoint Module="System.dll" Method="System.Diagnostics.Process::GetProcessById*"/>
+	</Tag>
+	<Tag Name="Xml Processing">
+		<Entrypoint Module="System.Xml.ni.dll" Method="*"/>
+		<Entrypoint Module="System.Xml.dll" Method="*"/>
+	</Tag>
+	<Tag Name="Reflection Overhead">
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.RuntimeType.get*"/>
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.RuntimeType.Get*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.RuntimeType::get*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.RuntimeType::Get*"/>
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Reflection.CustomAttribute.GetCustomAttributes*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.Reflection.CustomAttribute::GetCustomAttributes*"/>
+	</Tag>
+	<Tag Name="Reflection Code Gen" Priority="100">
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Reflection.Emit*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.Reflection.Emit*"/>
+	</Tag>
+	<Tag Name="Read App.Config">
+		<Entrypoint Module="System.Configuration.dll" Method="System.Configuration.ConfigurationSectionCollection::Get*"/>
+	</Tag>
+
+	<Tag Name="Satellite Assembly Lookup">
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Resources.ManifestBasedResourceGroveler.GetSatelliteAssembly*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.Resources.ManifestBasedResourceGroveler::GetSatelliteAssembly*"/>
+	</Tag>
+
+	<Tag Name="Static Initializer Synchronization">
+		<Entrypoint Module="clr.dll" Method="MethodTable::DoRunClassInitThrowing*"/>
+	</Tag>
+	<Tag Name="Object Comparisons and GetHashCode">
+		<Entrypoint Module="*.ni.dll" Method=".Equals(*"/>
+		<Entrypoint Module="*.dll" Method="::Equals*"/>
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Globalization.CompareInfo.Compare*"/>
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Collections.Generic.ObjectEqualityComparer`1[System.__Canon].Equals*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.Collections.Generic.ObjectEqualityComparer`1[System.__Canon]::Equals*"/>
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Collections.Generic.GenericEqualityComparer`1[System.__Canon].Equals*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.Collections.Generic.GenericEqualityComparer`1[System.__Canon]::Equals*"/>
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Collections.Generic.List`1[System.__Canon].Contains*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.Collections.Generic.List`1[System.__Canon]::Contains*"/>
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.Collections.Generic.ObjectEqualityComparer`1[System.__Canon].GetHashCode*"/>
+		<Entrypoint Module="mscorlib.dll" Method="System.Collections.Generic.ObjectEqualityComparer`1[System.__Canon]::GetHashCode*"/>
+	</Tag>
+	<Tag Name="String Operations">
+		<Entrypoint Module="mscorlib.ni.dll" Method="System.String.*"/>
+	</Tag>
+	<Tag Name="Regular Expression">
+		<Entrypoint Module="System.ni.dll" Method="*System.Text.RegularExpressions.Regex*"/>
+	</Tag>
+	<Tag Name="Event Leaks?">
+		<Tag Name="Delegate.Remove">
+			<Entrypoint Module="mscorlib.ni.dll" Method="System.MulticastDelegate.RemoveImpl(System.Delegate)"/>
+		</Tag>
+		<Tag Name="Delegate.Combine">
+			<Entrypoint Module="mscorlib.ni.dll" Method="System.MulticastDelegate.CombineImpl(System.Delegate)"/>
+		</Tag>
+	</Tag>
+	<Tag Name="Lock Contention">
+		<Entrypoint Module="clr.dll" Method="*JITutil_MonContention*"/>
+		<Entrypoint Module="clr.dll" Method="JIT_MonEnterWorker_InlineGetThread_GetThread_PatchLabel*"/>
+	</Tag>
+	<Tag Name="Background GC">
+		<Entrypoint Module="clr.dll" Method="*WKS::gc_heap::bgc_thread_function*"/>
+	</Tag>
+	<Tag Name="Threadpool Worker Contention">
+		<Entrypoint Module="clr.dll" Method="*ThreadpoolMgr::UnfairSemaphore::Wait*"/>
+	</Tag>
+	<Tag Name="Visual Basic Compiler" Priority="110">
+		<Entrypoint Module="System.Activities.dll" Method="*Microsoft.VisualBasic.Activities.VisualBasicHelper::Compile*" />
+		<Entrypoint Module="System.Activities.ni.dll" Method="*Microsoft.VisualBasic.Activities.VisualBasicHelper.Compile*" />
+	</Tag>
+	<Tag Name="WF Tracking">
+		<Entrypoint Module="System.Activities.ni.dll" Method="System.Activities.Tracking.TrackingProvider*"/>
+		<Entrypoint Module="System.Activities.dll" Method="System.Activities.Tracking.TrackingProvider*"/>
+	</Tag>
+	<Tag Name="Entity Framework (SQL Wrapper)" >
+		<Tag Name="ViewGeneration" Priority="110">
+			<Entrypoint Module="System.Data.Entity.dll" Method="*System.Data.Mapping.ViewGeneration*" />
+			<Entrypoint Module="System.Data.Entity.ni.dll" Method="*System.Data.Mapping.ViewGeneration*" />
+		</Tag>
+		<Tag Name="Entity Framework Query Compile" Priority="110">
+			<Entrypoint Module="System.Data.Entity.dll" Method="*System.Data.Objects.EntitySqlQueryState::GetExecutionPlan*" />
+			<Entrypoint Module="System.Data.Entity.ni.dll" Method="*System.Data.Objects.EntitySqlQueryStateGetExecutionPlan*" />
+		</Tag>
+		<Entrypoint Module="System.Data.Entity.dll" />
+	</Tag>
+	<Tag Name="Automapper (Dependency Injection)" Priority="110">
+		<Entrypoint Module="AutoMapper.dll" />
+	</Tag>
+	<!-- Serializers keep their GC and JIT overhead by having nodes with a higher priority than the GC and JIT nodes -->
+	<Tag Name="Serialize">
+		<Tag Name="DataContractSerializer" Priority="110">
+			<Entrypoint Module="System.Runtime.Serialization.ni.dll" Method="*System.Runtime.Serialization.DataContractSerializer.WriteObject*" />
+			<Entrypoint Module="System.Runtime.Serialization.dll" Method="*System.Runtime.Serialization.DataContractSerializer::WriteObject*" />
+			<Entrypoint Module="System.Runtime.Serialization.ni.dll" Method="*System.Runtime.Serialization.XmlObjectSerializer.WriteObject*" />
+			<Entrypoint Module="System.Runtime.Serialization.dll" Method="*System.Runtime.Serialization.XmlObjectSerializer.WriteObject*" />
+
+		</Tag>
+		<Tag Name="XmlSerializer" Priority="105">
+			<Entrypoint Module="System.Xml.ni.dll" Method="*System.Xml.Serialization.XmlSerializer.Serialize*" />
+			<Entrypoint Module="System.Xml.dll" Method="*System.Xml.Serialization.XmlSerializer.Serialize*" />
+		</Tag>
+		<Tag Name="BinaryFormatter" Priority="101">
+			<Entrypoint Module="mscorlib.ni.dll" Method="*System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Serialize*" />
+			<Entrypoint Module="mscorlib.dll" Method="*System.Runtime.Serialization.Formatters.Binary.BinaryFormatter::Serialize*" />
+			<Entrypoint Module="mscorlib.ni.dll" Method="*System.Runtime.Serialization.Formatters.Binary.ObjectWriter.Serialize*" />
+			<Entrypoint Module="mscorlib.dll" Method="*System.Runtime.Serialization.Formatters.Binary.ObjectWriter::Serialize*" />
+		</Tag>
+
+	</Tag>
+	<Tag Name="Deserialize">
+		<Tag Name="DataContractSerializer" Priority="110">
+			<Entrypoint Module="System.Runtime.Serialization.ni.dll" Method="*System.Runtime.Serialization.DataContractSerializer.ReadObject*" />
+			<Entrypoint Module="System.Runtime.Serialization.dll" Method="*System.Runtime.Serialization.DataContractSerializer::ReadObject*" />
+			<Entrypoint Module="System.Runtime.Serialization.ni.dll" Method="*System.Runtime.Serialization.XmlObjectSerializer.ReadObject*" />
+			<Entrypoint Module="System.Runtime.Serialization.dll" Method="*System.Runtime.Serialization.XmlObjectSerializer::ReadObject*" />
+		</Tag>
+		<Tag Name="XmlSerializer" Priority="105">
+			<Entrypoint Module="System.Xml.ni.dll" Method="*System.Xml.Serialization.XmlSerializer.Deserialize*" />
+			<Entrypoint Module="System.Xml.dll" Method="*System.Xml.Serialization.XmlSerializer::Deserialize*" />
+		</Tag>
+		<Tag Name="BinaryFormatter" Priority="101">
+			<Entrypoint Module="mscorlib.ni.dll" Method="*System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Deserialize*" />
+			<Entrypoint Module="mscorlib.dll" Method="*System.Runtime.Serialization.Formatters.Binary.BinaryFormatter::Deserialize*" />
+			<Entrypoint Module="mscorlib.ni.dll" Method="*System.Runtime.Serialization.Formatters.Binary.ObjectReader.Deserialize*" />
+			<Entrypoint Module="mscorlib.dll" Method="*System.Runtime.Serialization.Formatters.Binary.ObjectReader::Deserialize*" />
+		</Tag>
+	</Tag>
+  </Tag>
+</Tag>

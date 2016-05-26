@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="clr-namespace:ETWControler.UI"
-        Title="Configuration Settings" Height="225.641" Width="550">
+        Title="Configuration Settings" Height="399.641" Width="571">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -10,8 +10,14 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-    <GroupBox Header="Settings">
-        <StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="110"/>
+            <RowDefinition Height="110"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <GroupBox Grid.Row="0" Header="Network">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="150"/>
@@ -25,8 +31,7 @@
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="5"/>
                     <RowDefinition Height="20"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="5"/>
                 </Grid.RowDefinitions>
                 <Label Margin="0,-5,0,0" Grid.Column="0">Remote Host</Label>
                 <TextBox Grid.Column="1" Text="{Binding Host}" ToolTip="Remote host to send the hooked keyboard and mouse events." KeyboardNavigation.TabIndex="0" />
@@ -50,10 +55,26 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="6">Screenshot Directory</Label>
-                <TextBox Grid.Column="1" Grid.Row="6" Text ="{Binding ScreenshotDirectoryUnexpanded}"  ToolTip="To this directory the screenshots are saved after every mouse click when Take Screenshots is checked." KeyboardNavigation.TabIndex="3" />
-                <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="7">Jpg Compression (0-100)</Label>
-                <TextBox Grid.Column="1" Grid.Row="7"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="The JPG compression level can be a value between 0-100. 100 is no compression." KeyboardNavigation.TabIndex="4">
+            </Grid>
+
+        </GroupBox>
+        <GroupBox Grid.Row="1" Header="Screenshot">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="20"/>
+                </Grid.RowDefinitions>
+                <Label Margin="0,-5,0,0" Grid.Row="0" Grid.Column="0" >Screenshot Directory</Label>
+                <TextBox Grid.Row="0" Grid.Column="1" Text ="{Binding ScreenshotDirectoryUnexpanded}"  ToolTip="Screenshots files are saved to this directory." KeyboardNavigation.TabIndex="3" />
+                <Label Margin="0,-5,0,0" Grid.Row="2" Grid.Column="0" >Jpg Compression (0-100)</Label>
+                <TextBox  Grid.Row="2" Grid.Column="1"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="The JPG compression level can be a value between 0-100. 100 is no compression." KeyboardNavigation.TabIndex="4">
                     <TextBox.Text>
                         <Binding Path="JpgCompressionLevel" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
                             <Binding.ValidationRules>
@@ -62,11 +83,34 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
+                <Label Margin="0,-5,0,0" Grid.Row="4" Grid.Column="0" >Screenshot Timer in ms</Label>
+                <TextBox  Grid.Row="4" Grid.Column="1"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Time in ms between two screenshots regardless if a mouse click or keyboard press did happen (100ms-60000ms)." KeyboardNavigation.TabIndex="4">
+                    <TextBox.Text>
+                        <Binding Path="ForcedScreenshotIntervalinMs" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                            <Binding.ValidationRules>
+                                <ui:PortnumberValidator Min="100" Max="60000"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
             </Grid>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Width="50" Click="Ok" IsDefault="True" KeyboardNavigation.TabIndex="3" Content="Ok" />
-                <Button Width="50" Margin="10,0,0,0" Click="Cancel" KeyboardNavigation.TabIndex="4" Content="Cancel" />
-            </StackPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Header="Trace Viewer">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                </Grid.RowDefinitions>
+                <Label Margin="0,-5,0,0" Grid.Row="0" Grid.Column="0" >Trace Open Command</Label>
+                <TextBox Grid.Row="0" Grid.Column="1" Text ="{Binding TraceOpenCmdLine}"  ToolTip="This is the command line used to open a trace file. The variable $TraceFile is expanded to the current etl output file name. The current working directory is the location of ETWController.exe" KeyboardNavigation.TabIndex="3" />
+            </Grid>
+        </GroupBox>
+        <StackPanel Grid.Row="3"  Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Width="50" Click="Ok" IsDefault="True" KeyboardNavigation.TabIndex="3" Content="Ok" />
+            <Button Width="50" Margin="10,0,0,0" Click="Cancel" KeyboardNavigation.TabIndex="4" Content="Cancel" />
         </StackPanel>
-    </GroupBox>
+    </Grid>
 </Window>

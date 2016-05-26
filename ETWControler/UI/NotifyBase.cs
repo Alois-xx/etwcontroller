@@ -44,6 +44,15 @@ namespace ETWControler.UI
                 eventHandler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+        
+        /// <summary>
+        /// Force to fire the property changed event to let WPF rebind a changed value
+        /// </summary>
+        /// <param name="propertyName"></param>
+        protected void RefreshProperty([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

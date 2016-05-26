@@ -85,21 +85,23 @@ namespace ETWControler.Commands
         /// Create an asynchronous command 
         /// </summary>
         /// <param name="start">Method which returns a value to execute</param>
-        public AsyncCommand(Func<T> start)
+        /// <param name="scheduler">Scheduler to use for async command.</param>
+        public AsyncCommand(Func<T> start, TaskScheduler scheduler)
         {
             if (start == null)
             {
                 throw new ArgumentNullException("start");
             }
             MethodWithReturn = start;
-            Scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            Scheduler = scheduler;
         }
 
         /// <summary>
         /// Create an asynchronous command which executes a method
         /// </summary>
         /// <param name="start">Method to start</param>
-        public AsyncCommand(Action start)
+        /// <param name="scheduler">Scheduler to use for async command.</param>
+        public AsyncCommand(Action start, TaskScheduler scheduler)
         {
             if (start == null)
             {
@@ -107,7 +109,7 @@ namespace ETWControler.Commands
             }
 
             Method = start;
-            Scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            Scheduler = scheduler;
         }
 
         /// <summary>

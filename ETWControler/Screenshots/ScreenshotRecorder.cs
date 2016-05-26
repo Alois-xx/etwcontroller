@@ -59,6 +59,12 @@ namespace ETWControler.Screenshots
         /// </summary>
         TimeSpan SecondScreenshotTimerAfterClick = TimeSpan.FromMilliseconds(500);
 
+
+        /// <summary>
+        /// Lock object to serialize screenshots
+        /// </summary>
+        object Lock = new object();
+
         /// <summary>
         /// Define JPG compression level
         /// </summary>
@@ -190,50 +196,54 @@ namespace ETWControler.Screenshots
         public KeyValuePair<string,Exception> TakeScreenshot(int clickX, int clickY, string suffix, string suffixOfSecondScreenshot)
         {
             try
-            { 
-                if( IsDisposed)
+            {
+                lock (Lock)
                 {
-                    return new KeyValuePair<string, Exception>(null, null);
+                    if (IsDisposed)
+                    {
+                        return new KeyValuePair<string, Exception>(null, null);
+                    }
+                    // Determine the size of the "virtual screen", which includes all monitors.
+                    int screenLeft = SystemInformation.VirtualScreen.Left;
+                    int screenTop = SystemInformation.VirtualScreen.Top;
+                    int screenWidth = SystemInformation.VirtualScreen.Width;
+                    int screenHeight = SystemInformation.VirtualScreen.Height;
+
+                    // Create a bitmap of the appropriate size to receive the screenshot.
+                    using (Bitmap bmp = new Bitmap(screenWidth, screenHeight))
+                    {
+                        var now = DateTime.Now;
+                        // Draw the screenshot into our bitmap.
+                        using (Graphics g = Graphics.FromImage(bmp))
+                        {
+                            g.CopyFromScreen(screenLeft, screenTop, 0, 0, bmp.Size);
+                        }
+
+                        TimeStampBitmap(now, bmp);
+
+                        if (clickX != -1 && clickY != -1)
+                        {
+                            MarkMouseClick(clickX, clickY, bmp);
+                        }
+
+                        string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
+                        bmp.Save(savePath, JpgEncoder, EncoderParameters);
+                        HookEvents.ETWProvider.Screenshot(suffix, savePath);
+
+                        if (!IsDisposed && !String.IsNullOrEmpty(suffixOfSecondScreenshot))
+                        {
+                            Task.Factory.StartNew(() => TakeAnotherScreenshot(suffixOfSecondScreenshot), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+                        }
+
+                        // Update creation time to actual screenshot snapshot time so 
+                        // we can use the file creation date as snapshot time to sort them during report generation
+                        var fileInfo = new FileInfo(savePath);
+                        fileInfo.CreationTime = now;
+
+
+                        return new KeyValuePair<string, Exception>(savePath, null);
+                    }
                 }
-                // Determine the size of the "virtual screen", which includes all monitors.
-                int screenLeft = SystemInformation.VirtualScreen.Left;
-                int screenTop = SystemInformation.VirtualScreen.Top;
-                int screenWidth = SystemInformation.VirtualScreen.Width;
-                int screenHeight = SystemInformation.VirtualScreen.Height;
-
-                // Create a bitmap of the appropriate size to receive the screenshot.
-                using (Bitmap bmp = new Bitmap(screenWidth, screenHeight))
-                {
-                    var now = DateTime.Now;
-                    // Draw the screenshot into our bitmap.
-                    using (Graphics g = Graphics.FromImage(bmp))
-                    {
-                        g.CopyFromScreen(screenLeft, screenTop, 0, 0, bmp.Size);
-                    }
-
-                    TimeStampBitmap(now, bmp);
-
-                    if (clickX != -1 && clickY != -1)
-                    {
-                        MarkMouseClick(clickX, clickY, bmp);
-                    }
-
-                    string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
-                    bmp.Save(savePath, JpgEncoder, EncoderParameters);
-                    HookEvents.ETWProvider.Screenshot(suffix, savePath);
-
-                    if(!IsDisposed && !String.IsNullOrEmpty(suffixOfSecondScreenshot))
-                    {
-                        Task.Factory.StartNew(() => TakeAnotherScreenshot(suffixOfSecondScreenshot), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
-                    }
-
-                    // Update creation time to actual screenshot snapshot time so 
-                    // we can use the file creation date as snapshot time to sort them during report generation
-                    var fileInfo = new FileInfo(savePath);
-                    fileInfo.CreationTime = now;
-
-                    return new KeyValuePair<string,Exception>(savePath, null);
-                  }
             }
             catch(Win32Exception ex)
             {
@@ -251,11 +261,11 @@ namespace ETWControler.Screenshots
             }
 
             // throttle creation of new screenshots after a click to one screenshot every 500ms
-            if (DateTime.Now - LastOtherScreenshot > SecondScreenshotTimerAfterClick)
+            if (DateTime.Now - LastOtherScreenshot > SecondScreenshotTimerAfterClick || !bSleep)
             {
                 TakeScreenshot(-1, -1, suffix, null);
+                LastOtherScreenshot = DateTime.Now;
             }
-            LastOtherScreenshot = DateTime.Now;
         }
 
         /// <summary>
