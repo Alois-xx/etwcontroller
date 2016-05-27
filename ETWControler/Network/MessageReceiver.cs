@@ -21,6 +21,8 @@ namespace ETWControler.Network
         CancellationTokenSource CancelSource;
         TcpListener Listener;
         internal int OpenListeners;
+        Exception LastStartException = null;
+
 
         public const byte AcknowledgeByte = 0x25;
 
@@ -69,9 +71,13 @@ namespace ETWControler.Network
                 CancelSource = new CancellationTokenSource();
                 CancelToken = CancelSource.Token;
                 ConnectionAcceptor = Task.Factory.StartNew( ()=> StartAcceptingConnections(untilStartedListening), CancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-                untilStartedListening.SignalAndWait();
+                if( untilStartedListening.SignalAndWait(5000) == false)
+                {
+                    throw new InvalidOperationException($"Could not start network receiver on port {Port}. LastStartException: {LastStartException}");
+                }
             }
         }
+
 
         void StartAcceptingConnections(Barrier untilStartedListening)
         {
@@ -101,6 +107,13 @@ namespace ETWControler.Network
             catch(SocketException ex)
             {
                 Debug.Print("Got SocketException in server: {0}", ex);
+                LastStartException = ex;
+                throw;
+            }
+            catch(Exception ex)
+            {
+                LastStartException = ex;
+                throw;
             }
         }
 
