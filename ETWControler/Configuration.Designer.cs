@@ -85,7 +85,8 @@ namespace ETWControler {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\\HookEvents.w" +
+            "prp")]
         public string LocalTraceStart {
             get {
                 return ((string)(this["LocalTraceStart"]));
@@ -281,13 +282,13 @@ namespace ETWControler {
 <ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
   <Preset>
     <Name>Default</Name>
-    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile</TraceStartCommand>
+    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile  -start ETW\HookEvents.wprp</TraceStartCommand>
     <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
     <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
   </Preset>
   <Preset>
     <Name>Default and .NET</Name>
-    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET</TraceStartCommand>
+    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET  -start ETW\HookEvents.wprp</TraceStartCommand>
     <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
     <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
   </Preset>
