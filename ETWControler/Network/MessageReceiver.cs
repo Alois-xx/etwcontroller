@@ -21,6 +21,8 @@ namespace ETWControler.Network
         CancellationTokenSource CancelSource;
         TcpListener Listener;
         internal int OpenListeners;
+        Exception LastStartException = null;
+
 
         public const byte AcknowledgeByte = 0x25;
 
@@ -68,10 +70,14 @@ namespace ETWControler.Network
                 Listener = new TcpListener(IPAddress.Any, Port);
                 CancelSource = new CancellationTokenSource();
                 CancelToken = CancelSource.Token;
-                ConnectionAcceptor = Task.Factory.StartNew( ()=> StartAcceptingConnections(untilStartedListening), CancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-                untilStartedListening.SignalAndWait();
+                ConnectionAcceptor = Task.Factory.StartNew(() => StartAcceptingConnections(untilStartedListening), CancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                if (untilStartedListening.SignalAndWait(5000) == false)
+                {
+                    throw new InvalidOperationException($"Could not start network receiver on port {Port}. LastStartException: {LastStartException}");
+                }
             }
         }
+
 
         void StartAcceptingConnections(Barrier untilStartedListening)
         {
@@ -95,16 +101,23 @@ namespace ETWControler.Network
                         break;
                     }
 
-                    Task.Factory.StartNew((o)=>Receive((TcpClient)o), client);
+                    Task.Factory.StartNew((o) => Receive((TcpClient)o), client);
                 }
             }
-            catch(SocketException ex)
+            catch (SocketException ex)
             {
                 Debug.Print("Got SocketException in server: {0}", ex);
+                LastStartException = ex;
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LastStartException = ex;
+                throw;
             }
         }
 
-        
+
         /// <summary>
         /// Every message is prefixed with the length in bytes.
         /// </summary>
@@ -117,7 +130,7 @@ namespace ETWControler.Network
             int nTotal = 0;
             while (nRead > 0 && nTotal != 4 && !CancelToken.IsCancellationRequested)
             {
-                nRead = stream.Read(receiveBuffer, nTotal, 4-nTotal);
+                nRead = stream.Read(receiveBuffer, nTotal, 4 - nTotal);
                 nTotal += nRead;
             }
 
@@ -128,7 +141,7 @@ namespace ETWControler.Network
                        (receiveBuffer[2] << 8) +
                         receiveBuffer[3];
             }
-            else if( nTotal > 4 )
+            else if (nTotal > 4)
             {
                 throw new NotSupportedException(String.Format("Did read more data than exptected 4 but was {0}", nTotal));
             }
@@ -161,7 +174,7 @@ namespace ETWControler.Network
                         break;
                     }
 
-                    if( msgSize > 50*1000) // received potentially a partial message from an already closed socket
+                    if (msgSize > 50 * 1000) // received potentially a partial message from an already closed socket
                     {
                         throw new InvalidOperationException(String.Format("Invalid buffer size during connect found: {0}", msgSize));
                     }
