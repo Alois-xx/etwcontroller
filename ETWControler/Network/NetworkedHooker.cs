@@ -122,7 +122,7 @@ namespace ETWControler
                 Recorder = null;
             }
 
-            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory, Model.ForcedScreenshotIntervalinMs, Model.JpgCompressionLevel);
+            Recorder = new ScreenshotRecorder(Model.ScreenshotDirectory, Model.ForcedScreenshotIntervalinMs, Model.JpgCompressionLevel, Model.KeepNNewestScreenShots);
         }
 
         void Hooker_OnMouseWheel(int wheelDelta, int x, int y)

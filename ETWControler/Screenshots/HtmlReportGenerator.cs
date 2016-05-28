@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ETWControler.Properties;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,6 +38,8 @@ namespace ETWControler.Screenshots
         }
 
 
+
+
         /// <summary>
         /// Generate report with current settings. Currently there are none but if demand exists they can easily be added.
         /// </summary>
@@ -49,7 +52,7 @@ namespace ETWControler.Screenshots
             {
                 using (var writer = new StreamWriter(stream))
                 {
-                    writer.WriteLine("<html>");
+                    writer.WriteLine(Resources.HtmlTemplate);
                     writer.WriteLine($"<h1>Screenshot Report for {Environment.MachineName} from {DateTime.Now}</h1>");
                     writer.WriteLine("<hr>");
                     foreach(var jpg in JpgsByCreationDate)
@@ -59,7 +62,7 @@ namespace ETWControler.Screenshots
                         writer.WriteLine("</div>");
                         writer.WriteLine("<div>");
                         writer.WriteLine($"<a href=\"{jpg.Name}\">");
-                        writer.WriteLine($"<img src=\"{jpg.Name}\" width=\"50%\" height=\"50%\" alt=\"Not captured or deleted\" title=\"Input event {jpg.Name}\"/>");
+                        writer.WriteLine($"<img src=\"{jpg.Name}\" width=\"100%\" height=\"100%\" alt=\"Not captured or deleted\" title=\"Input event {jpg.Name}\"/>");
                         writer.WriteLine("</a>");
                         writer.WriteLine("</div>");
                         writer.WriteLine("<hr>");
@@ -67,6 +70,8 @@ namespace ETWControler.Screenshots
                     writer.WriteLine("</html>");
                 }
             }
+
+
 
             return htmlFile;
         }

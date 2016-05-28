@@ -99,6 +99,17 @@ namespace ETWControler
             }
         }
 
+
+        int _KeepNNewestScreenShots;
+        public int KeepNNewestScreenShots
+        {
+            get { return _KeepNNewestScreenShots; }
+            set
+            {
+                SetProperty<int>(ref _KeepNNewestScreenShots, value);
+            }
+        }
+
         int _ForcedScreenshotIntervalinMs;
 
         public int ForcedScreenshotIntervalinMs
@@ -106,16 +117,15 @@ namespace ETWControler
             get { return _ForcedScreenshotIntervalinMs; }
             set
             {
-                bool bSetFromefault = _ForcedScreenshotIntervalinMs == 0 ? true : false;
                 SetProperty<int>(ref _ForcedScreenshotIntervalinMs, value);
-                if( !bSetFromefault ) // update screenshot interval and restart screen recording
-                {
-                    if( Hooker!=null && CaptureScreenShots )
-                    {
-                        Hooker.EnableRecorder();
-                    }
-                }
-                
+            }
+        }
+
+        public void RestartScreenCapture()
+        {
+            if (Hooker != null && CaptureScreenShots)
+            {
+                Hooker.EnableRecorder();
             }
         }
 
@@ -692,7 +702,8 @@ namespace ETWControler
             CaptureMouseButtonDown = args.CaptureMouseButtonDown;
             CaptureMouseMove = args.CaptureMouseMove;
             ScreenshotDirectoryUnexpanded = (args.ScreenshotDirectory ?? Configuration.Default.ScreenshotDirectory);
-            CaptureScreenShots = args.CaptureScreenshots;
+
+            CaptureScreenShots = args.CaptureScreenshots; // This line will also trigger a property change event which instantiates and starts the screenshotrecorder
 
             IsKeyBoardEncrypted = !args.IsKeyBoardNotEncrypted;
 
@@ -824,6 +835,7 @@ namespace ETWControler
             this.PortNumber = Configuration.Default.PortNumber;
             this.WCFPort = Configuration.Default.WCFPort;
             this.Host = Configuration.Default.Host;
+            this.KeepNNewestScreenShots = Configuration.Default.KeepNNewestScreenShots;
             this.ForcedScreenshotIntervalinMs = Configuration.Default.ForcedScreenshotIntervalinMs;
             this.JpgCompressionLevel = Configuration.Default.JpgCompressionLevel;
             this.SlowEventHotkey = Configuration.Default.SlowEventHotkey;
@@ -849,6 +861,7 @@ namespace ETWControler
             Configuration.Default.WCFPort = this.WCFPort;
             Configuration.Default.Host = this.Host;
             Configuration.Default.ScreenshotDirectory = ScreenshotDirectoryUnexpanded;
+            Configuration.Default.KeepNNewestScreenShots = KeepNNewestScreenShots;
             Configuration.Default.TraceOpenCmdLine = TraceOpenCmdLine;
             Configuration.Default.ForcedScreenshotIntervalinMs = this.ForcedScreenshotIntervalinMs;
             Configuration.Default.JpgCompressionLevel = this.JpgCompressionLevel;

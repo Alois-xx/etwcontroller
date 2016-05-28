@@ -26,7 +26,7 @@ namespace ETWControler_uTest
         {
             using (var tmp = TempDir.Create())
             {
-                using (ScreenshotRecorder rec = new ScreenshotRecorder(tmp.Name, 500,100))
+                using (ScreenshotRecorder rec = new ScreenshotRecorder(tmp.Name, 500,100, 100))
                 {
                     Barrier b = new Barrier(4);
                     Action acc = () =>
@@ -43,6 +43,30 @@ namespace ETWControler_uTest
             }
         }
 
+
+        /// <summary>
+        /// There are race conditions when the timer callbacks are still executing and we leave the dispose method 
+        /// already. Ensure that this does not happen.
+        /// </summary>
+        [Test]
+        public void Create_And_Dispose_Fast_Many_ScreenshotRecoder_Instances()
+        {
+            using (var tmp = TempDir.Create())
+            {
+                for (int i = 0; i < 20; i++)
+                {
+                    using (ScreenshotRecorder rec = new ScreenshotRecorder(tmp.Name, 100, 100, 100))
+                    {
+                       
+                    }
+                    using (ScreenshotRecorder rec = new ScreenshotRecorder(tmp.Name, 100, 100, 100))
+                    {
+                        Thread.Sleep(50);
+                    }
+                }
+            }
+        }
+       
         [Test]
         public void EnsureOldestFilesAreCleared()
         {

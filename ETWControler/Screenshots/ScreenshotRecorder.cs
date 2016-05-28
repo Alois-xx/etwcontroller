@@ -47,7 +47,7 @@ namespace ETWControler.Screenshots
         /// <summary>
         /// Keep only the last 100 screenshots and delete older ones
         /// </summary>
-        const int KeepNNewestScreenShots = 100;
+        int KeepNNewestScreenShots = 100;
 
         /// <summary>
         /// Throttle the rate at which we capture secondary screenshots to observe the reaction of the UI to the click event
@@ -59,6 +59,8 @@ namespace ETWControler.Screenshots
         /// </summary>
         TimeSpan SecondScreenshotTimerAfterClick = TimeSpan.FromMilliseconds(500);
 
+
+        Barrier TimerExited = new Barrier(3);
 
         /// <summary>
         /// Lock object to serialize screenshots
@@ -129,10 +131,13 @@ namespace ETWControler.Screenshots
         /// <param name="screenshotDirectory">Directory will be created if it does not yet exist.</param>
         /// <param name="forcedScreenShotAfterMs">If > 99ms it will create after forcedScreenShotAfterMs a screenshot if no other screenshot was taken during that period of time.</param>
         /// <param name="jpgCompressionLevel">Can be a value from 0-100. 100 is lossless</param>
-        public ScreenshotRecorder(string screenshotDirectory, int forcedScreenShotAfterMs, int jpgCompressionLevel)
+        /// <param name="keepNNewestScreenShots">Delete oldest files every 5 minutes if total screenshot file count is over keepNNewestScreenShots.</param>
+        public ScreenshotRecorder(string screenshotDirectory, int forcedScreenShotAfterMs, int jpgCompressionLevel, int keepNNewestScreenShots)
         {
             ScreenshotDirectory = screenshotDirectory;
             Directory.CreateDirectory(ScreenshotDirectory); // Ensure that dir exists
+
+            KeepNNewestScreenShots = keepNNewestScreenShots;
 
             ClearFiles(ScreenshotDirectory);
 
@@ -156,16 +161,34 @@ namespace ETWControler.Screenshots
 
         void OnCleanupOldestFiles(object o)
         {
-            ClearFiles(ScreenshotDirectory, KeepNNewestScreenShots);   
+            try
+            {
+                Interlocked.Increment(ref ExecutingTimerCallbacks);
+                ClearFiles(ScreenshotDirectory, KeepNNewestScreenShots);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref ExecutingTimerCallbacks);
+            }
         }
+
+        volatile int ExecutingTimerCallbacks = 0;
 
         void OnScreenshotTimerExpired(object o)
         {
-            var now = DateTime.Now;
-            Debug.Print($"Timer expired {now.ToString("mm:ss")}, diff: {(now-LastOtherScreenshot).TotalMilliseconds}ms");
-            if( (now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
+            try
             {
-                TakeAnotherScreenshot($"Forced_{now.ToString("HH.mm.ss.fff")}", false);
+                Interlocked.Increment(ref ExecutingTimerCallbacks);
+                var now = DateTime.Now;
+                Debug.Print($"Timer expired {now.ToString("mm:ss")}, diff: {(now - LastOtherScreenshot).TotalMilliseconds}ms");
+                if ((now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
+                {
+                    TakeAnotherScreenshot($"Forced_{now.ToString("HH.mm.ss.fff")}", false);
+                }
+            }
+            finally
+            {
+                Interlocked.Decrement(ref ExecutingTimerCallbacks);
             }
         }
 
@@ -179,6 +202,12 @@ namespace ETWControler.Screenshots
             FileCleanupTimer.Change(0, Timeout.Infinite);
             FileCleanupTimer.Dispose();
             FileCleanupTimer = null;
+
+            // wait until all callback have exited to ensure that we have no races while creating the next ScreenshotRecorder instance
+            while (ExecutingTimerCallbacks > 0)
+            {
+                Thread.Sleep(1);
+            }
 
             ClearFiles(ScreenshotDirectory);
         }

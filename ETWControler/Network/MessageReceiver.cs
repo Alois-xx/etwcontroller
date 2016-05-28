@@ -47,6 +47,13 @@ namespace ETWControler.Network
         }
 
         /// <summary>
+        /// Interrupted function call e.g. closing a socket when someone is listening is raising this error.
+        /// This happens during unit testing quite frequently which is the reason why we do not flag
+        /// this as an error.
+        /// </summary>
+        const int WSAEINTR = 10004;
+
+        /// <summary>
         /// Create a message receiver server which can accept connection from many clients
         /// </summary>
         /// <param name="port"></param>
@@ -108,7 +115,10 @@ namespace ETWControler.Network
             {
                 Debug.Print("Got SocketException in server: {0}", ex);
                 LastStartException = ex;
-                throw;
+                if (ex.ErrorCode != WSAEINTR)
+                {
+                    throw;
+                }
             }
             catch (Exception ex)
             {

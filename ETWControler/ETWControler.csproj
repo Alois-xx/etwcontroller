@@ -281,6 +281,7 @@
     <Content Include="ETW\JIT.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Screenshots\HtmlTemplate.html" />
     <Content Include="Scripts\7z.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

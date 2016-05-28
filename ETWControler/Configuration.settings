@@ -85,5 +85,8 @@
     <Setting Name="TraceOpenCmdLine" Type="System.String" Scope="User">
       <Value Profile="(Default)">wpa -i $FileName -profile ETW\Simple.wpaProfile</Value>
     </Setting>
+    <Setting Name="KeepNNewestScreenShots" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

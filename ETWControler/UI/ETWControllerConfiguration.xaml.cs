@@ -14,6 +14,7 @@ namespace ETWControler.UI
         int BackupWCFPort;
         int BackupForcedScreenshotIntervalinMs;
         string BackupTraceOpenCmdLine;
+        int BackupKeepNNewestScreenShots;
 
         public ETWControlerConfiguration(ViewModel model)
         {
@@ -21,6 +22,7 @@ namespace ETWControler.UI
             BackupPortNumber = model.PortNumber;
             BackupWCFPort = model.WCFPort;
             BackupForcedScreenshotIntervalinMs = model.ForcedScreenshotIntervalinMs;
+            BackupKeepNNewestScreenShots = model.KeepNNewestScreenShots;
             BackupTraceOpenCmdLine = model.TraceOpenCmdLine;
             this.DataContext = model;
             Model = model;
@@ -34,7 +36,8 @@ namespace ETWControler.UI
             Model.NetworkSendState.RestartIfStarted();
             Model.WCFHost.Restart();
             Model.OpenFirewallPorts();
-            
+            Model.RestartScreenCapture();
+
             Task.Factory.StartNew(() => Model.SaveSettings());
             this.Close();
         }
@@ -45,6 +48,7 @@ namespace ETWControler.UI
             Model.PortNumber = BackupPortNumber;
             Model.WCFPort = BackupWCFPort;
             Model.ForcedScreenshotIntervalinMs = BackupForcedScreenshotIntervalinMs;
+            Model.KeepNNewestScreenShots = BackupKeepNNewestScreenShots;
             Model.TraceOpenCmdLine = BackupTraceOpenCmdLine;
             this.Close();
         }
