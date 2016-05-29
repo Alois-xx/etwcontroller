@@ -1,4 +1,5 @@
 @echo off
+REM xxWPR.cmd wrapper
 REM This is only a thin wrapper around wpr to allow zipping of the relevant etl file, ngen pdbs and screenshots. 
 REM when stopping the trace and the output file name is a compressed file it is compressed along with anohter optional directory which 
 REM usually contains the screenshots of the trace 
@@ -63,7 +64,10 @@ if "!CompressEtl!" EQU "1" (
 	echo ETL File !WprOutFileName!
 	echo NGen !WprOutFileName!.NGenPDB
 	echo Screenshots !ScreenshotDir!
-	!ScriptDir!\7z a !CompressionOption! !OutFileName! !WprOutFileName! -r !ScreenshotDir! !WprOutFileName!.NGenPDB  >> !LogFile!
+	set CompressCommand="!ScriptDir!\7z" a !CompressionOption! !OutFileName! !WprOutFileName! -r !ScreenshotDir! !WprOutFileName!.NGenPDB  
+	echo !CompressCommand!
+	echo !CompressCommand! >> !LogFile!
+	!CompressCommand! >> !LogFile!
 	if ERRORLEVEL 2 (
 		echo 7z returned an error. See log file "!LogFile!" for more details. 
 		goto :EOF
@@ -90,7 +94,7 @@ REM by other scripts as failure
 exit /b 0
 
 :Help
-echo xxperf.cmd is a wrapper around wpr.exe. You can pass the same command line arguments to it like wpr.
+echo xxWPR is a wrapper around WPR. You can pass the same command line arguments to it like WPR.
 echo The only difference is that for the -stop command you can pass as output file name not only ETL but also .7z or .zip file names.
 echo     -stop xxx.7z [ScreenshotDir] will generate a 7z file from the generated etl file and compress the etl, ngen and optional screenshot folder into
 echo                                  into the archive file. If all goes well the input files are deleted and only the compressed file is kept.
