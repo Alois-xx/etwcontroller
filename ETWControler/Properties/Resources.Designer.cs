@@ -59,5 +59,36 @@ namespace ETWControler.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;script&gt;
+        ///function Apply () 
+        ///{
+        ///	var rawPercentage = document.getElementById(&quot;Percent&quot;).value;
+        ///	var percentage = null;
+        ///	if( rawPercentage != &quot;&quot; )
+        ///	{
+        ///		var percentage = rawPercentage +&quot;%&quot;;
+        ///	}
+        ///	var images = document.getElementsByTagName(&quot;img&quot;);
+        ///
+        ///	var i;
+        ///	for(i=0;i&lt;images.length;i++)
+        ///	{
+        ///		if( percentage &amp;&amp; percentage != &quot;0%&quot;)
+        ///		{
+        ///			images[i].style.width = percentage;
+        ///			images[i].style.height = percentage;
+        ///		}
+        ///		else
+        ///		{
+        ///			images[i].style.width = images[i].naturalWidth;
+        ///			images[i].style [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string HtmlTemplate {
+            get {
+                return ResourceManager.GetString("HtmlTemplate", resourceCulture);
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="110"/>
-            <RowDefinition Height="110"/>
+            <RowDefinition Height="130"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
@@ -70,6 +70,8 @@
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="5"/>
                     <RowDefinition Height="20"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="20"/>
                 </Grid.RowDefinitions>
                 <Label Margin="0,-5,0,0" Grid.Row="0" Grid.Column="0" >Screenshot Directory</Label>
                 <TextBox Grid.Row="0" Grid.Column="1" Text ="{Binding ScreenshotDirectoryUnexpanded}"  ToolTip="Screenshots files are saved to this directory." KeyboardNavigation.TabIndex="3" />
@@ -93,6 +95,17 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
+                <Label Margin="0,-5,0,0" Grid.Row="6" Grid.Column="0" >Keep last N Screenshots</Label>
+                <TextBox  Grid.Row="6" Grid.Column="1"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="If in screenshot directory more than N files are present the oldest ones are deleted until no more than N files are in the screenshot directory." KeyboardNavigation.TabIndex="4">
+                    <TextBox.Text>
+                        <Binding Path="KeepNNewestScreenShots" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                            <Binding.ValidationRules>
+                                <ui:PortnumberValidator Min="100" Max="60000"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="2" Header="Trace Viewer">

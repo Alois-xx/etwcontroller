@@ -1,0 +1,39 @@
+﻿<script>
+function Apply () 
+{
+	var rawPercentage = document.getElementById("Percent").value;
+	var percentage = null;
+	if( rawPercentage != "" )
+	{
+		var percentage = rawPercentage +"%";
+	}
+	var images = document.getElementsByTagName("img");
+
+	var i;
+	for(i=0;i<images.length;i++)
+	{
+		if( percentage && percentage != "0%")
+		{
+			images[i].style.width = percentage;
+			images[i].style.height = percentage;
+		}
+		else
+		{
+			images[i].style.width = images[i].naturalWidth;
+			images[i].style.height = images[i].naturalHeight;
+		}	
+	}
+}
+
+		
+window.onload = function () 
+{
+	document.getElementById("Apply").onclick = Apply;
+};
+</script>
+<!-- language: lang-html -->
+<html>
+<form>
+<label for="Percent">Image Scale (e.g. 50, 100 or empty are valid values. Empty scales the images to natural size)<input id="Percent"></label>
+<button type="button" id="Apply">Apply</button>
+</form>

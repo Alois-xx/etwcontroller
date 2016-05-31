@@ -18,7 +18,7 @@
       <Value Profile="(Default)">Insert</Value>
     </Setting>
     <Setting Name="LocalTraceStart" Type="System.String" Scope="User">
-      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</Value>
     </Setting>
     <Setting Name="LocalTraceStop" Type="System.String" Scope="User">
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName  $ScreenshotDir</Value>
@@ -70,13 +70,13 @@
 &lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
   &lt;Preset&gt;
     &lt;Name&gt;Default&lt;/Name&gt;
-    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile&lt;/TraceStartCommand&gt;
+    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile  -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
     &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
     &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
   &lt;/Preset&gt;
   &lt;Preset&gt;
     &lt;Name&gt;Default and .NET&lt;/Name&gt;
-    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET&lt;/TraceStartCommand&gt;
+    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET  -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
     &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
     &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
   &lt;/Preset&gt;
@@ -84,6 +84,9 @@
     </Setting>
     <Setting Name="TraceOpenCmdLine" Type="System.String" Scope="User">
       <Value Profile="(Default)">wpa -i $FileName -profile ETW\Simple.wpaProfile</Value>
+    </Setting>
+    <Setting Name="KeepNNewestScreenShots" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
     </Setting>
   </Settings>
 </SettingsFile>
