@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+<Tag Name="Waits">
+		<Tag Name="Hard Page Fault" >
+			<Entrypoint Module="ntoskrnl.exe" Method="MiIssueHardFault"/>
+		</Tag>
+</Tag>
+-->
+<Tag Name="Windows">
+  <Tag Name="Page Faults" >
+    <Tag Name="Soft Page Fault">
+      <Entrypoint Module="ntoskrnl.exe" Method="KiPageFault*"/>
+    </Tag>
+    <Tag Name="Page memory compression">
+      <Entrypoint Module="ntoskrnl.exe" Method="RtlCompressBufferXpressLz*"/>
+    </Tag>
+    <Tag Name="Zero Page Thread">
+      <Entrypoint Module="ntoskrnl.exe" Method="MiZeroPageThread*"/>
+    </Tag>
+    <Tag Name="Page memory decompression">
+      <Entrypoint Module="ntoskrnl.exe" Method="RtlDecompressBufferEx*"/>
+    </Tag>
+    <Tag Name="Hard Fault">
+      <Entrypoint Module="ntoskrnl.exe" Method="MiIssueHardFault*"/>
+    </Tag>
+    <Tag Name="Add Page to System Process">
+      <Entrypoint Module="ntoskrnl.exe" Method="ST_STORE?SM_TRAITS?::StDmPageAdd*"/>
+    </Tag>
+    <Tag Name="Write Modified Pages">
+      <Entrypoint Module="ntoskrnl.exe" Method="MiModifiedPageWriter*"/>
+    </Tag>
+    <Tag Name="PageCombinig">
+      <Entrypoint Module="ntoskrnl.exe" Method="MiCombineIdenticalPages*"/>
+    </Tag>
+    <Tag Name="Trim or Age Working Set">
+      <Entrypoint Module="ntoskrnl.exe" Method="MiTrimOrAgeWorkingSet*"/>
+    </Tag>
+  </Tag>
+</Tag>
