@@ -178,10 +178,10 @@ namespace ETWControler.Screenshots
         {
             try
             {
-                Interlocked.Increment(ref ExecutingTimerCallbacks);
+                var concCurrentCount = Interlocked.Increment(ref ExecutingTimerCallbacks);
                 var now = DateTime.Now;
                 Debug.Print($"Timer expired {now.ToString("mm:ss")}, diff: {(now - LastOtherScreenshot).TotalMilliseconds}ms");
-                if ((now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
+                if (concCurrentCount == 0 && (now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
                 {
                     TakeAnotherScreenshot($"Forced_{now.ToString("HH.mm.ss.fff")}", false);
                 }
@@ -232,6 +232,7 @@ namespace ETWControler.Screenshots
                     {
                         return new KeyValuePair<string, Exception>(null, null);
                     }
+
                     // Determine the size of the "virtual screen", which includes all monitors.
                     int screenLeft = SystemInformation.VirtualScreen.Left;
                     int screenTop = SystemInformation.VirtualScreen.Top;
@@ -250,10 +251,13 @@ namespace ETWControler.Screenshots
 
                         TimeStampBitmap(now, bmp);
 
-                        if (clickX != -1 && clickY != -1)
-                        {
-                            MarkMouseClick(clickX, clickY, bmp);
-                        }
+                        bool bClicked = clickX != -1 && clickY != -1;
+                      
+                        var cursor = Cursor.Position;
+                        var cursorPosInVirtualDesktopCoordinates = ScreenCoordinateMapper.ScreenToDesktopCoordinates(cursor.X, cursor.Y, Screen.AllScreens.Select(x => new ScreenFacade(x)).ToArray());
+                        clickX = cursorPosInVirtualDesktopCoordinates.X;
+                        clickY = cursorPosInVirtualDesktopCoordinates.Y;
+                        MarkMouseClick(clickX, clickY, bmp, bClicked);
 
                         string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
                         bmp.Save(savePath, JpgEncoder, EncoderParameters);
@@ -303,14 +307,23 @@ namespace ETWControler.Screenshots
         /// <param name="clickX"></param>
         /// <param name="clickY"></param>
         /// <param name="bmp"></param>
-        private static void MarkMouseClick(int clickX, int clickY, Bitmap bmp)
+        private static void MarkMouseClick(int clickX, int clickY, Bitmap bmp, bool wasClicked)
         {
             for (int x = Math.Abs(clickX); x < bmp.Width && x < Math.Abs(clickX) + 14; x++)
             {
                 for (int y = Math.Abs(clickY); y < bmp.Height && y < Math.Abs(clickY) + 14; y++)
                 {
                     Color c = bmp.GetPixel(x, y);
-                    bmp.SetPixel(x, y, Color.FromArgb(255, c.G / 2, c.B / 2));
+                    if (wasClicked)
+                    {
+                        // red is click
+                        bmp.SetPixel(x, y, Color.FromArgb(255, c.G / 2, c.B / 2));
+                    }
+                    else
+                    {
+                        // green is no click
+                        bmp.SetPixel(x, y, Color.FromArgb(c.R/2, 255, c.B / 2));
+                    }
                 }
             }
         }

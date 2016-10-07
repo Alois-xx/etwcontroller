@@ -150,6 +150,7 @@
     <Compile Include="Network\SelfHostedService.cs" />
     <Compile Include="RedirectedProcess.cs" />
     <Compile Include="Screenshots\HtmlReportGenerator.cs" />
+    <Compile Include="Screenshots\ScreenCoordinateMapper.cs" />
     <Compile Include="Screenshots\ScreenshotRecorder.cs" />
     <Compile Include="UI\HelpWindow.xaml.cs">
       <DependentUpon>HelpWindow.xaml</DependentUpon>
