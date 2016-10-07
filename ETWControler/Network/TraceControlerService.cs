@@ -29,7 +29,7 @@ namespace ETWControler
 
         /// <summary>
         /// Execute a WPR command with specified command line args. Used e.g. to start/stop/cancel tracing. 
-        /// Commands can take a long time to execute. Currently the WCF service it set to time out after 10 minutes.
+        /// Commands can take a long time to execute. Currently the WCF service has a time of 10 minutes.
         /// </summary>
         /// <param name="wpaArgs">WPR command line args</param>
         /// <returns>stdout and stderr of executed command when it has finished.</returns>
