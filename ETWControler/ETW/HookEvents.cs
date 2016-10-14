@@ -21,6 +21,8 @@ namespace ETWControler.ETW
         /// ETW provider to log keyboard and mouse events to ETW to enable coherent analysis between user actions and the system reactions.
         /// </summary>
         public static HookEvents ETWProvider = new HookEvents();
+        static string EventRegisterPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "eventRegister.exe");
+
 
         /// <summary>
         /// ctor
@@ -40,6 +42,7 @@ namespace ETWControler.ETW
             return File.Exists(manifestName);
         }
 
+
         /// <summary>
         /// Register as regular event provider in the system to make xperf happy. The pure dynamic registration less provider approach
         /// does not work out well if you need to do a full rundown to dump the manifest into the ETW stream which currently only PerfView does.
@@ -49,7 +52,7 @@ namespace ETWControler.ETW
         {
             ProcessStartInfo info = new ProcessStartInfo()
             {
-                FileName = "eventregister",
+                FileName = EventRegisterPath,
                 Arguments = String.Format("\"{0}\"", Assembly.GetExecutingAssembly().Location),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -66,7 +69,7 @@ namespace ETWControler.ETW
         {
             ProcessStartInfo info = new ProcessStartInfo()
             {
-                FileName = "eventregister",
+                FileName = EventRegisterPath,
                 Arguments = "-uninstall " + String.Format("\"{0}\"", Assembly.GetExecutingAssembly().Location),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
