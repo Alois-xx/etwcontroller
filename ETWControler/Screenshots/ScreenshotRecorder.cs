@@ -181,7 +181,7 @@ namespace ETWControler.Screenshots
                 var concCurrentCount = Interlocked.Increment(ref ExecutingTimerCallbacks);
                 var now = DateTime.Now;
                 Debug.Print($"Timer expired {now.ToString("mm:ss")}, diff: {(now - LastOtherScreenshot).TotalMilliseconds}ms");
-                if (concCurrentCount == 0 && (now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
+                if (concCurrentCount == 1 && (now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
                 {
                     TakeAnotherScreenshot($"Forced_{now.ToString("HH.mm.ss.fff")}", false);
                 }
@@ -208,8 +208,6 @@ namespace ETWControler.Screenshots
             {
                 Thread.Sleep(1);
             }
-
-            ClearFiles(ScreenshotDirectory);
         }
 
 

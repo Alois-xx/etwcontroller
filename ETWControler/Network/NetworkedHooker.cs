@@ -100,6 +100,12 @@ namespace ETWControler
                     {
                         EnableRecorder();
                     }
+                    else
+                    {
+                        Recorder?.Dispose();
+                        Recorder = null;
+                    }
+
                 }
             };
 
