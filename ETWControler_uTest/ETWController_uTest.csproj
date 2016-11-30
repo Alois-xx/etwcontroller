@@ -7,8 +7,8 @@
     <ProjectGuid>{9FC6E93A-7D10-4EFC-8F78-D3B079DABB98}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ETWControler_uTest</RootNamespace>
-    <AssemblyName>ETWControler_uTest</AssemblyName>
+    <RootNamespace>ETWController_uTest</RootNamespace>
+    <AssemblyName>ETWController_uTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -81,9 +81,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ETWControler\ETWControler.csproj">
+    <ProjectReference Include="..\ETWControler\ETWController.csproj">
       <Project>{c907d40f-7ec1-4c5f-b27c-8db9915ccc2b}</Project>
-      <Name>ETWControler</Name>
+      <Name>ETWController</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

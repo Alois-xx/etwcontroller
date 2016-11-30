@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ETWControler" GeneratedClassName="Configuration">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ETWController" GeneratedClassName="Configuration">
   <Profiles />
   <Settings>
     <Setting Name="PortNumber" Type="System.Int32" Scope="User">
@@ -42,7 +42,7 @@
       <Value Profile="(Default)">Snapshot</Value>
     </Setting>
     <Setting Name="ScreenshotDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">c:\temp\ETWControlerScreenshots</Value>
+      <Value Profile="(Default)">c:\temp\ETWControllerScreenshots</Value>
     </Setting>
     <Setting Name="LocalTraceCancel" Type="System.String" Scope="User">
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -cancel</Value>
@@ -51,7 +51,7 @@
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -cancel</Value>
     </Setting>
     <Setting Name="TraceFileName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">c:\temp\etwControler%COMPUTERNAME%.etl</Value>
+      <Value Profile="(Default)">c:\temp\etwController%COMPUTERNAME%.etl</Value>
     </Setting>
     <Setting Name="ForcedScreenshotIntervalinMs" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2000</Value>
@@ -65,7 +65,7 @@
     <Setting Name="JpgCompressionLevel" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
-    <Setting Name="Presets" Type="ETWControler.UI.Preset[]" Scope="Application">
+    <Setting Name="Presets" Type="ETWController.UI.Preset[]" Scope="Application">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
   &lt;Preset&gt;

@@ -23,7 +23,7 @@ set CompressEtl=0
 if "%3" NEQ "" (
 	set ETWScreenshotDir=%3
 ) else (
-	set ETWScreenshotDir=C:\temp\ETWControlerScreenshots
+	set ETWScreenshotDir=C:\temp\ETWControllerScreenshots
 )
 
 if "!OutFileName:~-4!" EQU ".zip" (

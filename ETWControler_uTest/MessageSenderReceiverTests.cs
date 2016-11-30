@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ETWControler_uTest
+namespace ETWController_uTest
 {
     [TestFixture]
     public class MessageSenderReceiverTests

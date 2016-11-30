@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8' standalone='yes'?>
 <!-- Created by Alois Kraus. Free for public use. 
    This region file is used to visualize mouse clicks which makes it very useful to follow user interactions on one or more machines.
-   The mouse and keyboard events are written by ETWControler https://etwcontroler.codeplex.com/ which can capture your mouse and keyboard events 
-   on one machine and can send them over the network to remote version of ETWControler which logs them again as ETW events. 
+   The mouse and keyboard events are written by ETWController https://etwcontroler.codeplex.com/ which can capture your mouse and keyboard events 
+   on one machine and can send them over the network to remote version of ETWController which logs them again as ETW events. 
    This is super useful if you are hunting down distributed problems where it is not clear if the client, server or the network in between 
-   has a problem. With ETWControler I could track down sporadic networking issues and prove that it was really the network.    
+   has a problem. With ETWController I could track down sporadic networking issues and prove that it was really the network.    
 -->
 <InstrumentationManifest>
   <Instrumentation>

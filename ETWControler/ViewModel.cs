@@ -24,10 +24,10 @@ namespace ETWController
     /// </summary>
     public class ViewModel : NotifyBase, IDisposable
     {
-        // Firewall rule names which open the configured ports during startup of ETWControler and close
+        // Firewall rule names which open the configured ports during startup of ETWController and close
         // them when it exits.
-        const string FirewallWCFRule = "ETWControler WCFPort";
-        const string FirewallSocketRule = "ETWControler SocketPort";
+        const string FirewallWCFRule = "ETWController WCFPort";
+        const string FirewallSocketRule = "ETWController SocketPort";
 
         public const string CustomCommandPrefix = "::";
 
@@ -372,7 +372,7 @@ namespace ETWController
         string _SlowEventHotkey;
 
         /// <summary>
-        /// Hotkey which is the stringified value of System.Windows.Input.Key or ETWControler.MouseButton
+        /// Hotkey which is the stringified value of System.Windows.Input.Key or ETWController.MouseButton
         /// </summary>
         public string SlowEventHotkey
         {
@@ -555,7 +555,7 @@ namespace ETWController
             return commands;
         }
 
-        static readonly string CommandLineOptions = "ETWControler [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] [-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
+        static readonly string CommandLineOptions = "ETWController [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] [-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
                                                     "\t-Hide                              Hide main window." + Environment.NewLine +
                                                     "\t-CaptureKeyboard                   Capture keyboard events." + Environment.NewLine +
                                                     "\t-ClearKeyboardEvents               By default the keys are all logged as SomeKey. If this is enabled the actual keyboard code is also logged." + Environment.NewLine +
@@ -569,11 +569,11 @@ namespace ETWController
                                                     "\t-UnRegisterEtwProvider             Unregister the HookEvents ETW provider and then exit." + Environment.NewLine +
                                                     "\t" + Environment.NewLine +
                                                     "Example:" + Environment.NewLine +
-                                                    "\tETWControler.exe -capturemouseclick -capturekeyboard -sendtoserver localhost" + Environment.NewLine +
+                                                    "\tETWController.exe -capturemouseclick -capturekeyboard -sendtoserver localhost" + Environment.NewLine +
                                                     "This will eanble mouse click, encrypted keyboard tracing which will send to to your local machine again. If you want to hide the window you can add -hide." + Environment.NewLine + 
-                                                    "These commands are useful if you only want to use ETWControler as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
+                                                    "These commands are useful if you only want to use ETWController as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
 
-        static readonly string About = String.Format("ETWControler (c) by Alois Kraus 2015-2016 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
+        static readonly string About = String.Format("ETWController (c) by Alois Kraus 2015-2016 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
         private void AboutBox()
         {
             var window = new HelpWindow("About", About);
@@ -838,7 +838,7 @@ namespace ETWController
 
         private void ShowConfigDialog()
         {
-            var dlg = new ETWControlerConfiguration(this);
+            var dlg = new ETWControllerConfiguration(this);
             dlg.ShowDialog();
         }
 

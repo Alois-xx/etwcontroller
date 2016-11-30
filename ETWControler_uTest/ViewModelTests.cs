@@ -1,6 +1,6 @@
 ﻿using ETWController;
 using ETWController.UI;
-using ETWControler_uTest.TestHelper;
+using ETWController_uTest.TestHelper;
 using NUnit.Framework;
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ETWControler_uTest
+namespace ETWController_uTest
 {
     [TestFixture]
     public class ViewModelTests
@@ -77,7 +77,7 @@ namespace ETWControler_uTest
 
                     WaitUntilLocalTargetState(model, TraceStates.Running);
 
-                    using (File.Create(Path.Combine(tmp.Name, "test1.etl"))) ;
+                    using (File.Create(Path.Combine(tmp.Name, "test1.etl"))) { } ;
 
                     model.Commands["StopTracing"].Execute(null);
 
@@ -99,7 +99,7 @@ namespace ETWControler_uTest
             {
                 using (var model = Create(tmp.Name, bUseTraceDirStopVariable: true))
                 {
-                    using (File.Create(Path.Combine(tmp.Name, "test1.etl"))) ;
+                    using (File.Create(Path.Combine(tmp.Name, "test1.etl"))) { };
 
                     Thread.Sleep(2000); // create etl file too old ot match trace start
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETWControler_uTest
+namespace ETWController_uTest
 {
     class MessageDisplayMock : IMessageBoxDisplay
     {

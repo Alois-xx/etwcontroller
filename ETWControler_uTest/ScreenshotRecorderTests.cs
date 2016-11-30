@@ -1,5 +1,5 @@
 ﻿using ETWController.Screenshots;
-using ETWControler_uTest.TestHelper;
+using ETWController_uTest.TestHelper;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ETWControler_uTest
+namespace ETWController_uTest
 {
     [TestFixture]
     public class ScreenshotRecorderTests

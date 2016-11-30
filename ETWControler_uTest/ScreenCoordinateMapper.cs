@@ -8,7 +8,7 @@ using ETWController.Screenshots;
 using NUnit.Framework.Compatibility;
 using System;
 
-namespace ETWControler_uTest
+namespace ETWController_uTest
 {
     [TestFixture]
     public class ScreenCoordinateMapperTests

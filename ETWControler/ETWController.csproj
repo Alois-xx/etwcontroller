@@ -7,7 +7,7 @@
     <ProjectGuid>{C907D40F-7EC1-4C5F-B27C-8DB9915CCC2B}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ETWControler</RootNamespace>
+    <RootNamespace>ETWController</RootNamespace>
     <AssemblyName>ETWController</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -284,6 +284,7 @@
     </Content>
     <Content Include="ETW\HookRegions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="ETW\JIT.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

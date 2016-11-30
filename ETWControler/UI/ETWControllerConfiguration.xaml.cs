@@ -4,9 +4,9 @@ using System.Windows;
 namespace ETWController.UI
 {
     /// <summary>
-    /// Interaction logic for ETWControlerConfiguration.xaml
+    /// Interaction logic for ETWControllerConfiguration.xaml
     /// </summary>
-    public partial class ETWControlerConfiguration : Window
+    public partial class ETWControllerConfiguration : Window
     {
         ETWController.ViewModel Model;
         string BackupHost;
@@ -16,7 +16,7 @@ namespace ETWController.UI
         string BackupTraceOpenCmdLine;
         int BackupKeepNNewestScreenShots;
 
-        public ETWControlerConfiguration(ETWController.ViewModel model)
+        public ETWControllerConfiguration(ETWController.ViewModel model)
         {
             BackupHost = model.Host;
             BackupPortNumber = model.PortNumber;

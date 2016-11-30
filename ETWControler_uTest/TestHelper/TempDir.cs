@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETWControler_uTest.TestHelper
+namespace ETWController_uTest.TestHelper
 {
     interface ITempDir : IDisposable
     {

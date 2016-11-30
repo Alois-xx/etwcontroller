@@ -12,7 +12,7 @@ namespace ETWController {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.0.0.0")]
     internal sealed partial class Configuration : global::System.Configuration.ApplicationSettingsBase {
         
         private static Configuration defaultInstance = ((Configuration)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Configuration())));
@@ -182,7 +182,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("c:\\temp\\ETWControlerScreenshots")]
+        [global::System.Configuration.DefaultSettingValueAttribute("c:\\temp\\ETWControllerScreenshots")]
         public string ScreenshotDirectory {
             get {
                 return ((string)(this["ScreenshotDirectory"]));
@@ -218,7 +218,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("c:\\temp\\etwControler%COMPUTERNAME%.etl")]
+        [global::System.Configuration.DefaultSettingValueAttribute("c:\\temp\\etwController%COMPUTERNAME%.etl")]
         public string TraceFileName {
             get {
                 return ((string)(this["TraceFileName"]));

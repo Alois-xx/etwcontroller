@@ -77,7 +77,7 @@ namespace ETWController.Network
             }
             catch(ProtocolException ex)
             {
-                throw new ArgumentException("Wrong protocol detected. The most likely reason is that the WCF port runs already a different service not related to ETWControler.", ex);
+                throw new ArgumentException("Wrong protocol detected. The most likely reason is that the WCF port runs already a different service not related to ETWController.", ex);
             }
             finally
             {

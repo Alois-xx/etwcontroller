@@ -7,15 +7,15 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ETWControler")]
+[assembly: AssemblyTitle("ETWController")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ETWControler")]
-[assembly: AssemblyCopyright("Copyright © by Alois Kraus 2015")]
+[assembly: AssemblyProduct("ETWController")]
+[assembly: AssemblyCopyright("Copyright © by Alois Kraus 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly:InternalsVisibleTo("ETWControler_uTest")]
+[assembly:InternalsVisibleTo("ETWController_uTest")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
