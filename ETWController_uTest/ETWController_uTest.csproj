@@ -81,7 +81,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ETWControler\ETWController.csproj">
+    <ProjectReference Include="..\ETWController\ETWController.csproj">
       <Project>{c907d40f-7ec1-4c5f-b27c-8db9915ccc2b}</Project>
       <Name>ETWController</Name>
     </ProjectReference>
