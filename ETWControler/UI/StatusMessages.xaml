@@ -1,4 +1,4 @@
-﻿<Window x:Class="ETWControler.UI.StatusMessages"
+﻿<Window x:Class="ETWController.UI.StatusMessages"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="StatusMessages" Height="315.498" Width="613.284">

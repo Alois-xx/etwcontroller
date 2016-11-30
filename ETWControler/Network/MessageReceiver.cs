@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ETWControler.Network
+namespace ETWController.Network
 {
     /// <summary>
     /// Server class which receives messages from on or more clients
@@ -202,10 +202,7 @@ namespace ETWControler.Network
 
                     string readStr = Encoding.UTF8.GetString(receiveBuffer, 0, msgSize);
                     //    Debug.Print("Did read {0} bytes with message: {1}", nRead, read);
-                    if (OnMessageReceivedInternal != null)
-                    {
-                        OnMessageReceivedInternal(readStr);
-                    }
+                    OnMessageReceivedInternal?.Invoke(readStr);
 
                     SendAck(stream);
                 }

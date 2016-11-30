@@ -1,5 +1,5 @@
-﻿using ETWControler.ETW;
-using ETWControler.Network;
+﻿using ETWController.ETW;
+using ETWController.Network;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ETWControler.Commands
+namespace ETWController.Commands
 {
     public class NetworkReceiveState
     {
@@ -110,9 +110,7 @@ namespace ETWControler.Commands
             ReceivedMessages.Enqueue(networkMessage);
             Task.Factory.StartNew( () =>
             {
-                string msg;
-
-                if (ReceivedMessages.TryDequeue(out msg))
+                if (ReceivedMessages.TryDequeue(out string msg))
                 {
                     string[] parts = msg.Split(RemoteMessageSeparator);
                     if( parts.Length == 2 )

@@ -1,4 +1,4 @@
-﻿using ETWControler.Properties;
+﻿using ETWController.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETWControler.Screenshots
+namespace ETWController.Screenshots
 {
     /// <summary>
     /// Generate from a direcotry of jpg files a HTML page where one can quickly see what was happening in chronological order.

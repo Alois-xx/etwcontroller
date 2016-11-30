@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ETWControler.Network
+namespace ETWController.Network
 {
     /// <summary>
     /// Client which connects to a server to send message to it.

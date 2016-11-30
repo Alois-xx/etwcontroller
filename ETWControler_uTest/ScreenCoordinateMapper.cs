@@ -4,7 +4,7 @@
 
 using NUnit.Framework;
 using System.Drawing;
-using ETWControler.Screenshots;
+using ETWController.Screenshots;
 using NUnit.Framework.Compatibility;
 using System;
 

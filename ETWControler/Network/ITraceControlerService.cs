@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
 
-namespace ETWControler
+namespace ETWController
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "ITraceControlerService" in both code and config file together.
     [ServiceContract]

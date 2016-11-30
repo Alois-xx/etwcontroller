@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ETWControler.Hooking
+namespace ETWController.Hooking
 {
     class Hooker : IDisposable
     {
@@ -129,10 +129,7 @@ namespace ETWControler.Hooking
                     var key = KeyInterop.KeyFromVirtualKey((int)keyboardData.vkCode);
                     if (wInt == WM.KEYDOWN || wInt == WM.SYSKEYDOWN && OnKeyDown != null)
                     {
-                        if (OnKeyDown != null)
-                        {
-                            OnKeyDown(key);
-                        }
+                        OnKeyDown?.Invoke(key);
                     }
                     else
                     {
@@ -177,17 +174,11 @@ namespace ETWControler.Hooking
                     }
                     else if (wParami == WM.MOUSEWHEEL && OnMouseWheel != null)
                     {
-                        if (OnMouseWheel != null)
-                        {
-                            OnMouseWheel(wheelDelta, mouseData.pt.x, mouseData.pt.y);
-                        }
+                        OnMouseWheel?.Invoke(wheelDelta, mouseData.pt.x, mouseData.pt.y);
                     }
                     else if( OnMouseButton != null)
                     {
-                        if (OnMouseButton != null)
-                        {
-                            OnMouseButton(mouseButton, mouseData.pt.x, mouseData.pt.y);
-                        }
+                        OnMouseButton?.Invoke(mouseButton, mouseData.pt.x, mouseData.pt.y);
                     }
                 }
             }

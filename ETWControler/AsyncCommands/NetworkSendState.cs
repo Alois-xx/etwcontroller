@@ -1,4 +1,4 @@
-﻿using ETWControler.Network;
+﻿using ETWController.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace ETWControler.Commands
+namespace ETWController.Commands
 {
     public class NetworkSendState
     {

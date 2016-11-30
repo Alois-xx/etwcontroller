@@ -11,15 +11,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     /// <summary>
     /// Interaction logic for StatusMessages.xaml
     /// </summary>
     public partial class StatusMessages : Window
     {
-        ViewModel Model;
-        public StatusMessages(ViewModel model)
+        ETWController.ViewModel Model;
+        public StatusMessages(ETWController.ViewModel model)
         {
             Model = model;
             DataContext = Model;

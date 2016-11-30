@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ETWControler.Commands
+namespace ETWController.Commands
 {
     public enum CommandState
     {
@@ -88,11 +88,7 @@ namespace ETWControler.Commands
         /// <param name="scheduler">Scheduler to use for async command.</param>
         public AsyncCommand(Func<T> start, TaskScheduler scheduler)
         {
-            if (start == null)
-            {
-                throw new ArgumentNullException("start");
-            }
-            MethodWithReturn = start;
+            MethodWithReturn = start ?? throw new ArgumentNullException("start");
             Scheduler = scheduler;
         }
 
@@ -103,12 +99,7 @@ namespace ETWControler.Commands
         /// <param name="scheduler">Scheduler to use for async command.</param>
         public AsyncCommand(Action start, TaskScheduler scheduler)
         {
-            if (start == null)
-            {
-                throw new ArgumentNullException("start");
-            }
-
-            Method = start;
+            Method = start ?? throw new ArgumentNullException("start");
             Scheduler = scheduler;
         }
 
@@ -148,10 +139,7 @@ namespace ETWControler.Commands
                                 SafeNotifyMessage(Started);
                             }
                         }
-                        if (Completed != null)
-                        {
-                            Completed(null);
-                        }
+                        Completed?.Invoke(null);
                         ExecutionState = CommandState.Finished;
                     }, Scheduler);
             }
@@ -172,10 +160,7 @@ namespace ETWControler.Commands
                         {
                             SafeNotifyMessage(Started);
                         }
-                        if (Completed != null)
-                        {
-                            Completed(task.Result);
-                        }
+                        Completed?.Invoke(task.Result);
 
                         ExecutionState = CommandState.Finished;
                         return task.Result;
@@ -186,18 +171,12 @@ namespace ETWControler.Commands
 
         void SafeNotifyError(string message, Exception ex)
         {
-            if( NotifyError != null )
-            {
-                NotifyError(message,ex);
-            }
+            NotifyError?.Invoke(message, ex);
         }
 
         void SafeNotifyMessage(string message)
         {
-            if( NotifyInfo != null )
-            {
-                NotifyInfo(message);
-            }
+            NotifyInfo?.Invoke(message);
         }
     }
 }

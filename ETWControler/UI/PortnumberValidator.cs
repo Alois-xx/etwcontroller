@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     class PortnumberValidator : ValidationRule
     {

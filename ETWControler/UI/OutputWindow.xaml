@@ -1,4 +1,4 @@
-﻿<Window x:Class="ETWControler.UI.OutputWindow"
+﻿<Window x:Class="ETWController.UI.OutputWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="WPR Command Output" Height="300" Width="997.675">

@@ -1,4 +1,4 @@
-﻿using ETWControler.UI;
+﻿using ETWController.UI;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -26,6 +26,13 @@ namespace ETWControler_uTest
             string exe = TraceControlViewModel.ExtractExecName(cmdLine);
             Assert.AreEqual("\"C:\\program files\\wpa.exe\"", exe);
             Console.WriteLine($"ExeName: {exe}");
+        }
+
+        [Test]
+        public void CanExtractDirectoryWithPlaceholders()
+        {
+            string ret = TraceControlViewModel.GetDirectoryNameFromFileName(@"C:\temp\etlFile%COMPUTERNAME%.ETL");
+            Assert.AreEqual(@"C:\temp", ret);
         }
     }
 }

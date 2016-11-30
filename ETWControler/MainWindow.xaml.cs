@@ -1,10 +1,10 @@
-﻿using ETWControler.Hooking;
+﻿using ETWController.Hooking;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace ETWControler
+namespace ETWController
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -49,7 +49,7 @@ namespace ETWControler
 
         private void DefineSlowHotkeyClick(object sender, RoutedEventArgs e)
         {
-            HotKeyHook.OnMouseButton += (ETWControler.Hooking.MouseButton button, int x, int y) =>
+            HotKeyHook.OnMouseButton += (ETWController.Hooking.MouseButton button, int x, int y) =>
             {
                 HotKeyHook.DisableHooks();
                 Model.SlowEventHotkey = button.ToString("G");
@@ -65,7 +65,7 @@ namespace ETWControler
 
         private void DefineFastHotkeyClick(object sender, RoutedEventArgs e)
         {
-            HotKeyHook.OnMouseButton += (ETWControler.Hooking.MouseButton button, int x, int y) =>
+            HotKeyHook.OnMouseButton += (ETWController.Hooking.MouseButton button, int x, int y) =>
             {
                 HotKeyHook.DisableHooks();
                 Model.FastEventHotkey = button.ToString("G");

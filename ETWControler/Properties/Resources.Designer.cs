@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ETWControler.Properties {
+namespace ETWController.Properties {
     using System;
     
     

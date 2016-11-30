@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ETWControler {
+namespace ETWController {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -293,9 +293,9 @@ namespace ETWControler {
     <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
   </Preset>
 </ArrayOfPreset>")]
-        public ETWControler.UI.Preset[] Presets {
+        public ETWController.UI.Preset[] Presets {
             get {
-                return ((ETWControler.UI.Preset[])(this["Presets"]));
+                return ((ETWController.UI.Preset[])(this["Presets"]));
             }
         }
         

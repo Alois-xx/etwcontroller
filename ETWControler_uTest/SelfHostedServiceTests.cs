@@ -1,5 +1,5 @@
-﻿using ETWControler;
-using ETWControler.Network;
+﻿using ETWController;
+using ETWController.Network;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;

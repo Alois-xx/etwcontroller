@@ -1,4 +1,4 @@
-﻿using ETWControler.Properties;
+﻿using ETWController.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.ServiceModel.Description;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETWControler.Network
+namespace ETWController.Network
 {
     /// <summary>
     /// Host the trace service locally

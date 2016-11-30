@@ -1,8 +1,8 @@
-﻿using ETWControler.Commands;
-using ETWControler.ETW;
-using ETWControler.Network;
-using ETWControler.Screenshots;
-using ETWControler.UI;
+﻿using ETWController.Commands;
+using ETWController.ETW;
+using ETWController.Network;
+using ETWController.Screenshots;
+using ETWController.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,8 +17,11 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace ETWControler
+namespace ETWController
 {
+    /// <summary>
+    /// Main ViewModel of ETWController 
+    /// </summary>
     public class ViewModel : NotifyBase, IDisposable
     {
         // Firewall rule names which open the configured ports during startup of ETWControler and close
@@ -489,6 +492,11 @@ namespace ETWControler
             set;
         }
 
+        /// <summary>
+        /// Time when tracing was started. Needed to determine if new files were added when trace stop command was exected.
+        /// </summary>
+        DateTime _TraceStartTime;
+
 
         public string ScreenshotDirectory { get { return Environment.ExpandEnvironmentVariables(ScreenshotDirectoryUnexpanded); } }
 
@@ -513,81 +521,18 @@ namespace ETWControler
         {
             Dictionary<string, ICommand> commands = new Dictionary<string, ICommand>
             {
-                {"LogSlow", CreateCommand( o =>
-                {
-                    Hooker.LogSlowEvent();
-                })},
-                {"LogFast", CreateCommand( o =>
-                {
-                    Hooker.LogFastEvent();
-                })},
-                {"Config", CreateCommand( (o)=>
-                                {
-                                    var dlg = new ETWControlerConfiguration(this);
-                                    dlg.ShowDialog();
-                                })},
-                {"TraceRefresh", CreateCommand( (o) =>
+                {"LogSlow", CreateCommand( _ =>  Hooker.LogSlowEvent())},
+                {"LogFast", CreateCommand( _ => Hooker.LogFastEvent())},
+                {"Config", CreateCommand( _ => ShowConfigDialog())},
+                {"TraceRefresh", CreateCommand( _ =>
                 {
                     TraceSessions = LocalTraceControler.GetTraceSessions();
                     WCFHost.GetTraceSessions.Execute();
                 })},
-                {"StartTracing", CreateCommand(
-                (o) =>
-                {
-                    if(!this.LocalTraceEnabled && !this.ServerTraceEnabled)
-                    {
-                        MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.","Warning");
-                        return;
-                    }
-
-                    this.Hooker.ResetId();
-
-                    if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
-                    {
-                        LocalTraceSettings.TraceStates = TraceStates.Starting;
-
-                        if( File.Exists(TraceFileName))
-                        {
-                            try
-                            {
-                                File.Delete(TraceFileName);
-                            }
-                            catch(Exception ex)
-                            {
-                                MessageBoxDisplay.ShowMessage($"Could not delete old trace file {TraceFileName}. Is the file still open in WPA? Full error: {ex}", "Error");
-                                LocalTraceSettings.TraceStates = TraceStates.Stopped;
-                                return;
-                            }
-                        }
-
-                        Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStartFullCommandLine))
-                                    .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UISheduler);
-                    }
-                    if (this.ServerTraceEnabled)
-                    {
-                        ServerTraceSettings.TraceStates = TraceStates.Starting;
-                        var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStartFullCommandLine);
-                        command.Completed = (output) => ServerTraceSettings.ProcessStartCommand(output);
-                        command.Execute();
-                    }
-                }
-                )},
-                {"StopTracing", CreateCommand( o => StopTracing())},
-                {"CancelTracing", CreateCommand( o=>
-                {
-                    if (this.LocalTraceEnabled)
-                    {
-                        var output = LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceCancel);
-                        LocalTraceSettings.ProcessCancelCommand(output);
-                    }
-                    if (this.ServerTraceEnabled)
-                    {
-                        var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceCancel);
-                        command.Completed = (output) => ServerTraceSettings.ProcessCancelCommand(output);
-                        command.Execute();
-                    }
-                })},
-                {"RegisterETWProvider", CreateCommand( o =>
+                {"StartTracing", CreateCommand( _ => StartTracing()) },
+                {"StopTracing", CreateCommand( _ => StopTracing())},
+                {"CancelTracing", CreateCommand( _ => CancelTracing())},
+                {"RegisterETWProvider", CreateCommand( _ =>
                     {
                         string output = HookEvents.RegisterItself();
                         SetStatusMessage("Registering ETW provider: " + output);
@@ -596,12 +541,12 @@ namespace ETWControler
                     Configuration.Default.Reset();
                     Configuration.Default.Save();
                     LoadSettings();
-                })}, 
-                {"ShowMessages", CreateCommand( o=> ShowMessages() )},
-                {"NetworkSendToggle", CreateCommand( o=> NetworkSendState.NetworkSendChangeState() )},
-                {"NetworkReceiveToggle", CreateCommand( o=> NetworkReceiveState.NetworkReceiveChangeState() )},
-                {"ClearStatusMessages", CreateCommand( o => StatusMessages.Clear() )},
-                {"ShowCommandLineOptions", CreateCommand( o=> ShowCommandLineOptions()) },
+                })},
+                {"ShowMessages", CreateCommand( _ => ShowMessages() )},
+                {"NetworkSendToggle", CreateCommand( _ => NetworkSendState.NetworkSendChangeState() )},
+                {"NetworkReceiveToggle", CreateCommand( _ => NetworkReceiveState.NetworkReceiveChangeState() )},
+                {"ClearStatusMessages", CreateCommand( _ => StatusMessages.Clear() )},
+                {"ShowCommandLineOptions", CreateCommand( _ => ShowCommandLineOptions()) },
                 {"About", CreateCommand( _ => AboutBox()) },
 
             };
@@ -609,7 +554,6 @@ namespace ETWControler
 
             return commands;
         }
-
 
         static readonly string CommandLineOptions = "ETWControler [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] [-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
                                                     "\t-Hide                              Hide main window." + Environment.NewLine +
@@ -714,8 +658,7 @@ namespace ETWControler
 
             if (args.SendToServerPort != null)
             {
-                int portNumber = 0;
-                if (int.TryParse(args.SendToServerPort, out portNumber))
+                if (int.TryParse(args.SendToServerPort, out int portNumber))
                 {
                     this.PortNumber = portNumber;
                 }
@@ -723,8 +666,7 @@ namespace ETWControler
 
             if (args.SendtoServerSecondaryPort != null)
             {
-                int secondaryPort = 0;
-                if (int.TryParse(args.SendtoServerSecondaryPort, out secondaryPort))
+                if (int.TryParse(args.SendtoServerSecondaryPort, out int secondaryPort))
                 {
                     this.WCFPort = secondaryPort;
                 }
@@ -791,6 +733,54 @@ namespace ETWControler
             StatusWindow.Activate();
         }
 
+
+
+        /// <summary>
+        /// Start Tracing
+        /// </summary>
+        private void StartTracing()
+        {
+            if (!this.LocalTraceEnabled && !this.ServerTraceEnabled)
+            {
+                MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.", "Warning");
+                return;
+            }
+
+            this.Hooker.ResetId();
+
+            if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
+            {
+                _TraceStartTime = DateTime.Now;
+                LocalTraceSettings.TraceStates = TraceStates.Starting;
+
+                if (File.Exists(TraceFileName))
+                {
+                    try
+                    {
+                        File.Delete(TraceFileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxDisplay.ShowMessage($"Could not delete old trace file {TraceFileName}. Is the file still open in WPA? Full error: {ex}", "Error");
+                        LocalTraceSettings.TraceStates = TraceStates.Stopped;
+                        return;
+                    }
+                }
+
+                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStartFullCommandLine))
+                            .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UISheduler);
+            }
+
+            if (this.ServerTraceEnabled)
+            {
+                ServerTraceSettings.TraceStates = TraceStates.Starting;
+                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStartFullCommandLine);
+                command.Completed = (output) => ServerTraceSettings.ProcessStartCommand(output);
+                command.Execute();
+            }
+        }
+
+
         /// <summary>
         /// stop tracing command 
         /// </summary>
@@ -802,10 +792,12 @@ namespace ETWControler
                 htmlReportGenerator.GenerateReport();
             }
 
-            StopData = new ViewModelFrozenData
+            StopData = new ViewModelFrozenData(this)
             {
                 TraceStopFullCommandLine = LocalTraceSettings.TraceStopFullCommandLine,
+                TraceStopNotExpanded = LocalTraceSettings.TraceStop,
                 TraceFileName = TraceFileName,
+                TraceStartTime = this._TraceStartTime,
             };
 
             if (this.LocalTraceEnabled) 
@@ -824,6 +816,30 @@ namespace ETWControler
             }
              
             this.TraceFileCounter++;
+        }
+
+        /// <summary>
+        /// Cancel Tracing command
+        /// </summary>
+        private void CancelTracing()
+        {
+            if (this.LocalTraceEnabled)
+            {
+                var output = LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceCancel);
+                LocalTraceSettings.ProcessCancelCommand(output);
+            }
+            if (this.ServerTraceEnabled)
+            {
+                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceCancel);
+                command.Completed = (output) => ServerTraceSettings.ProcessCancelCommand(output);
+                command.Execute();
+            }
+        }
+
+        private void ShowConfigDialog()
+        {
+            var dlg = new ETWControlerConfiguration(this);
+            dlg.ShowDialog();
         }
 
         /// <summary>

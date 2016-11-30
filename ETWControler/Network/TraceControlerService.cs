@@ -9,7 +9,7 @@ using System.ServiceModel;
 using System.Text;
 using System.Threading;
 
-namespace ETWControler
+namespace ETWController
 {
     /// <summary>
     /// Implemenation class of WCF ITraceControlerService

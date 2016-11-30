@@ -1,9 +1,9 @@
-﻿<Window x:Class="ETWControler.MainWindow"
+﻿<Window x:Class="ETWController.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:l="clr-namespace:ETWControler"
-        xmlns:h="clr-namespace:ETWControler.Hooking"
-        xmlns:ui="clr-namespace:ETWControler.UI"
+        xmlns:l="clr-namespace:ETWController"
+        xmlns:h="clr-namespace:ETWController.Hooking"
+        xmlns:ui="clr-namespace:ETWController.UI"
         MinHeight="440"
         MinWidth="640"
         Title="ETW Controller And Logger" Height="500" Width="773.5" Closing="Window_Closing">

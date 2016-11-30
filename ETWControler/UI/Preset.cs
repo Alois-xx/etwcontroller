@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     public class Preset
     {

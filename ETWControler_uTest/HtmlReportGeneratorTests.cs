@@ -1,4 +1,4 @@
-﻿using ETWControler.Screenshots;
+﻿using ETWController.Screenshots;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,9 @@ namespace ETWControler_uTest
         [Explicit]
         public void GenerateHtmlReport()
         {
-            var gen = new HtmlReportGenerator(@"C:\temp\ScreensTest");
+            string path = @"C:\temp\ScreensTest";
+            Directory.CreateDirectory(path);
+            var gen = new HtmlReportGenerator(path);
             gen.GenerateReport();
         }
 

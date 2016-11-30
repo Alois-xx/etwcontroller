@@ -1,4 +1,4 @@
-﻿using ETWControler;
+﻿using ETWController;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;

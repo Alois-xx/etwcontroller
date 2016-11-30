@@ -1,4 +1,4 @@
-﻿using ETWControler.Screenshots;
+﻿using ETWController.Screenshots;
 using ETWControler_uTest.TestHelper;
 using NUnit.Framework;
 using System;

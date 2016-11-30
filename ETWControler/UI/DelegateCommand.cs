@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Input;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     /// <summary>
     /// Execute a command binding which is bound to the passed in delegate
@@ -25,13 +25,8 @@ namespace ETWControler.UI
         /// <param name="canExecuteFunc">Can be null. Check method if command can be executed. Usually this will determine the button state.</param>
         public DelegateCommand(Action<object> action, Func<bool> canExecuteFunc)
         {
-            if( action == null )
-            {
-                throw new ArgumentNullException("action");
-            }
-
             CanExecuteFunc = canExecuteFunc;
-            Command = action;
+            Command = action ?? throw new ArgumentNullException("action");
         }
 
         /// <summary>
@@ -109,9 +104,7 @@ namespace ETWControler.UI
         /// </summary>
         protected virtual void OnCanExecuteChanged()
         {
-            EventHandler eCanExecuteChanged = _internalCanExecuteChanged;
-            if (eCanExecuteChanged != null)
-                eCanExecuteChanged(this, EventArgs.Empty);
+            _internalCanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

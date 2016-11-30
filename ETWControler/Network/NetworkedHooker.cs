@@ -1,6 +1,6 @@
-﻿using ETWControler.ETW;
-using ETWControler.Hooking;
-using ETWControler.Screenshots;
+﻿using ETWController.ETW;
+using ETWController.Hooking;
+using ETWController.Screenshots;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ETWControler
+namespace ETWController
 {
     /// <summary>
     /// Captures mouse/keybaord events and log them locally and send them over the network to a configures host.
@@ -136,7 +136,7 @@ namespace ETWControler
             int id = CurrentId;
             HookEvents.ETWProvider.MouseWheel(id, wheelDelta, x, y); // write to ETW
             string message = String.Format("MouseWheel Delta {0}, ({1},{2})", wheelDelta, x, y);
-            SendToNetwork(id, message); // Send over network when present 
+            SendToNetworkAsync(id, message); // Send over network when present 
         }
 
         void Hooker_OnMouseMove(int x, int y)
@@ -148,7 +148,7 @@ namespace ETWControler
             }
         }
 
-        void Hooker_OnMouseButton(ETWControler.Hooking.MouseButton button, int x, int y)
+        void Hooker_OnMouseButton(ETWController.Hooking.MouseButton button, int x, int y)
         {
             string strButton = button.ToString("G");
             int id = CurrentId;
@@ -188,7 +188,7 @@ namespace ETWControler
                 }, CancellationToken.None, TaskContinuationOptions.None, Model.UISheduler);
             }
 
-            SendToNetwork(id, message);
+            SendToNetworkAsync(id, message);
             LogEventIfKeyOrMouseMatches(strButton);
         }
 
@@ -229,7 +229,7 @@ namespace ETWControler
                 }
             }
 
-            SendToNetwork(id, String.Format("KeyDown {0}", strKey));
+            SendToNetworkAsync(id, String.Format("KeyDown {0}", strKey));
 
             LogEventIfKeyOrMouseMatches(key.ToString("G")); // to match we need the clear string of the keyboard event
         }
@@ -239,7 +239,7 @@ namespace ETWControler
             string msg = String.Format("Slow Event[{0}]: {1}", SlowEventNumber, Model.SlowEventMessage);
             int id = CurrentId;
             HookEvents.ETWProvider.SlowMarker(id, msg);
-            SendToNetwork(id, msg);
+            SendToNetworkAsync(id, msg);
 
             SlowEventNumber++;
         }
@@ -249,7 +249,7 @@ namespace ETWControler
             string msg = String.Format("Fast Event[{0}]: {1}", SlowEventNumber, Model.FastEventMessage);
             int id = CurrentId;
             HookEvents.ETWProvider.FastMarker(id, msg);
-            SendToNetwork(id, msg);
+            SendToNetworkAsync(id, msg);
 
             SlowEventNumber++;
         }
@@ -259,7 +259,7 @@ namespace ETWControler
         /// disable the sending checkbox to prevent further attempts to send data.
         /// </summary>
         /// <param name="message"></param>
-        async void SendToNetwork(int eventId, string message)
+        async void SendToNetworkAsync(int eventId, string message)
         {
             try
             {

@@ -9,7 +9,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     /// <summary>
     /// ViewModel for TraceControl which contains the start/stop command line args, the current trace state 
@@ -21,9 +21,10 @@ namespace ETWControler.UI
 
         OutputWindow OutputWindow;
 
-        ViewModel RootModel;
+        ETWController.ViewModel RootModel;
 
         internal const string TraceFileNameVariable = "$FileName";
+        internal const string TraceFileDirVariable = "$FileDirectory";
         internal const string ScreenShotVariable = "$ScreenshotDir";
 
         string _TraceStart;
@@ -74,9 +75,15 @@ namespace ETWControler.UI
             {
                 string lret = TraceStop;
                 lret = lret.Replace(TraceFileNameVariable, RootModel.UnexpandedCountedTraceFileName);
+                lret = lret.Replace(TraceFileDirVariable,  GetDirectoryNameFromFileName(RootModel.UnexpandedCountedTraceFileName)); 
                 lret = lret.Replace(ScreenShotVariable, RootModel.ScreenshotDirectory);
                 return lret;
             }
+        }
+
+        static internal string GetDirectoryNameFromFileName(string fileName)
+        {
+            return Path.GetDirectoryName(fileName);
         }
 
         string _TraceCancel;
@@ -101,7 +108,7 @@ namespace ETWControler.UI
                 // some day we might specify the output file already with the start command ... 
                 string lret = TraceStart.Replace(TraceFileNameVariable, traceFileName);
 
-                if (!lret.StartsWith(ViewModel.CustomCommandPrefix)) // its still WPR
+                if (!lret.StartsWith(ETWController.ViewModel.CustomCommandPrefix)) // its still WPR
                 {
                     string ownManifest = Path.Combine("ETW", "HookEvents.wprp");
                     lret += " -start " + ownManifest;
@@ -157,7 +164,7 @@ namespace ETWControler.UI
 
 
 
-        public TraceControlViewModel(ViewModel rootModel, bool isRemoteState)
+        public TraceControlViewModel(ETWController.ViewModel rootModel, bool isRemoteState)
         {
             RootModel = rootModel;
             IsRemoteState = isRemoteState;
@@ -189,7 +196,7 @@ namespace ETWControler.UI
                         WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
                     };
                     Process.Start(startInfo);
-                    AddLogEntry(ViewModel.CustomCommandPrefix + exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
+                    AddLogEntry(ETWController.ViewModel.CustomCommandPrefix + exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
                 }
             }, 
             () => !IsRemoteState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
@@ -242,10 +249,8 @@ namespace ETWControler.UI
                 RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
 
-            if( !File.Exists(RootModel.StopData.TraceFileName))
-            {
-                RootModel.MessageBoxDisplay.ShowMessage($"Error: Output file {RootModel.StopData.TraceFileName} was not found!", "Error");
-            }
+            RootModel.StopData.VerifySuccesfulStop();
+
 
             TraceStates = TraceStates.Stopped;
         }
@@ -286,12 +291,12 @@ namespace ETWControler.UI
             // remove empty lines
             string[] strippedOutput = wprCommandResult.Item2.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            string logMessage = String.Format("{0}: {1}{2}{3}", 
+            string logMessage = string.Format("{0}: {1}{2}{3}",
                                             DateTime.Now.ToString("hh:mm:ss.fff"),
-                                            Environment.ExpandEnvironmentVariables(command.StartsWith(ViewModel.CustomCommandPrefix) ? 
-                                                                                   command.Substring(ViewModel.CustomCommandPrefix.Length) : "wpr " + command), 
+                                            Environment.ExpandEnvironmentVariables(command.StartsWith(ETWController.ViewModel.CustomCommandPrefix) ? 
+                                                                                   command.Substring(ETWController.ViewModel.CustomCommandPrefix.Length) : "wpr " + command),
                                             Environment.NewLine,
-                                            String.Join(Environment.NewLine, strippedOutput.Where(x=>!String.IsNullOrEmpty(x))));
+                                            string.Join(Environment.NewLine, strippedOutput.Where(x=>!string.IsNullOrEmpty(x))));
             log.Add(logMessage);
         }
     }

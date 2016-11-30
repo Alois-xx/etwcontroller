@@ -1,4 +1,4 @@
-﻿using ETWControler.Properties;
+﻿using ETWController.Properties;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace ETWControler
+namespace ETWController
 {
     /// <summary>
     /// Interaction logic for App.xaml

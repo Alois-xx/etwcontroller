@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     /// <summary>
     /// A wpa trace session can have the following states

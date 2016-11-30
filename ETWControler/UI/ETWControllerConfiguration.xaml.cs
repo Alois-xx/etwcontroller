@@ -1,14 +1,14 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     /// <summary>
     /// Interaction logic for ETWControlerConfiguration.xaml
     /// </summary>
     public partial class ETWControlerConfiguration : Window
     {
-        ViewModel Model;
+        ETWController.ViewModel Model;
         string BackupHost;
         int BackupPortNumber;
         int BackupWCFPort;
@@ -16,7 +16,7 @@ namespace ETWControler.UI
         string BackupTraceOpenCmdLine;
         int BackupKeepNNewestScreenShots;
 
-        public ETWControlerConfiguration(ViewModel model)
+        public ETWControlerConfiguration(ETWController.ViewModel model)
         {
             BackupHost = model.Host;
             BackupPortNumber = model.PortNumber;

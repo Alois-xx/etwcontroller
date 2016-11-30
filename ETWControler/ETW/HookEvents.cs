@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ETWControler.ETW
+namespace ETWController.ETW
 {
     /// <summary>
     /// ETW Provider for window and mouse hook messages.
@@ -50,19 +50,25 @@ namespace ETWControler.ETW
         /// </summary>
         public static string RegisterItself()
         {
-            ProcessStartInfo info = new ProcessStartInfo()
+            if (Process.GetCurrentProcess().MainModule.FileName.Contains("ETWController.exe"))
             {
-                FileName = EventRegisterPath,
-                Arguments = String.Format("\"{0}\"", Assembly.GetExecutingAssembly().Location),
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
-            };
+                ProcessStartInfo info = new ProcessStartInfo()
+                {
+                    FileName = EventRegisterPath,
+                    Arguments = String.Format("\"{0}\"", Assembly.GetExecutingAssembly().Location),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                };
 
-            var register = Process.Start(info);
-            string output = register.StandardOutput.ReadToEnd();
-            register.WaitForExit();
-            return output;
+                var register = Process.Start(info);
+                string output = register.StandardOutput.ReadToEnd();
+                register.WaitForExit();
+                return output;
+            }
+            else
+                return "";
+
         }
 
         public static string UnregisterItself()

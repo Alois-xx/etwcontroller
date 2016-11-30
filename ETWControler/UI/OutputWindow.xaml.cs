@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     /// <summary>
     /// Interaction logic for OutputWindow.xaml

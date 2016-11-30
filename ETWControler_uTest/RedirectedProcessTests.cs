@@ -1,4 +1,4 @@
-﻿using ETWControler;
+﻿using ETWController;
 using ETWControler_uTest.TestHelper;
 using NUnit.Framework;
 using System;

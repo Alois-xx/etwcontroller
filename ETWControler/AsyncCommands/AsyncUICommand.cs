@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETWControler.Commands
+namespace ETWController.Commands
 {
     public class AsyncUICommand <T> : AsyncCommand<T> where T : class 
     {

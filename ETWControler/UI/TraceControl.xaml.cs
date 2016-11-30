@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ETWControler.UI
+namespace ETWController.UI
 {
     /// <summary>
     /// Interaction logic for TraceControl.xaml
@@ -36,12 +36,12 @@ namespace ETWControler.UI
             var model = e.NewValue as TraceControlViewModel;
             if( model != null )
             {
-                model.PropertyChanged += model_PropertyChanged;
+                model.PropertyChanged += Model_PropertyChanged;
                 Model = model;
             }
         }
 
-        void model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        void Model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "TraceStates")
             {

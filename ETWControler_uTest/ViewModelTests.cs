@@ -1,5 +1,5 @@
-﻿using ETWControler;
-using ETWControler.UI;
+﻿using ETWController;
+using ETWController.UI;
 using ETWControler_uTest.TestHelper;
 using NUnit.Framework;
 using System;
@@ -19,7 +19,6 @@ namespace ETWControler_uTest
         ConcurrentQueue<string> TraceMessages = new ConcurrentQueue<string>();
         List<TraceStates> LocalTraceStateChanges = new List<TraceStates>();
         App CurrentApp = null;
-
 
         [Test]
         public void Start_Stop_Verify_MessageBox_Is_Displayed_IfOutputFile_Was_Not_Created()
@@ -45,6 +44,82 @@ namespace ETWControler_uTest
         }
 
         [Test]
+        public void Start_Stop_Verify_MessageBox_Is_Displayed_IfOutputDirectory_Contains_No_EtlFiles()
+        {
+            using (var tmp = TempDir.Create())
+            {
+                using (var model = Create(tmp.Name, bUseTraceDirStopVariable:true))
+                {
+                    model.Commands["StartTracing"].Execute(null);
+
+                    WaitUntilLocalTargetState(model, TraceStates.Running);
+
+                    model.Commands["StopTracing"].Execute(null);
+
+                    WaitUntilLocalTargetState(model, TraceStates.Stopped);
+
+                    ContainsMessage("hi trace start");
+                    ContainsMessage($"trace stop performed {tmp.Name}");
+
+                    MessageBoxShown($"Error: No new etl files were created in directory {tmp.Name}");
+                }
+            }
+        }
+
+        [Test]
+        public void Start_Stop_Verify_No_MessageBox_Is_Shown_If_New_ETL_Files_Created_In_Directory()
+        {
+            using (var tmp = TempDir.Create())
+            {
+                using (var model = Create(tmp.Name, bUseTraceDirStopVariable: true))
+                {
+                    model.Commands["StartTracing"].Execute(null);
+
+                    WaitUntilLocalTargetState(model, TraceStates.Running);
+
+                    using (File.Create(Path.Combine(tmp.Name, "test1.etl"))) ;
+
+                    model.Commands["StopTracing"].Execute(null);
+
+                    WaitUntilLocalTargetState(model, TraceStates.Stopped);
+
+                    ContainsMessage("hi trace start");
+                    ContainsMessage($"trace stop performed {tmp.Name}");
+
+                    MessageBoxNotShown();
+                }
+            }
+        }
+
+
+        [Test]
+        public void Start_Stop_Verify_No_MessageBox_Is_Shown_If_Too_Old_Files_Created_In_Directory()
+        {
+            using (var tmp = TempDir.Create())
+            {
+                using (var model = Create(tmp.Name, bUseTraceDirStopVariable: true))
+                {
+                    using (File.Create(Path.Combine(tmp.Name, "test1.etl"))) ;
+
+                    Thread.Sleep(2000); // create etl file too old ot match trace start
+
+                    model.Commands["StartTracing"].Execute(null);
+
+                    WaitUntilLocalTargetState(model, TraceStates.Running);
+
+                    model.Commands["StopTracing"].Execute(null);
+
+                    WaitUntilLocalTargetState(model, TraceStates.Stopped);
+
+                    ContainsMessage("hi trace start");
+                    ContainsMessage($"trace stop performed {tmp.Name}");
+
+                    MessageBoxShown($"Error: No new etl files were created in directory {tmp.Name}");
+                }
+            }
+        }
+
+        [Test]
         public void Display_MessageBox_When_OutputFile_During_Trace_Start_Cannot_Be_Deleted()
         {
             using (var tmp = TempDir.Create())
@@ -65,9 +140,21 @@ namespace ETWControler_uTest
             }
         }
 
+        const string MessageBoxStringPrefix = "MessageBox";
+
         void MessageBoxShown(string message)
         {
-            ContainsMessage(message, "MessageBox");
+            ContainsMessage(message, MessageBoxStringPrefix);
+        }
+
+        void MessageBoxNotShown()
+        {
+            foreach(var tracemessage in TraceMessages)
+            {
+                int idx = tracemessage.IndexOf(MessageBoxStringPrefix);
+
+                Assert.IsFalse( idx == 0, $"MessageBox shown: {tracemessage}");
+            }
         }
 
         private void ContainsMessage(string substring1, string substring2=null, int count=1)
@@ -84,7 +171,7 @@ namespace ETWControler_uTest
             Assert.AreEqual(count, containsCount, $"substrings \"{substring1}\" \"{substring2 ?? "none"}\" were not found the expected number of times.");
         }
 
-        ViewModel Create(string tempDir)
+        ViewModel Create(string tempDir, bool bUseTraceDirStopVariable=false)
         {
             TraceMessages = new ConcurrentQueue<string>();
             if (CurrentApp == null)
@@ -95,9 +182,9 @@ namespace ETWControler_uTest
             MessageDisplayMock display = new MessageDisplayMock();
             display.OnMessage += (str1, str2) =>
             {
-                TraceMessages.Enqueue($"MessageBox: {str1} Caption: {str2}");
+                TraceMessages.Enqueue($"{MessageBoxStringPrefix}: {str1} Caption: {str2}");
             };
-            ViewModel model = new ViewModel(display);
+            ETWController.ViewModel model = new ETWController.ViewModel(display);
 
             model.LocalTraceSettings.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) =>
             {
@@ -116,7 +203,7 @@ namespace ETWControler_uTest
             model.CaptureScreenShots = false;
             model.UnexpandedTraceFileName = Path.Combine(tempDir, "test.etl");
             model.LocalTraceSettings.TraceStart = ":: echo hi trace start";
-            model.LocalTraceSettings.TraceStop = ":: echo trace stop performed " + TraceControlViewModel.TraceFileNameVariable;
+            model.LocalTraceSettings.TraceStop = ":: echo trace stop performed " + (bUseTraceDirStopVariable ? ETWController.UI.TraceControlViewModel.TraceFileDirVariable : ETWController.UI.TraceControlViewModel.TraceFileNameVariable);
             model.LocalTraceSettings.CommandOutputs.CollectionChanged += (sender, e) =>
             {
                 if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
@@ -128,7 +215,7 @@ namespace ETWControler_uTest
             return model;
         }
 
-        void WaitUntilLocalTargetState(ViewModel model, ETWControler.UI.TraceStates targetState, int waitMs = 2000)
+        void WaitUntilLocalTargetState(ETWController.ViewModel model, ETWController.UI.TraceStates targetState, int waitMs = 2000)
         {
             while (model.LocalTraceSettings.TraceStates != targetState && waitMs-- > 0)
             {

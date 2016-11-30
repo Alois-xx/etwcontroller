@@ -1,4 +1,4 @@
-﻿using ETWControler.ETW;
+﻿using ETWController.ETW;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.ComponentModel;
 
-namespace ETWControler.Screenshots
+namespace ETWController.Screenshots
 {
 
     /// <summary>
@@ -59,8 +59,6 @@ namespace ETWControler.Screenshots
         /// </summary>
         TimeSpan SecondScreenshotTimerAfterClick = TimeSpan.FromMilliseconds(500);
 
-
-        Barrier TimerExited = new Barrier(3);
 
         /// <summary>
         /// Lock object to serialize screenshots
@@ -266,11 +264,18 @@ namespace ETWControler.Screenshots
                             Task.Factory.StartNew(() => TakeAnotherScreenshot(suffixOfSecondScreenshot), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
                         }
 
-                        // Update creation time to actual screenshot snapshot time so 
-                        // we can use the file creation date as snapshot time to sort them during report generation
-                        var fileInfo = new FileInfo(savePath);
-                        fileInfo.CreationTime = now;
-
+                        try
+                        {
+                            // Update creation time to actual screenshot snapshot time so 
+                            // we can use the file creation date as snapshot time to sort them during report generation
+                            var fileInfo = new FileInfo(savePath)
+                            {
+                                CreationTime = now
+                            };
+                        }
+                        catch(Exception) // may fail if in the meantime the file has been moved.
+                        {
+                        }
 
                         return new KeyValuePair<string, Exception>(savePath, null);
                     }

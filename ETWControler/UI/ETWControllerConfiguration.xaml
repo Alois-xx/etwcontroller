@@ -1,7 +1,7 @@
-﻿<Window x:Class="ETWControler.UI.ETWControlerConfiguration"
+﻿<Window x:Class="ETWController.UI.ETWControlerConfiguration"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ui="clr-namespace:ETWControler.UI"
+        xmlns:ui="clr-namespace:ETWController.UI"
         Title="Configuration Settings" Height="399.641" Width="571">
     <Window.Resources>
         <ResourceDictionary>
