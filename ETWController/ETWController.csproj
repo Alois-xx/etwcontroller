@@ -267,9 +267,6 @@
     </Content>
     <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
-    <None Include="Doc\_TraceEventProgrammersGuide.docx" />
-    <None Include="Doc\_EventSourceUsersGuide.docx" />
-    <None Include="Doc\_EventRegisterUsersGuide.docx" />
     <None Include="Scripts\xxWPR.cmd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -301,8 +298,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="ApplicationIcon.ico" />
-    <Resource Include="Doc\TraceEvent.ReadMe.txt" />
-    <Resource Include="Doc\TraceEvent.ReleaseNotes.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

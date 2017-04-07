@@ -1,0 +1,104 @@
+<div class="wikidoc">
+<h1>What is it?</h1>
+<p><em>ETWController</em> is the tool to troubleshoot Windows performance issues. It can profile</p>
+<ul>
+<li>Your local machine </li><li>A remote machine </li><li>Both machines simultaneously</li></ul>
+<p>When using a profiling tool it is normally very hard to deduce from the profiling data alone which steps the user did perform and where some issue did happen which did annoy the user. To solve that issue once and for all
+<em>ETWController</em> records for every mouse click and Enter key press and every two seconds a full screenshot of all attached monitors. All user actions like</p>
+<ul>
+<li>Mouse Click </li><li>Keyboard Press </li><li>Mouse Move </li></ul>
+<p>can be recorded along with the screenshots into the profiling data. That is very helpful to see what the user did and how the UI (if there is any) did react. To make things even better you only need this tool on Windows 10 machines without any additional
+ downloads because WPR.exe is part of Windows 10 which enables easy ETW system wide profiling with
+<em>ETWController</em>. On other machines you need to install the Windows Performance Toolkit which brings WPR.exe (the recording tool) and WPA (the profiling data viewer) along. It is part of the
+<a href="https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk">
+Windows 10 SDK</a> where you need to install only the Windows Performance Toolkit part (40MB).</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574824"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574825" width="758" height="491" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<h1>Usage Scenarios</h1>
+<h2>Record data at the machine/s where the user has a problem </h2>
+<ul>
+<li>You can xcopy deploy ETWController or start if from a remote network share if you are not allowed to install any software on client machines
+</li><li>You can customize the settings for a specific problem in ETWController.exe.config so the user can start the tool easily and you record only the data you are interested in.
+<ol>
+<li>User starts ETWController </li><li>Select Trace Collection tab </li><li>Press Start </li><li>Reproduce the issue </li><li>Press Stop </li><li>Send the collected zip/.7z file back to you.</li></ol>
+</li><li>You not only get a nice compressed file but also (if you enable it) many screenshots which document the actions the user did perform
+<ul>
+<li>Do not ask me if you have legal issues with that. Work something out with your clients.
+</li><li>One possible way out to not disclose confidential information is to analyze the data on the client machine so no confidential data every leaves the users machine.</li></ul>
+</li></ul>
+<h2>Distributed Profiling</h2>
+<p>Most software comes with a backend on one or more server machines. It can be challenging to analyze issues in a distributed setup. If a problem shows up you need to check if
+</p>
+<ul>
+<li>The client machine has an issue </li><li>The network in between is to blame </li><li>Or the backend/s have a problem</li></ul>
+<p>To support that you can start ETWController on both machines and drive profiling from one machine where you initiate the server requests.
+<em>ETWController</em> can send the keyboard and mouse events to the remote machine via a dedicated socket so you can synchronize the ETW traces from both machines in time without the necessity to have exactly synchronized clocks on both machines. Each input
+ event gets a unique id so you can find for mouse click 145 the exact time point on the client and remote machine where e.g. a hang did start.
+</p>
+<p>If neither the client nor the server machine show anything unusual you can take the next step and use
+<em>WireShark</em> to record the network data. There you can filter in <em>Wireshark</em> for the
+<em>ETWController</em> input socket to find e.g. mouse click 145 and check there if unusual high packet round trip times, TCP retransmissions or something equally bad on the network did happen at that time. If yes then you need to follow the switches which
+ one was overloaded or not booted for a long time and present the customer definitive proof that their network infrastructure has an issue.
+</p>
+<h2>Script Data Recording</h2>
+<p>ETWController can be the driver or only another data source in your own data collection strategy. If you use the UI you can configure your own profiling start/stop scripts as you like. ETWController will be happy to execute them for you. You can record the
+ generated mouse and keyboard events with your own tracing script along with the provided screenshots and HTML report if you wish. You can also configure ETWController from the command line to fully automate the data collection without any user visible UI.
+ It is up to you and your use case how you want to use it.</p>
+<p>&nbsp;</p>
+<h2>Quickstart</h2>
+<ul>
+<li>Install from the latest <a href="https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk">
+Windows 10 SDK</a> the Windows Performance Toolkit </li><li>Unzip <em>ETWController</em> (XCopy Deployable) </li><li>Start <em>ETWController.exe</em></li></ul>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574826"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574827" width="760" height="350" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>The default settings should be ok for now. If not you can change quite a lot of things in the Configuration dialog.</p>
+<ul>
+<li>Click on Trace Collection Tab.</li></ul>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574828"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574829" width="757" height="492" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<ul>
+<li>Press Start and press on the Show Output button to see the script output.</li></ul>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574830"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574831" width="733" height="317" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<ul>
+<li>Reproduce some performance issue. </li><li>Press Stop</li></ul>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574832"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574833" width="142" height="43" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>&nbsp;</p>
+<p>The trace state should now flash blue for the time the data is collected. This can take quite some time for the first time because for all .NET native images the pdbs must be created which can take on machines with large .NET projects up to 15 minutes for
+ the first time. But later stop calls are much faster.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574834"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574835" width="708" height="363" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<ul>
+<li>Press Open Trace </li></ul>
+<p>This will launch <em>WPA</em> with my simplified <em>WPA</em> profile from my blog which makes ETW analysis especially for managed code much easier.
+</p>
+<p>While the trace loads you can examine the captured screenshots which are copied by the
+<em>xxwpr.cmd</em> script besides the ETL file with the extension<em><strong> .Screenshots</strong></em>.</p>
+<p>There is a file named <em><strong>Report.html</strong></em> which you can open. In this report you can configure the size of the displayed screenshots to get an better overview where the interesting things did happen.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574836"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574837" width="866" height="432" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>For each mouse click event a screenshot is taken which is named <strong><em>Screenshot_dd</em></strong> where dd is the number of mouse clicks since trace start. To make it easier to see where the user did click around the mouse coordinates a red square
+ is drawn (see picture below) and a second screenshot 500ms later is taken named <strong>
+<em>Screenshot_ddAfter500ms</em></strong>.</p>
+<p>That should make it easy to see if the UI did react to a click event in a decent time interval.
+</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574838"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574839" width="449" height="319" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>In the meantime the trace file should have opened in <em>WPA</em> of the Windows Performance Toolkit. Where you see in the HookEvents graphs our mouse, keyboard and screenshot events nicely lined up where it is now much easier to drill down guided by the
+ screenshots to the interesting time region where the user did experience a performance glitch.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574840"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574841" width="1021" height="856" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>From there it is the usual WPA analysis with more details than ever.</p>
+<p>&nbsp;</p>
+<h1>Distributed Profiling Background</h1>
+<p>In a distributed world performance troubleshooting has just got much harder. Now we have at least two computers and the Internet involved. Sane developers blame for all performance problems, which involve a remote server, the network which can be true or
+ not. It is nearly impossible to correlate user input of one computer (lets say a keyboard press) with the associated network traffic and the following actions on a remote server, since most of the time the network traffic is encrypted or too hard to follow
+ because of the huge amount of data transferred.</p>
+<p>This is where <em>ETWControler</em> comes into the game. The name <em>ETWControler</em> stems from
+<u>E</u>vent <u>T</u>racing for <u>W</u>indows. ETW is the most detailed and fastest profiling facility on Windows. If you do not know it you have one more reason to learn how to make use of it.
+<em>ETWControler</em> as the name suggests controls simultaneously profiling on two machines. It can start/stop at the same time ETW tracing on the local and remote machine making it an ideal buddy to capture data on one or more systems.</p>
+<p>It allows you to simultaneously capture and correlate profiling information from the client, network and server. If the user presses a key or a mouse button it can be sent to the remote server over a dedicated port.
+<em>ETWControler</em> comes with a built in keyboard and mouse logger which writes the captured keyboard and mouse events locally to ETW and sends them over a configurable port in plain text over the wire to the remote server where another instance of
+<em>ETWControler</em> receives the user events and logs them also as ETW events.</p>
+<p>Additionally there is a &quot;Slow&quot; button which can be assigned to a mouse or keyboard hot key which logs a user configurable message to the local computer, network stream and the remote machine. With this hotkey you can create marker events where you did experience
+ sluggish behavior or other interesting incidents. This makes it very easy to identify in the network stream the exact time point where a slowdown did happen and you can look with e.g. Wireshark directly at the plain text data and search for your user defined
+ message in a multi GB network trace stream.</p>
+<p>Sure you can wade through GB network traces if you wish but I want to get my hands out of the network trace analyzer as fast as possible. These marker events on a dedicated port make searching and marking of strategic events trivial. Every logged event gets
+ a unique number which allows you to search for specific mouse/keyboard events as well. The data flow is shown below:</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783436"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783437" width="1030" height="493" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>Currently <em>ETWControler</em> does not start or stop Wireshark captures. You need to start network capturing on the network devices by yourself. But now you can correlate with the help of the keyboard and the Slow/Fast Marker events both ETW traces and
+ the network trace without any trouble. That makes it much easier to find the point of interest in any captured ETW and/or network stream. You can e.g. watch your network load during an integration test and insert at interesting spikes marker events to check
+ if the network performance did drop due to network issues or if the server or the client was busy doing something else (e.g. the virus scanner was active or your application did perform a garbage collection).</p>
+</div><div class="ClearBoth"></div>

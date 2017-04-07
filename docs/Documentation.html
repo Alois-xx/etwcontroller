@@ -1,0 +1,104 @@
+<div class="wikidoc">
+<h2>Prerequisites</h2>
+<ul>
+<li>.NET 4.5 or higher </li><li>To record data
+<ul>
+<li>Windows 10 or higher </li><li>Pre Windows 10
+<ul>
+<li>Windows Performance Toolkit of Windows 10 (works also on Windows 7) Please download from the
+<a href="https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk">
+Windows 10 SDK.</a> </li><li>On Windows 7 you need after the WPT installation to execute
+<ul>
+<li>wpr -disablepagingexecutive </li><li>And a reboot to enable full stack walking.</li></ul>
+</li></ul>
+</li></ul>
+</li><li>To analyze data
+<ul>
+<li>Windows Performance Toolkit of Windows 10 SDK to load the trace data into WPA
+</li><li>But you can configure also another trace viewer like PerfView if you like in the Configuration dialog.</li></ul>
+</li><li><strong>Caution</strong>
+<ul>
+<li><em>ETWController</em> hooks into your keyboard and mouse event handlers. If something goes wrong your machine appears react very slowly. In that case you should close ETWController and not try to debug it because debugging will not get you anywhere. Creating
+ a memory dump and sending it to me is the better option.</li></ul>
+</li></ul>
+<h2>Local Recording</h2>
+<p>When you start it you can first configure the settings to connect to a remote instance. If you want to use it only locally&nbsp; you do not need to configure anything extra. Mouse and keyboard capturing is enabled along with screenshots by default. All settings
+ are saved when you exit and remembered when you start the tool next time if you prefer a different setup.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574864"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574865" width="762" height="495" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>To start profiling by default the xxwpr.cmd script is configured which is&nbsp; a simple wrapper around wpr.exe. It supports exactly the same command line options as wpr.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574866"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574867" width="762" height="495" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<h3>Which Commands are Supported?</h3>
+<p>By default wpr.exe is used as trace collection executable. This means that you need only to pass the command line options of wpr into the start/stop/cancel text boxes.</p>
+<p>You can execute any script you like by prepending the command line with <strong>
+<em><font size="3">::</font></em></strong> to tell ETWController that the command line should be treated as custom script.</p>
+<p>WPR is by default installed with Windows 10 which makes it a good choice</p>
+<ul>
+<li>But for more sophisticated recording sessions wpr with its xml logger inheritance is not the best option in my opinion.
+</li><li>The good old xperf tool which is part of the Windows Performance Toolkit is still the most flexible tool out there.
+</li><li>tracelog from the Driver development kit is the only tool which supports (most) enhanced ETW features which were introduced with Windows 8 and 10.
+</li></ul>
+<h3>xxWPR.cmd</h3>
+<p><em>xxWPR</em> is a wrapper around <em>WPR</em>. You can pass the same command line arguments to it like
+<em>WPR</em>.<br>
+The only difference is that for the -stop command you can pass as output file name not only .ETL but also .7z or .zip file names.<br>
+&nbsp;&nbsp;&nbsp; -stop xxx.7z [ScreenshotDir] will generate a 7z file from the generated etl file and compress the etl, ngen and optional screenshot folder into<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; into the archive file. If all goes well the input files are deleted
+ and only the compressed file is kept.</p>
+<p>If you configure as output file name .7z or .zip all output data is compressed and stored in one file which makes it a perfect choice if you want to let others record data on their machines so they can easily transfer it to you.
+</p>
+<h3>Stopping a Trace&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h3>
+<p>Press the Stop button and wait until the trace state Stopping stops flashing. If an error happens a message box will pop up. You can examine the script output by pressing the
+<strong>Show Output</strong> button.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574868"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574869" width="986" height="254" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>That will create a nice 7z file which contains the etl file, managed pdbs and the saved screenshots</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574870"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574871" width="448" height="95" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>If you specify as output file an ETL file you can open the resulting file directly within
+<em>ETWController</em> by clicking on the <strong>Open Trace</strong> button. This will execute the configured trace viewer which is currently
+<em>WPA</em> with a custom profile.</p>
+<p>You can configure the used tool in the <strong>Configuration - Configuration</strong> menu</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574872"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574873" width="559" height="395" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>If you want to open a ETL file like <em>ETWController</em> you can apply in <em>
+WPA</em> this profile by using </p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574874"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574875" width="345" height="140" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>and select from the <em>ETWController</em> folder Simple.wpaProfile</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574876"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574877" width="507" height="168" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>To open any ETL file with that profile you can save it as default profile in <em>
+WPA</em></p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574878"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574879" width="392" height="179" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>This works but has the drawback that if you open another ETL file with <em>ETWController</em> which also loads a profile you will load basically
+<strong><em>SimpleProfile</em></strong> two times which results in a lot of redundant views. I normally close all tabs and save a empty view as startup profile to work around that. When you need a specific profile you can use the<strong><em> Apply Recently
+ Used Profile</em></strong> to load an interesting one. </p>
+<p>The next thing to do is to load the symbols so you are able to make most use of the supplied stacktags which mainly cover .NET related issues. Check out the file ETW\default.stacktags for more information and my blog at
+</p>
+<ul>
+<li><a href="http://geekswithblogs.net/akraus1/archive/2015/08/16/166270.aspx">Make WPA Simple - Garbage Collection and JIT Times</a>
+</li><li><a href="http://geekswithblogs.net/akraus1/archive/2015/09/26/167117.aspx">Making WPA Simple - CPU/Disk/Memory and Wait Analysis</a></li></ul>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574880"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574881" width="887" height="687" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>&nbsp;</p>
+<h2>Distributed Profiling</h2>
+<p>First you need to deploy and start <em>ETWController</em> on both machines. </p>
+<p><strong>Important: Windows Firewall will ask you if you want to give it network access. If you press No you will have to manually fiddle around with your network settings. I have seen interesting issues like that the keyboard events work but the WCF service
+ won´t&nbsp; work for some reason.</strong></p>
+<p>Both instances will automatically start a local WCF service which can receive keyboard and mouse events from remote machines.
+</p>
+<p>Now you need to configure on your &quot;client&quot; machine the remote machine in the <strong>
+Configuration - Configuration</strong> menu. There you need to enter the name or IP of the remote host and press OK.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574882"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574883" width="559" height="395" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>To send data over the wire check the &quot;Start Sending&quot; check box.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1522133"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1522134" width="389" height="176" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>To start a distributed profiling session go to Trace Collection and check x Enable for the local and remote machine. The default output file name contains %COMPUTERNAME% for exactly this reason. If you collect the traces from both machines and copy the data
+ into one directory you will not overwrite the files from the other machines and as added bonus you can see in the file name on which machine it was collected.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574884"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=1574885" width="754" height="486" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>When you press Start/Stop/Cancel the ETW recording session on both machines will be started/stopped or cancelled at the same time. The recorded data on both machine will get HookTracer events for all mouse and keyboard events which should make it easy to
+ correlate the user input and the reaction of the remote machine. </p>
+<p>&nbsp;</p>
+<h2>Network Analysis</h2>
+<p>If you suspect the network it can help to execute your use case with a network sniffer attached to make sense of the collected data. If you detect some glitches in your app you can press either the Log Slow Event button to insert a custom message you can
+ search later for or you can press the Slow button to define a hot key which writes the Slow message every time to the ETW and network stream when you press the hotkey.
+</p>
+<p>After the trap is set you can search for interesting events in the network stream. Below is an example of a network issue I found this way. There was a packet lost in the tcp stream. We see the &quot;[TCP Previous segment not capture]&quot; ACK message followed by
+ another ACK which is the basic error handling in TCP to force the server to retransmit the missing packet/s. This takes time nearly 300ms as you can see which resulted in noticeable hiccups in an application.
+</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783546"><img title="image_thumb[5]" border="0" alt="image_thumb[5]" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783547" width="1387" height="539" style="border-left-width:0px; border-right-width:0px; border-bottom-width:0px; padding-top:0px; padding-left:0px; margin:0px; display:inline; padding-right:0px; border-top-width:0px"></a></p>
+<p>Now you only need to learn how to read network traces. It is now much easier to create a setup where the client/network and server is fully under observation and you only need one repro to have enough data to pinpoint the issue.</p>
+</div><div class="ClearBoth"></div>

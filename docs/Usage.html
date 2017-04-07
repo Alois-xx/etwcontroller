@@ -1,0 +1,48 @@
+<div class="wikidoc">
+<p>Prerequisites:</p>
+<ul>
+<li>Windows Performance Toolkit of Windows 8.1 (works also on Windows 7) Please download from the
+<a href="http://msdn.microsoft.com/en-us/windows/desktop/bg162891">Windows 8.1 SDK</a>.
+<ul>
+<li>Hint: You need only the Windows Performance Toolkit which is only a 40 MB download and not the full SDK!
+</li><li>On Windows 7 you need after the WPT installation to execute
+<ol>
+<li>wpr -disablepagingexecutive </li><li>And a reboot to enable full stack walking.</li></ol>
+</li></ul>
+</li></ul>
+<p>&nbsp;</p>
+<p><font size="4"><strong>Local Recording</strong></font></p>
+<p>When you start it you can first configure the settings to connect to a remote instance. If you want to use it only locally&nbsp; you do not need to configure anything extra.
+</p>
+<p>The easiest use case is to enable mouse and keyboard capturing:</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783527"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783528" width="673" height="435" style="border-top:0px; border-right:0px; border-bottom:0px; padding-top:0px; padding-left:0px; margin:0px; border-left:0px; display:inline; padding-right:0px"></a></p>
+<p>&nbsp;</p>
+<p>Then you want to start profiling:</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783529"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783530" width="674" height="433" style="border-top:0px; border-right:0px; border-bottom:0px; padding-top:0px; padding-left:0px; margin:0px; border-left:0px; display:inline; padding-right:0px"></a></p>
+<p>&nbsp;</p>
+<p>Here you can configure the command line options to the executed WPR command. Now you can press the Start Button at the bottom and execute your use case while pressing some keys ….</p>
+<p>After you are done you can stop the recording. When done you can open the collected trace data on your local machine with the Open Trace button which will open WPA with the saved etl file.
+</p>
+<p>There you need to add Generic Events from the available graphs and filter for HookEvents which will show your keyboard and mouse input:</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783531"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783532" width="1035" height="680" style="border-top:0px; border-right:0px; border-bottom:0px; padding-top:0px; padding-left:0px; margin:0px; border-left:0px; display:inline; padding-right:0px"></a></p>
+<p>The first field is the number of the keyboard event to enable identification of a specific keyboard/mouse press in the traces locally or on the server. The next field is the actually recorded keyboard/mouse event.
+</p>
+<p>&nbsp;</p>
+<p><font size="4"><strong>Remote Recording</strong></font></p>
+<p>First you need to install and start <em>ETWControler</em> on both machines.</p>
+<p>To record remote traces as you need to disable the firewall of the remote server to be able to pass data on port 8080 and 4295. You can reconfigure the ports and the name of the remove server in the Configuration -&nbsp; Network menu.</p>
+<p>&nbsp;</p>
+<p>To send data over the wire check the &quot;Start Sending&quot; check box.</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783533"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783534" width="638" height="427" style="border-top:0px; border-right:0px; border-bottom:0px; padding-top:0px; padding-left:0px; margin:0px; border-left:0px; display:inline; padding-right:0px"></a></p>
+<p>&nbsp;</p>
+<p>To start connected tracing you need to check the Enable checkbox on Local and Server in the Trace Collection tab. When you press Start/Stop/Cancel the ETW recording session on both machines will be started/stopped or cancelled at the same time. Now it is
+ time to execute your use case with a network sniffer attached to make sense of the collected data. If you detect some glitches in your app you can press either the Log Slow Event button to insert a custom message you can search later for or you can press the
+ Slow button to define a hot key which writes the Slow message every time to the ETW and network stream when you press the hotkey.
+</p>
+<p>After the trap is set you can search for interesting events in the network stream. Below is an example of a network issue I found this way. There was a packet lost in the tcp stream. We see the &quot;[TCP Previous segment not capture]&quot; ACK message followed by
+ another ACK which is the basic error handling in TCP to force the server to retransmit the missing packet/s. This takes time nearly 300ms as you can see which resulted in noticeable hiccups in an application.
+</p>
+<p><a href="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783535"><img title="image" border="0" alt="image" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=etwcontroler&DownloadId=783536" width="1387" height="539" style="border-top:0px; border-right:0px; border-bottom:0px; padding-top:0px; padding-left:0px; margin:0px; border-left:0px; display:inline; padding-right:0px"></a></p>
+<p>Now you only need to learn how to read network traces. It is now much easier to create a setup where the client/network and server is fully under observation and you only need one repro to have enough data to pinpoint the issue. Happy bug hunting. If you
+ have other creative ideas how to use or expand this tool I would love to hear about it!</p>
+</div><div class="ClearBoth"></div>
