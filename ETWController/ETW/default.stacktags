@@ -1,34 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Alois Kraus. Free for public use. 
-  This enrichted stack tag file captures some of the most common .NET issues which would be very hard to spot otherwise and serves as
+  This enriched stack tag file captures some of the most common Windows and .NET issues which would be very hard to spot otherwise and serves as
   platform to add your methods of your application to this file. Once you have found an issue in your application after a long analysis you
   can stuff the CPU consumption bugs of the lowest methods in the call stack in this file and give it a tag. 
   When you hit this CPU issue next time you can see that if this stack tag consumes significant CPU again that you have the same issue again.
-  To make it work you need to overwrite the file
+  To make it work you can overwrite the file
     C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\Catalog\default.stacktags
-  with your file or be sure to remove the default file used by WPA.
-  The reason behind this is that otherwise the default file will steal nearly all CPU activity caused by JIT compiler and GC and list it as GC or JIT or TypeLoader tags but your more
-  specific application level tags will never show up. 
+  with your file or be sure to remove the default file used by WPA. Or you add the stack tag file to your profile which will be then used instead.
+  The default WPA provided file is crap and your more application specific tags will never show up. 
   Lets suppose you have a call stack like
   
-    Main()
+  Main()
 	F1()
 	F2()
 	ScaleImage()        Tag=ScaleImageProblem
 	garbage::collect()  Tag=GC  
 	
-	Now WPA will walk from the bottom and find that the default stack tag for GC will match first. Then your tag higher up in the call stack will never show up!
+	WPA will walk from the bottom and find that the default stack tag for GC will match first. Then your tag higher up in the call stack will never show up!
 	To work around this you need to overwrite the default stacktag file so it does not steal the stacks which are relevant to your tagging. 
 	Or you make sure that you remove the default stacktag file always in your list under Trace - Trace Properties - Stack Tag Definitions
 	
 	As a general rule to get a useful stacktag file you should tag methods as high as possible in the call stack to prevent that you "steal" methods from other tags which might
 	be conflicting with your tagging lower in the call stack. 
 	
-	When you idenfity a method be sure to add both definitions for NGenned and JITed to the tag file
+	When you identify a method be sure to add both definitions for NGenned and JITed to the tag file
 	
 	The JITed methods have :: between class and method name but no arguments:
 		PresentationFramework.dll!System.Windows.Markup.WpfXamlLoader::Load	
-	Whereas NGenned code has . between class and metehod name and the full list of types in the pdb. You need to be careful when you
+	Whereas NGenned code has . between class and method name and the full list of types in the pdb. You need to be careful when you
 	create stack tag file to get the same tags for JITed and NGenned code.
 		System.ni.dll!System.Text.RegularExpressions.RegexRunner.Scan(System.Text.RegularExpressions.Regex, System.String, Int32, Int32, Int32, Int32, Boolean, System.TimeSpan)
 -->

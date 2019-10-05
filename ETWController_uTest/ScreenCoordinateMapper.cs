@@ -5,8 +5,8 @@
 using NUnit.Framework;
 using System.Drawing;
 using ETWController.Screenshots;
-using NUnit.Framework.Compatibility;
 using System;
+using System.Diagnostics;
 
 namespace ETWController_uTest
 {
