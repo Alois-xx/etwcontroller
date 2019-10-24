@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tag Name="">
+	<Tag Name="Trend Micro Virus Scanner">
+		<Entrypoint Module="VSApiNt.sys" Method="*"/>
+	</Tag>
+</Tag>

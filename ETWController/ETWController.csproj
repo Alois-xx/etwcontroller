@@ -245,6 +245,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Documentation\ReadMe.md" />
+    <None Include="ETW\.NET.stacktags" />
+    <None Include="ETW\OverView.wpaProfile" />
+    <None Include="ETW\VirusScanners.stacktags" />
+    <None Include="ETW\Wait.stacktags" />
+    <None Include="ETW\Windows.stacktags" />
     <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>

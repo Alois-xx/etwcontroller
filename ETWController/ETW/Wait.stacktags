@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Tag Name="">
+<Tag Name="Waits">
+    <Tag Name="SqlData">
+      <Tag Name="ReadSniSyncOverAsync">
+        <Entrypoint Module="System.Data.ni.dll" Method="System.Data.SqlClient.TdsParserStateObject.ReadSniSyncOverAsync*"/>
+        <Entrypoint Module="System.Data.dll" Method="System.Data.SqlClient.TdsParserStateObject::ReadSniSyncOverAsync*"/>
+      </Tag>
+    </Tag>
+    <Tag Name="SqlLite">
+      <Tag Name="Execute Query" Priority="1001">
+        <Entrypoint Module="System.Data.SQLite.ni.dll" Method="System.Data.SQLite.SQLiteCommand.ExecuteReader*"/>
+        <Entrypoint Module="System.Data.SQLite.dll" Method="System.Data.SQLite.SQLiteCommand::ExecuteReader*"/>
+      </Tag>
+      <Tag Name="Open" Priority="1001">
+        <Entrypoint Module="System.Data.SQLite.ni.dll" Method="System.Data.SQLite.SQLiteConnection.Open*"/>
+        <Entrypoint Module="System.Data.SQLite.dll" Method="System.Data.SQLite.SQLiteConnection::Open*"/>
+      </Tag>
+      <Tag Name="BeginTransaction" Priority="1002">
+        <Entrypoint Module="System.Data.SQLite.ni.dll" Method="System.Data.SQLite.SQLiteConnection.BeginDbTransaction*"/>
+        <Entrypoint Module="System.Data.SQLite.dll" Method="System.Data.SQLite.SQLiteConnection::BeginDbTransaction*"/>
+      </Tag>
+      <Tag Name="DataReader GetValues">
+        <Entrypoint Module="System.Data.SQLite.ni.dll" Method="System.Data.SQLite.SQLiteDataReader.GetValues*"/>
+        <Entrypoint Module="System.Data.SQLite.dll" Method="System.Data.SQLite.SQLiteDataReader::GetValues*"/>
+      </Tag>
+    </Tag>
+    <Tag Name="DllLoad">
+      <Entrypoint Module="ntdll.dll" Method="LdrpFindOrMapDll"/>
+    </Tag>
+    <Tag Name="Sleep ConditionVariable">
+      <Entrypoint Module="KernelBase.dll" Method="SleepConditionVariableSRW*"/>
+    </Tag>
+    <Tag Name="Thread Sleep">
+      <Entrypoint Module="ntdll.dll" Method="NtDelayExecution*"/>
+    </Tag>
+    <Tag Name="CLR Wait" Priority="-3">
+      <Entrypoint Module="*clr.dll" Method="Thread::DoAppropriateWait*"/>
+    </Tag>
+    <Tag Name=".NET Thread Join">
+      <Entrypoint Module="*clr.dll" Method="Thread::JoinEx*"/>
+    </Tag>
+    <Tag Name="Socket">
+      <Tag Name="Socket Receive Wait">
+        <Entrypoint Module="mswsock.dll" Method="WSPRecv*"/>
+      </Tag>
+      <Tag Name="Socket Send Wait">
+        <Entrypoint Module="mswsock.dll" Method="WSPSend*"/>
+      </Tag>
+    </Tag>
+    <Tag Name="UI">
+      <Tag Name="MsgWaitForMultipleObjects" Priority="-9">
+        <Entrypoint Module="user32.dll" Method="MsgWaitForMultipleObjectsEx*"/>
+      </Tag>
+    </Tag>
+
+    <Tag Name="Garbage Collector Wait">
+      <Entrypoint Module="*clr.dll" Method="WKS::GCHeap::WaitUntilGCComplete*"/>
+      <Entrypoint Module="*clr.dll" Method="WKS::gc_heap::background_gc_wait*"/>
+    </Tag>
+    <Tag Name="WaitForSingleObject" Priority="-11">
+      <Entrypoint Module="ntdll.dll" Method="ZwWaitForSingleObject*"/>
+    </Tag>
+    <Tag Name="WaitForMultipleObjects" Priority="-11">
+      <Entrypoint Module="ntdll.dll" Method="ZwWaitForMultipleObjects*"/>
+    </Tag>
+    <Tag Name="LRPC Wait">
+      <Entrypoint Module="rpcrt4.dll" Method="LRPC_BASE_CCALL::DoSendReceive*"/>
+    </Tag>
+    <Tag Name="Task Wait" Priority="-8">
+      <Entrypoint Module="mscorlib.ni.dll" Method="System.Threading.Tasks.Task.Wait*"/>
+      <Entrypoint Module="mscorlib.dll" Method="System.Threading.Tasks.Task::Wait*"/>
+      <Entrypoint Module="System.Private.CoreLib.dll" Method="System.Threading.Tasks.Task.Wait*"/>
+    </Tag>
+    <Tag Name="SemaphoreSlim Wait" Priority="-9">
+      <Entrypoint Module="mscorlib.ni.dll" Method="System.Threading.SemaphoreSlim.Wait*"/>
+      <Entrypoint Module="mscorlib.dll" Method="System.Threading.SemaphoreSlim::Wait*"/>
+      <Entrypoint Module="System.Private.CoreLib.dll" Method="System.Threading.SemaphoreSlim.Wait*"/>
+    </Tag>
+    <Tag Name="Normal Waits">
+      <Tag Name="IO Completion Port Wait">
+        <Entrypoint Module="ntdll.dll" Method="NtRemoveIoCompletion*"/>
+      </Tag>
+      <Tag Name="NVidia Driver" Priority="-10">
+        <Entrypoint Module="nvoglv64.dll" Method="*"/>
+      </Tag>
+      <Tag Name="NT Worker Thread">
+        <Entrypoint Module="ntdll.dll" Method="NtWaitForWorkViaWorkerFactory*"/>
+      </Tag>
+      <Tag Name="Finalizer Wait for Work">
+        <Entrypoint Module="*clr.dll" Method="WKS::WaitForFinalizerEvent*"/>
+        <Entrypoint Module="*clr.dll" Method="FinalizerThread::WaitForFinalizerEvent*"/>
+      </Tag>
+      <Tag Name="Threadpool Wait for Work">
+        <Entrypoint Module="*clr.dll" Method="ThreadpoolMgr::GateThreadStart*"/>
+        <Entrypoint Module="*clr.dll" Method="ThreadpoolMgr::SafeWait*"/>
+        <Entrypoint Module="*clr.dll" Method="*ThreadpoolMgr::UnfairSemaphore::Wait*"/>
+      </Tag>
+      <Tag Name="Threadpool Task Sleep" Priority="1">
+        <Entrypoint Module="*clr.dll" Method="ThreadpoolMgr::WaitThreadStart*"/>
+      </Tag>
+      <Tag Name=".NET Timer Sleep" Priority="1">
+        <Entrypoint Module="*clr.dll" Method="ThreadpoolMgr::TimerThreadFire*"/>
+      </Tag>
+      <Tag Name="Message Loop Wait">
+        <Entrypoint Module="win32kfull.sys" Method="NtUserWaitMessage*"/>
+      </Tag>
+      <Tag Name="Message Loop GetMessage">
+        <Entrypoint Module="user32.dll" Method="GetMessageW*"/>
+        <Entrypoint Module="user32.dll" Method="NtUserWaitMessage*"/>
+      </Tag>
+      <Tag Name="WPF Wait for Work" Priority="-9">
+        <Entrypoint Module="wpfgfx_v0400.dll" Method="CPartitionManager::GetWork*"/>
+      </Tag>
+      <Tag Name="Socket Select Wait">
+        <Entrypoint Module="ws2_32.dll" Method="select*"/>
+      </Tag>
+
+    </Tag>
+  </Tag>
+</Tag>
