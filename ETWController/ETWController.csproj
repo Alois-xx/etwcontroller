@@ -230,6 +230,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="ETW\default.stacktags">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -246,7 +247,7 @@
     </Content>
     <None Include="Documentation\ReadMe.md" />
     <None Include="ETW\.NET.stacktags" />
-    <None Include="ETW\OverView.wpaProfile" />
+    <None Include="ETW\Overview.wpaProfile" />
     <None Include="ETW\VirusScanners.stacktags" />
     <None Include="ETW\Wait.stacktags" />
     <None Include="ETW\Windows.stacktags" />

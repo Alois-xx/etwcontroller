@@ -61,6 +61,9 @@ namespace ETWController
                     case "-capturemouseclick":
                         CaptureMouseButtonDown = true;
                         break;
+                    case "-capturemousewheel":
+                        CaptureMouseWheel = true;
+                        break;
                     case "-capturemousemove":
                         CaptureMouseMove = true;
                         break;
@@ -140,7 +143,8 @@ namespace ETWController
             get; set;
         }
         public bool CaptureKeyboard { get; private set; }
-        public bool CaptureMouseButtonDown { get; private set; }
+        public bool CaptureMouseButtonDown { get; private set; } 
+        public bool CaptureMouseWheel { get; private set; }
         public bool CaptureMouseMove { get; private set; }
         public string SendToServer { get; private set; }
         public string SendToServerPort { get; private set; }

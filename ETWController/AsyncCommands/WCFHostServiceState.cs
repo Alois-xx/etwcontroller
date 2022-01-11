@@ -42,9 +42,9 @@ namespace ETWController.Commands
                 }
             }, Model, Scheduler)
             {
-                StartingError = "Could not start TraceControlerService service. Error: ",
-                Starting = "Starting TraceControlerService" + Model.LocalTraceServiceUrl,
-                Started = "Started TraceContolerService at " + Model.LocalTraceServiceUrl
+                StartingError = "Could not start TraceControllerService service. Error: ",
+                Starting = "Starting TraceControllerService" + Model.LocalTraceServiceUrl,
+                Started = "Started TraceControllerService at " + Model.LocalTraceServiceUrl
             };
         }
 
@@ -70,9 +70,9 @@ namespace ETWController.Commands
                 return service.UseService<Tuple<int,string>>(webservice => webservice.ExecuteWPRCommand(wprArgs));
             }, Model, Scheduler)
             {
-                Starting = String.Format("Execute on host {0}: wpr.exe {1}", Model.Host, wprArgs),
-                Started = "WPR completed on host" + Model.Host,
-                StartingError = "WPR command could not be executed on host " + Model.Host,
+                Starting = String.Format("Executing on host '{0}': wpr.exe {1}", Model.Host, wprArgs),
+                Started = "WPR completed on host '" + Model.Host + "'",
+                StartingError = "WPR command could not be executed on host '" + Model.Host + "'",
             };
         }
 

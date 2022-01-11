@@ -1,19 +1,13 @@
 ﻿using ETWController.Commands;
 using ETWController.ETW;
-using ETWController.Network;
 using ETWController.Screenshots;
 using ETWController.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -31,7 +25,7 @@ namespace ETWController
 
         public const string CustomCommandPrefix = "::";
 
-        public TaskScheduler UISheduler
+        public TaskScheduler UIScheduler
         {
             get;
             set;
@@ -240,6 +234,17 @@ namespace ETWController
         }
         
 
+        public bool _CaptureMouseWheel;
+        /// <summary>
+        /// Check state of Checkbox
+        /// </summary>
+        public bool CaptureMouseWheel
+        {
+            get { return _CaptureMouseWheel; }
+            set { SetProperty<bool>(ref _CaptureMouseWheel, value); }
+        }
+
+
         public bool _CaptureMouseMove;
         /// <summary>
         /// Check state of Checkbox
@@ -270,7 +275,7 @@ namespace ETWController
 
         bool _LocalTraceEnabled;
         /// <summary>
-        /// When true tracing is started/stopped/canelled on local machine when one of the trace start/stop/cancel buttons is pressed.
+        /// When true tracing is started/stopped/cancelled on local machine when one of the trace start/stop/cancel buttons is pressed.
         /// </summary>
         public bool LocalTraceEnabled
         {
@@ -311,6 +316,27 @@ namespace ETWController
         {
             get { return _NetworkSendEnabled; }
             set { SetProperty<bool>(ref _NetworkSendEnabled, value); }
+        }
+
+        bool _StartButtonEnabled = true;
+        public bool StartButtonEnabled
+        {
+            get { return _StartButtonEnabled; }
+            set { SetProperty<bool>(ref _StartButtonEnabled, value); }
+        }
+
+        bool _StopButtonEnabled;
+        public bool StopButtonEnabled
+        {
+            get { return _StopButtonEnabled; }
+            set { SetProperty<bool>(ref _StopButtonEnabled, value); }
+        }
+
+        bool _CancelButtonEnabled;
+        public bool CancelButtonEnabled
+        {
+            get { return _CancelButtonEnabled; }
+            set { SetProperty<bool>(ref _CancelButtonEnabled, value); }
         }
 
         ObservableCollection<string> _ReceivedMessages;
@@ -544,6 +570,8 @@ namespace ETWController
                 })},
                 {"ShowMessages", CreateCommand( _ => ShowMessages() )},
                 {"NetworkSendToggle", CreateCommand( _ => NetworkSendState.NetworkSendChangeState() )},
+                {"EnableLocalTraceToggle", CreateCommand( _ => EnableLocalTraceToggle() )},
+                {"EnableRemoteTraceToggle", CreateCommand( _ => EnableRemoteTraceToggle() )},
                 {"NetworkReceiveToggle", CreateCommand( _ => NetworkReceiveState.NetworkReceiveChangeState() )},
                 {"ClearStatusMessages", CreateCommand( _ => StatusMessages.Clear() )},
                 {"ShowCommandLineOptions", CreateCommand( _ => ShowCommandLineOptions()) },
@@ -561,8 +589,9 @@ namespace ETWController
                                                     "\t-ClearKeyboardEvents               By default the keys are all logged as SomeKey. If this is enabled the actual keyboard code is also logged." + Environment.NewLine +
                                                     "\t                                   Be careful that you do not enter your password while clear keyboard logging is enabled!" + Environment.NewLine +
                                                     "\t-CaptureMouseClick                 Capture muse click events." + Environment.NewLine +
+                                                    "\t-CaptureMouseWheel                 Capture mouse wheel events. " + Environment.NewLine +
                                                     "\t-CaptureMouseMove                  Capture mouse mouse events. " + Environment.NewLine +
-                                      String.Format("\t-DisableCaptureScreenshots         Disables the save a screenshot feature where for each mouse click to the directory {0} or specify an explicit locaton with -ScreenshotDir xxx", Configuration.Default.ScreenshotDirectory) + Environment.NewLine +
+                                                    String.Format("\t-DisableCaptureScreenshots         Disables the save a screenshot feature where for each mouse click to the directory {0} or specify an explicit locaton with -ScreenshotDir xxx", Configuration.Default.ScreenshotDirectory) + Environment.NewLine +
                                                     "\t-ScreenshotDir xxxx                Directory to where the screenshots are saved if -CaptureScreenshots is set" + Environment.NewLine  +
                                                     "\t-SendToServer Server [Port1 Port2] Enable sending events to remote server. If Port1/2 are omitted the configured ports are used. " + Environment.NewLine +
                                                     "\t-RegisterEtwProvider               Register the HookEvents ETW provider and then exit. This needs to be done only once e.g. during installation." + Environment.NewLine +
@@ -631,10 +660,10 @@ namespace ETWController
         /// </summary>
         public void InitUIDependantVariables(App args, TaskScheduler scheduler)
         {
-            UISheduler = scheduler;
-            NetworkSendState = new NetworkSendState(this, UISheduler);
-            NetworkReceiveState = new NetworkReceiveState(this, UISheduler);
-            WCFHost = new WCFHostServiceState(this, UISheduler);
+            UIScheduler = scheduler;
+            NetworkSendState = new NetworkSendState(this, UIScheduler);
+            NetworkReceiveState = new NetworkReceiveState(this, UIScheduler);
+            WCFHost = new WCFHostServiceState(this, UIScheduler);
             Hooker = new NetworkedHooker(this);
             if( !HookEvents.IsAlreadyRegistered() )
             {
@@ -644,6 +673,7 @@ namespace ETWController
             // use settings from command line if present
             CaptureKeyboard = args.CaptureKeyboard;
             CaptureMouseButtonDown = args.CaptureMouseButtonDown;
+            CaptureMouseWheel = args.CaptureMouseWheel;
             CaptureMouseMove = args.CaptureMouseMove;
             ScreenshotDirectoryUnexpanded = (args.ScreenshotDirectory ?? Configuration.Default.ScreenshotDirectory);
 
@@ -742,7 +772,13 @@ namespace ETWController
         {
             if (!this.LocalTraceEnabled && !this.ServerTraceEnabled)
             {
-                MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.", "Warning");
+                MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.", "Error");
+                return;
+            }
+
+            if (this.ServerTraceEnabled && (Configuration.Default.Host == "localhost" || Configuration.Default.Host == "127.0.0.1"))
+            {
+                MessageBoxDisplay.ShowMessage($"Remote tracing needs a real remote address, not \"{Configuration.Default.Host}\"", "Error");
                 return;
             }
 
@@ -768,9 +804,11 @@ namespace ETWController
                 }
 
                 Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStartFullCommandLine))
-                            .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UISheduler);
+                            .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler);
             }
 
+            StopButtonEnabled = CancelButtonEnabled = true;
+            StartButtonEnabled = false;
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Starting;
@@ -800,12 +838,15 @@ namespace ETWController
                 TraceStartTime = this._TraceStartTime,
             };
 
+            StopButtonEnabled = CancelButtonEnabled = false;
+            StartButtonEnabled = true;
+
             if (this.LocalTraceEnabled) 
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
                 // stop tracing asynchronously so we do not need to wait until local trace collection has stopped (while blocking the UI)
                 Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(StopData.TraceStopFullCommandLine))
-                            .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UISheduler);
+                            .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UIScheduler);
             }
             if (this.ServerTraceEnabled)
             {
@@ -823,17 +864,20 @@ namespace ETWController
         /// </summary>
         private void CancelTracing()
         {
+            StopButtonEnabled = CancelButtonEnabled = false;
             if (this.LocalTraceEnabled)
             {
                 var output = LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceCancel);
                 LocalTraceSettings.ProcessCancelCommand(output);
             }
+
             if (this.ServerTraceEnabled)
             {
                 var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceCancel);
                 command.Completed = (output) => ServerTraceSettings.ProcessCancelCommand(output);
                 command.Execute();
             }
+            StartButtonEnabled = true;
         }
 
         private void ShowConfigDialog()
@@ -861,9 +905,11 @@ namespace ETWController
             this.LocalTraceSettings.TraceStart = Configuration.Default.LocalTraceStart;
             this.LocalTraceSettings.TraceStop = Configuration.Default.LocalTraceStop;
             this.LocalTraceSettings.TraceCancel = Configuration.Default.LocalTraceCancel;
+            this.LocalTraceSettings.UpdateSelectedPreset();
             this.ServerTraceSettings.TraceStart = Configuration.Default.ServerTraceStart;
             this.ServerTraceSettings.TraceStop = Configuration.Default.ServerTraceStop;
             this.ServerTraceSettings.TraceCancel = Configuration.Default.ServerTraceCancel;
+            this.ServerTraceSettings.UpdateSelectedPreset();
             this.ServerTraceEnabled = Configuration.Default.ServerTraceEnabled;
             this.LocalTraceEnabled = Configuration.Default.LocalTraceEnabled;
         }
@@ -921,6 +967,16 @@ namespace ETWController
             return proc.Start();
         }
 
+        private void EnableLocalTraceToggle()
+        {
+            LocalTraceEnabled = !LocalTraceEnabled;
+        }
+
+        private void EnableRemoteTraceToggle()
+        {
+            ServerTraceEnabled = !ServerTraceEnabled;
+        }
+
         public void OpenFirewallPorts()
         {
             Task.Factory.StartNew(() =>
@@ -932,7 +988,7 @@ namespace ETWController
                 var proc = new RedirectedProcess("netsh.exe", openWCFPort);
                 return proc.Start();
             }).ContinueWith( ret => 
-                this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh output: {1}", this.WCFPort, ret.Result.Item2.Trim())), this.UISheduler);
+                this.SetStatusMessage(String.Format("Opened firewall for port {0}. {1}", this.WCFPort, ret.Result.Item2.Trim() == "Ok." ? "" : "Netsh output: " + ret.Result.Item2.Trim())), this.UIScheduler);
 
             Task.Factory.StartNew( () =>
              {
@@ -942,7 +998,7 @@ namespace ETWController
                 var proc = new RedirectedProcess("netsh.exe", openSocketPort);
                 return proc.Start();
              }).ContinueWith(( ret =>
-                 this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh ouputput: {1}", this.PortNumber, ret.Result.Item2.Trim()))), this.UISheduler);
+                 this.SetStatusMessage(String.Format("Opened firewall for port {0}. {1}", this.PortNumber, ret.Result.Item2.Trim() == "Ok." ? "" : "Netsh output: " + ret.Result.Item2.Trim()))), this.UIScheduler);
         }
 
         public void Dispose()

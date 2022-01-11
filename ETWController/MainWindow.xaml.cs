@@ -1,4 +1,6 @@
-﻿using ETWController.Hooking;
+﻿using System;
+
+using ETWController.Hooking;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -95,7 +97,7 @@ namespace ETWController
 
         private void TraceRefreshSelected(object sender, RoutedEventArgs e)
         {
-            if( cTraceSessionsTab.IsSelected == true )
+            if( TraceSessionsTab.IsSelected )
             {
                 Model.Commands["TraceRefresh"].Execute(null);
             }

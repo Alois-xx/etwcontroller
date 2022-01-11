@@ -43,13 +43,13 @@ namespace ETWController.UI
             get { return Configuration.Default.Presets; }
         }
 
-        Preset _Preset = null;
+        Preset _SelectedPreset = null;
         public Preset SelectedPreset
         {
-            get { return _Preset; }
+            get { return _SelectedPreset; }
             set
             {
-                SetProperty<Preset>(ref _Preset, value);
+                SetProperty<Preset>(ref _SelectedPreset, value);
                 if( value != null)
                 {
                     TraceStart = value.TraceStartCommand;
@@ -68,6 +68,21 @@ namespace ETWController.UI
             get { return _TraceStop; }
             set { SetProperty<string>(ref _TraceStop, value); }
         }
+
+        public void UpdateSelectedPreset()
+        {
+            foreach (var preset in Presets)
+            {
+                if (preset.TraceStartCommand.Trim() == TraceStart.Trim()
+                    && preset.TraceStopCommand.Trim() == TraceStop.Trim()
+                    && preset.TraceCancelCommand.Trim() == TraceCancel.Trim())
+                {
+                    SelectedPreset = preset;
+                    break;
+                }
+            }
+        }
+
 
         public string TraceStopFullCommandLine
         {
@@ -249,7 +264,7 @@ namespace ETWController.UI
                 RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
 
-            RootModel.StopData.VerifySuccesfulStop();
+            RootModel.StopData.VerifySuccessfulStop();
 
 
             TraceStates = TraceStates.Stopped;

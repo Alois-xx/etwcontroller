@@ -122,7 +122,7 @@ namespace ETWController.Commands
                     
                 }
 
-            }, CancellationToken.None, TaskCreationOptions.None, Model.UISheduler);
+            }, CancellationToken.None, TaskCreationOptions.None, Model.UIScheduler);
         }
 
         static char[] RemoteMessageSeparator = new char[] { '~' };

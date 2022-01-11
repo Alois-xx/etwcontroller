@@ -5,15 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:ui="clr-namespace:ETWController.UI"
-             mc:Ignorable="d" d:DesignWidth="559" Height="127">
-    <StackPanel >
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="5"/>
-            </Grid.RowDefinitions>
-        </Grid>
+             mc:Ignorable="d" d:DesignWidth="559" Padding="5">
+    <StackPanel>
         <StackPanel Orientation="Horizontal" Height="25">
-            <Label Margin="0,-5,0,0">Trace State:</Label>
+            <Label Margin="0" VerticalAlignment="Center">Trace State:</Label>
             <TextBox Width="60" Name="cTraceState" Text="{Binding TraceStates}" IsReadOnly="True">
                 <TextBox.Background>
                     <SolidColorBrush x:Name="tbBrush" Color="White"/>
@@ -36,48 +31,28 @@
                     </Storyboard>
                 </TextBox.Resources>
             </TextBox>
-            <Button Width="100" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR comamnds." Command="{Binding ShowCommand}">Show Output</Button>
-            <Button Width="100" Margin="10,0,0,0" ToolTip="Open the output etl file when present with WPA." Command="{Binding OpenTraceCommand}">Open Trace</Button>
-            <Label Margin="10,0,0,0">Presets</Label>
-            <ComboBox ItemsSource="{Binding Presets}"  SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"></ComboBox>
+            <Button Width="100" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR commands." Command="{Binding ShowCommand}">Show Output</Button>
+            <Button Width="100" Margin="10,0,0,0" ToolTip="Open the output ETL file (if present) with WPA" Command="{Binding OpenTraceCommand}">Run WPA</Button>
+            <Label Margin="30,0,5,0" VerticalAlignment="Center">Preset:</Label>
+            <ComboBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset, Mode=TwoWay}" Margin="0" VerticalAlignment="Center"/>
         </StackPanel>
         <Grid Margin="0,5,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="25"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
-            <Label Content="Start Comand" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceStart}"  ToolTip="Enter here the WPR command line arguments to start tracing. Custom script must start with ::" Margin="0,0,0,0"/>
-        </Grid>
-        <Grid Margin="0,5,0,0" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="25"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Label Content="Stop Command" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file. Custom script command must start with :: Supported variables are $FileName, $FileDirectory and $ScreenshotDir"/>
-        </Grid>
-        <Grid Margin="0,5,0,0" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="439"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
-            </Grid.RowDefinitions>
-            <Label Content="Cancel Command" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line to cancel tracing. Custom script command must start with ::  Supported variables are $FileName, $FileDirectory and $ScreenshotDir"/>
-        </Grid>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="5"/>
-            </Grid.RowDefinitions>
+            <Label Content="Start Command:" Grid.Column="0" Grid.Row="0" Padding="5,0"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TraceStart}" 
+                     ToolTip="Enter here the WPR command line arguments to start tracing. Custom script must start with ::" Margin="1"/>
+            <Label Content="Stop Command:" Grid.Column="0" Grid.Row="1" Padding="5,0"/>
+            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file. Custom script command must start with :: Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"/>
+            <Label Content="Cancel Command:" Grid.Column="0" Grid.Row="2" Padding="5,0"/>
+            <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line to cancel tracing. Custom script command must start with ::  Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"/>
         </Grid>
     </StackPanel>
 </UserControl>

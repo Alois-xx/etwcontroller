@@ -6,7 +6,7 @@
       <Value Profile="(Default)">4295</Value>
     </Setting>
     <Setting Name="Host" Type="System.String" Scope="User">
-      <Value Profile="(Default)">localhost</Value>
+      <Value Profile="(Default)">remotehost</Value>
     </Setting>
     <Setting Name="WCFPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8091</Value>
@@ -21,13 +21,13 @@
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</Value>
     </Setting>
     <Setting Name="LocalTraceStop" Type="System.String" Scope="User">
-      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName  $ScreenshotDir</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</Value>
     </Setting>
     <Setting Name="ServerTraceStart" Type="System.String" Scope="User">
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile</Value>
     </Setting>
     <Setting Name="ServerTraceStop" Type="System.String" Scope="User">
-      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName  $ScreenshotDir</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</Value>
     </Setting>
     <Setting Name="LocalTraceEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -42,7 +42,7 @@
       <Value Profile="(Default)">Snapshot</Value>
     </Setting>
     <Setting Name="ScreenshotDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">c:\temp\ETWControllerScreenshots</Value>
+      <Value Profile="(Default)">C:\temp\ETWControllerScreenshots</Value>
     </Setting>
     <Setting Name="LocalTraceCancel" Type="System.String" Scope="User">
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -cancel</Value>
@@ -51,7 +51,7 @@
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -cancel</Value>
     </Setting>
     <Setting Name="TraceFileName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">c:\temp\etwController%COMPUTERNAME%.etl</Value>
+      <Value Profile="(Default)">C:\temp\ETWController_%COMPUTERNAME%.etl</Value>
     </Setting>
     <Setting Name="ForcedScreenshotIntervalinMs" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2000</Value>
@@ -65,28 +65,29 @@
     <Setting Name="JpgCompressionLevel" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
-    <Setting Name="Presets" Type="ETWController.UI.Preset[]" Scope="Application">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;Preset&gt;
-    &lt;Name&gt;Default&lt;/Name&gt;
-    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile  -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
-    &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
-    &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
-  &lt;/Preset&gt;
-  &lt;Preset&gt;
-    &lt;Name&gt;Default and .NET&lt;/Name&gt;
-    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET  -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
-    &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
-    &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
-  &lt;/Preset&gt;
-&lt;/ArrayOfPreset&gt;</Value>
-    </Setting>
-    <Setting Name="TraceOpenCmdLine" Type="System.String" Scope="User">
-      <Value Profile="(Default)">wpa -i $FileName -profile ETW\Simple.wpaProfile</Value>
-    </Setting>
     <Setting Name="KeepNNewestScreenShots" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="Presets" Type="ETWController.UI.Preset[]" Scope="Application">
+      <Value Profile="(Default)">
+                    &lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+                        &lt;Preset&gt;
+                            &lt;Name&gt;WPR Default&lt;/Name&gt;
+                            &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+                            &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+                            &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
+                        &lt;/Preset&gt;
+                        &lt;Preset&gt;
+                            &lt;Name&gt;WPR Default + .NET&lt;/Name&gt;
+                            &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+                            &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+                            &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
+                        &lt;/Preset&gt;
+                    &lt;/ArrayOfPreset&gt;
+                </Value>
+    </Setting>
+    <Setting Name="TraceOpenCmdLine" Type="System.String" Scope="User">
+      <Value Profile="(Default)">wpa -i $FileName -profile ETW\Overview.wpaProfile</Value>
     </Setting>
   </Settings>
 </SettingsFile>
