@@ -128,13 +128,13 @@
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <CheckBox Grid.Row="1" Grid.Column="0" Content="Log key presses" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureKeyboard}" Height="15" ToolTip="Log all keyboard down events to ETW." Name="LogKeyboardCB"/>
-                            <CheckBox Grid.Row="1" Grid.Column="1"  Content="Secure key logging" IsChecked="{Binding IsKeyBoardEncrypted}" 
+                                <CheckBox Grid.Row="1" Grid.Column="0" Content="Record key presses" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureKeyboard}" Height="15" ToolTip="Log all keyboard down events to ETW." Name="LogKeyboardCB"/>
+                                <CheckBox Grid.Row="1" Grid.Column="1"  Content="Secure key logging" IsChecked="{Binding IsKeyBoardEncrypted}" 
                                       ToolTip="For regular characters, only a generic 'SomeKey' message is logged for security reasons.&#x0a;Special keys like F1-F12, Enter, Space, Alt, Tab, Shift and cursor keys are still recorded verbatim.&#x0a;&#x0a;Enabled by default so you do not record passwords or other sensitive information by accident!" 
                                       IsEnabled="{Binding IsChecked, ElementName=LogKeyboardCB}" />
-                            <CheckBox Grid.Column="0" Content="Log mouse clicks" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureMouseButtonDown}" Grid.ColumnSpan="2" ToolTip="Log all mouse button down events to ETW."/>
-                            <CheckBox Grid.Column="1" Content="Log mouse wheel"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseWheel}"  VerticalAlignment="Top" Grid.ColumnSpan="2" ToolTip="Log all mouse wheel events to ETW. There can be many of them!"/>
-                            <CheckBox Grid.Column="2" Content="Log mouse moves"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseMove}"  VerticalAlignment="Top" Grid.ColumnSpan="2" ToolTip="Log all mouse move events to ETW. There can be many of them!"/>
+                                <CheckBox Grid.Column="0" Content="Record mouse clicks" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureMouseButtonDown}" Grid.ColumnSpan="2" ToolTip="Log all mouse button down events to ETW."/>
+                                <CheckBox Grid.Column="1" Content="Record mouse wheel"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseWheel}"  VerticalAlignment="Top" Grid.ColumnSpan="2" ToolTip="Log all mouse wheel events to ETW. There can be many of them!"/>
+                                <CheckBox Grid.Column="2" Content="Record mouse moves"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseMove}"  VerticalAlignment="Top" Grid.ColumnSpan="2" ToolTip="Log all mouse move events to ETW. There can be many of them!"/>
                             <Grid Grid.Row="2" Grid.ColumnSpan="4" Grid.Column="0" Margin="0,6,0,0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -184,7 +184,7 @@
                         <CheckBox Content="Take screenshot on each mouse click and on each 'Enter' key press" IsChecked="{Binding CaptureScreenShots}" ToolTip="Capture a screenshot on every mouse click or whenever Return key is pressed."/>
                     </GroupBox>
 
-                    <GroupBox Margin="5,2" Padding="3,0" Header="Recording State">
+                    <GroupBox Margin="5,2" Padding="3,0" Header="State and Results">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,1" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}">
                                 <ui:TraceStatusDisplay DataContext="{Binding LocalTraceSettings}" />
@@ -196,13 +196,13 @@
                     </GroupBox>
 
                     <StackPanel Name="MainButtonPanel" DockPanel.Dock="Bottom" Height="24" Margin="10,6" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button IsDefault="True" Content="_Start Tracing" Width="120" 
+                        <Button IsDefault="True" Content="Start Recording" Width="120" 
                                 IsEnabled="{Binding StartButtonEnabled}"
                                 Command="{Binding Commands[StartTracing]}" Margin="10,0,0,0"></Button>
-                        <Button Content="S_top Tracing" Width="120"  
+                            <Button Content="Stop Recording" Width="120"  
                                 IsEnabled="{Binding StopButtonEnabled}"
                                 Command="{Binding Commands[StopTracing]}" Margin="10,0,0,0"></Button>
-                        <Button Content="Can_cel Tracing" Width="120" 
+                            <Button Content="Cancel Recording" Width="120" 
                                 IsEnabled="{Binding CancelButtonEnabled}"
                                 Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"/>
                     </StackPanel>
