@@ -258,12 +258,13 @@ namespace ETWController.UI
         {
             AddLogEntry(RootModel.StopData.TraceStopFullCommandLine, wprCommandOutput, CommandOutputs);
             OpenTraceCommand.RaiseCanExecuteChanged();
-            if (wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) 
+            if ((wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) && !IsErrorOutput(wprCommandOutput.Item2)) 
             {
                 // Trace not running
             }
             else
             {
+                TraceStates = TraceStates.Stopped;
                 RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
 
@@ -281,14 +282,26 @@ namespace ETWController.UI
         {
             AddLogEntry(TraceStartFullCommandLine, wprCommandOutput, CommandOutputs);
 
-            if (wprCommandOutput.Item1 == 0)
+            if (wprCommandOutput.Item1 == 0 && ! IsErrorOutput(wprCommandOutput.Item2))
             {
                 TraceStates = TraceStates.Running;
             }
             else
             {
+                TraceStates = TraceStates.Stopped;
                 RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
+        }
+
+        private bool IsErrorOutput(string txt)
+        {
+            if (txt.Contains("Invalid command")
+            || txt.Contains("Error code: "))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
