@@ -288,30 +288,6 @@ namespace ETWController {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"
-                    <ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-                        <Preset>
-                            <Name>WPR Default</Name>
-                            <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start ETW\HookEvents.wprp</TraceStartCommand>
-                            <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
-                            <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
-                        </Preset>
-                        <Preset>
-                            <Name>WPR Default + .NET</Name>
-                            <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</TraceStartCommand>
-                            <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
-                            <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
-                        </Preset>
-                    </ArrayOfPreset>
-                ")]
-        public ETWController.UI.Preset[] Presets {
-            get {
-                return ((ETWController.UI.Preset[])(this["Presets"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("wpa -i $FileName -profile ETW\\Overview.wpaProfile")]
@@ -321,6 +297,53 @@ namespace ETWController {
             }
             set {
                 this["TraceOpenCmdLine"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <Preset>
+    <Name>WPR Default</Name>
+    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start ETW\HookEvents.wprp</TraceStartCommand>
+    <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
+    <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
+  </Preset>
+  <Preset>
+    <Name>WPR Default + .NET</Name>
+    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</TraceStartCommand>
+    <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
+    <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
+  </Preset>
+</ArrayOfPreset>")]
+        public ETWController.UI.Preset[] Presets {
+            get {
+                return ((ETWController.UI.Preset[])(this["Presets"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CaptureMouseWheel {
+            get {
+                return ((bool)(this["CaptureMouseWheel"]));
+            }
+            set {
+                this["CaptureMouseWheel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CaptureMouseMove {
+            get {
+                return ((bool)(this["CaptureMouseMove"]));
+            }
+            set {
+                this["CaptureMouseMove"] = value;
             }
         }
     }

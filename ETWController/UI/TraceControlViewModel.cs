@@ -13,7 +13,8 @@ namespace ETWController.UI
 {
     /// <summary>
     /// ViewModel for TraceControl which contains the start/stop command line args, the current trace state 
-    /// and the command outputs
+    /// and the command outputs.
+    /// This view model is used for both the TraceControl control and the TraceStatusDisplay class!
     /// </summary>
     public class TraceControlViewModel : NotifyBase
     {
@@ -68,6 +69,8 @@ namespace ETWController.UI
             get { return _TraceStop; }
             set { SetProperty<string>(ref _TraceStop, value); }
         }
+
+        public string StatusPrefix => IsRemoteState ? "Remote Recording:" : "Local Recording:";
 
         public void UpdateSelectedPreset()
         {

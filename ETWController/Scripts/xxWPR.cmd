@@ -7,12 +7,14 @@ REM usually contains the screenshots of the trace
 setlocal ENABLEDELAYEDEXPANSION
 set ScriptDir=%~dp0
 
+set WPR=wpr.exe
+rem set WPR="C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\wpr.exe"
+
 if "%1" EQU "" goto :Help
 if "%1" EQU "-help" goto :Help
 if "%1" EQU "-stop" goto :Stop
 
-
-wpr %*
+%WPR% %*
 goto :EOF
 
 :Stop
@@ -43,7 +45,7 @@ if "!OutFileName:~-3!" EQU ".7z" (
 
 
 echo Stopping Tracing 
-wpr -stop !WprOutFileName!
+%WPR% -stop !WprOutFileName!
 
 set ScreenshotDir=!WprOutFileName!.Screenshots
 

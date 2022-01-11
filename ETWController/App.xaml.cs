@@ -36,6 +36,8 @@ namespace ETWController
             {
                 CaptureKeyboard = Configuration.Default.CaptureKeyboard;
                 CaptureMouseButtonDown = Configuration.Default.CaptureMouseButtonDown;
+                CaptureMouseWheel = Configuration.Default.CaptureMouseWheel;
+                CaptureMouseMove = Configuration.Default.CaptureMouseMove;
             }
 
             string currentArg = null;

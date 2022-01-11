@@ -161,6 +161,9 @@
     <Compile Include="Network\TraceControlerService.cs" />
     <Compile Include="UI\DelegateCommand.cs" />
     <Compile Include="UI\PortnumberValidator.cs" />
+    <Compile Include="UI\TraceStatusDisplay.xaml.cs">
+      <DependentUpon>TraceStatusDisplay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\TraceControl.xaml.cs">
       <DependentUpon>TraceControl.xaml</DependentUpon>
     </Compile>
@@ -205,6 +208,10 @@
     <Page Include="UI\Styles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\TraceStatusDisplay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\TraceControl.xaml">
       <SubType>Designer</SubType>

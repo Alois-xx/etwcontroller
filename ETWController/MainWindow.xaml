@@ -6,7 +6,7 @@
         xmlns:ui="clr-namespace:ETWController.UI"
         Background="#F0F0F0"
         Title="ETW Controller and Logger" 
-        Height="750" Width="790" Closing="Window_Closing">
+        Height="850" Width="790" Closing="Window_Closing">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -20,13 +20,13 @@
     <DockPanel LastChildFill="True">
         <Menu Grid.Row="0"  DockPanel.Dock="Top">
             <MenuItem Header="Options">
-                <CheckBox x:Name="LocalTraceEnabledCB" Content="Enable local ETW tracing   - F3" IsChecked="{Binding LocalTraceEnabled}" />
-                <CheckBox x:Name="ServerTraceEnabledCB" Content="Enable remote machine ETW tracing   - F4" IsChecked="{Binding ServerTraceEnabled}"/>
+                <CheckBox x:Name="LocalTraceEnabledCB" Content="Enable local ETW tracing   - F7" IsChecked="{Binding LocalTraceEnabled}" />
+                <CheckBox x:Name="ServerTraceEnabledCB" Content="Enable remote machine ETW tracing   - F8" IsChecked="{Binding ServerTraceEnabled}"/>
                 <Separator />
                 <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
-                <MenuItem Header="Reset Configuration" Command="{Binding Commands[ConfigReset]}" ToolTip="Reset any user configured values to the defaults of ETWController in its current version. This can help to see updated settings provided by a newer version of ETWController."/>
                 <Separator />
-                <MenuItem Header="Configuration..." Command="{Binding Commands[Config]}"/>
+                <MenuItem Header="Edit Configuration..." Command="{Binding Commands[Config]}"/>
+                <MenuItem Header="Reset Configuration" Command="{Binding Commands[ConfigReset]}" ToolTip="Reset any user configured values to the defaults of ETWController in its current version. This can help to see updated settings provided by a newer version of ETWController."/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Command line options" Command="{Binding Commands[ShowCommandLineOptions]}"/>
@@ -73,6 +73,7 @@
         </StatusBar>
         <TabControl DockPanel.Dock="Top">
             <TabItem Header="Control">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto">
                 <StackPanel>
                     <GroupBox Header="Output" Margin="5" Padding="3" >
                         <Grid>
@@ -99,6 +100,8 @@
                             </StackPanel>
                         </Grid>
                     </GroupBox>
+
+
                     <GroupBox Header="Local ETW Recording" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}" Margin="5" Padding="3" >
                         <ui:TraceControl DataContext="{Binding LocalTraceSettings}"  Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}"/>
                     </GroupBox>
@@ -180,6 +183,18 @@
                     <GroupBox Margin="5,2" Padding="3" Header="Screenshots">
                         <CheckBox Content="Take screenshot on each mouse click and on each 'Enter' key press" IsChecked="{Binding CaptureScreenShots}" ToolTip="Capture a screenshot on every mouse click or whenever Return key is pressed."/>
                     </GroupBox>
+
+                    <GroupBox Margin="5,2" Padding="3,0" Header="Recording State">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,1" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}">
+                                <ui:TraceStatusDisplay DataContext="{Binding LocalTraceSettings}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,1" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ServerTraceEnabledCB}">
+                                <ui:TraceStatusDisplay DataContext="{Binding ServerTraceSettings}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+
                     <StackPanel Name="MainButtonPanel" DockPanel.Dock="Bottom" Height="24" Margin="10,6" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button IsDefault="True" Content="_Start Tracing" Width="120" 
                                 IsEnabled="{Binding StartButtonEnabled}"
@@ -191,7 +206,7 @@
                                 IsEnabled="{Binding CancelButtonEnabled}"
                                 Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"/>
                     </StackPanel>
-                </StackPanel>
+                </StackPanel></ScrollViewer>
             </TabItem>
             <TabItem Header="Event History">
                 <Grid MinHeight="400">
@@ -234,8 +249,8 @@
     </DockPanel>
     <Window.InputBindings>
         <KeyBinding Command="{Binding Commands[EnableLocalTraceToggle]}" 
-                    Key="F3"/>
+                    Key="F7"/>
         <KeyBinding Command="{Binding Commands[EnableRemoteTraceToggle]}" 
-                    Key="F4"/>
+                    Key="F8"/>
     </Window.InputBindings>
 </Window>

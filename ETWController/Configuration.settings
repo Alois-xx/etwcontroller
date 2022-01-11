@@ -68,26 +68,31 @@
     <Setting Name="KeepNNewestScreenShots" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
-    <Setting Name="Presets" Type="ETWController.UI.Preset[]" Scope="Application">
-      <Value Profile="(Default)">
-                    &lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-                        &lt;Preset&gt;
-                            &lt;Name&gt;WPR Default&lt;/Name&gt;
-                            &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
-                            &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
-                            &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
-                        &lt;/Preset&gt;
-                        &lt;Preset&gt;
-                            &lt;Name&gt;WPR Default + .NET&lt;/Name&gt;
-                            &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
-                            &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
-                            &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
-                        &lt;/Preset&gt;
-                    &lt;/ArrayOfPreset&gt;
-                </Value>
-    </Setting>
     <Setting Name="TraceOpenCmdLine" Type="System.String" Scope="User">
       <Value Profile="(Default)">wpa -i $FileName -profile ETW\Overview.wpaProfile</Value>
+    </Setting>
+    <Setting Name="Presets" Type="ETWController.UI.Preset[]" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfPreset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;WPR Default&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;WPR Default + .NET&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;::.\Scripts\xxWPR.cmd -cancel&lt;/TraceCancelCommand&gt;
+  &lt;/Preset&gt;
+&lt;/ArrayOfPreset&gt;</Value>
+    </Setting>
+    <Setting Name="CaptureMouseWheel" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CaptureMouseMove" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

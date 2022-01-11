@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="ETWController.UI.TraceStatusDisplay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:ui="clr-namespace:ETWController.UI"
+             mc:Ignorable="d" d:DesignWidth="500">
+    <StackPanel Orientation="Horizontal">
+        <Label Margin="0" Width="140" VerticalAlignment="Center" Content="{Binding StatusPrefix}" />
+        <TextBox Width="80" Name="cTraceState" Text="{Binding TraceStates}" IsReadOnly="True" TextAlignment="Center">
+            <TextBox.Background>
+                <SolidColorBrush x:Name="tbBrush" Color="White"/>
+            </TextBox.Background>
+            <TextBox.Resources>
+                <Storyboard x:Key="TraceRunningAnimation" Storyboard.TargetProperty="Background.Color">
+                    <ColorAnimation  Duration="0:0:2.0"  
+                                     AutoReverse="True"  RepeatBehavior="Forever" 
+                                     From="White" To="#D805C305" />
+                </Storyboard>
+                <Storyboard x:Key="TraceStoppingAnimation" Storyboard.TargetProperty="Background.Color">
+                    <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
+                                     RepeatBehavior="Forever" AutoReverse="True" 
+                                     From="White" To="#8B8BF9" />
+                </Storyboard>
+                <Storyboard x:Key="TraceStartingAnimation" Storyboard.TargetProperty="Background.Color">
+                    <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
+                                     RepeatBehavior="Forever" AutoReverse="True" 
+                                     From="White" To="Yellow" />
+                </Storyboard>
+            </TextBox.Resources>
+        </TextBox>
+        <Button Width="120" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR commands" Command="{Binding ShowCommand}">Show Output</Button>
+        <Button Width="120" Margin="10,0,0,0" ToolTip="Open the output ETL file (if present) with WPA" Command="{Binding OpenTraceCommand}">Run WPA</Button>
+    </StackPanel>
+
+</UserControl>

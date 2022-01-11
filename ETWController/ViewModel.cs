@@ -933,6 +933,8 @@ namespace ETWController
             Configuration.Default.FastEventHotkey = this.FastEventHotkey;
             Configuration.Default.CaptureKeyboard = this.CaptureKeyboard;
             Configuration.Default.CaptureMouseButtonDown = this.CaptureMouseButtonDown;
+            Configuration.Default.CaptureMouseWheel = this.CaptureMouseWheel;
+            Configuration.Default.CaptureMouseMove = this.CaptureMouseMove;
             Configuration.Default.LocalTraceStart = this.LocalTraceSettings.TraceStart;
             Configuration.Default.LocalTraceStop = this.LocalTraceSettings.TraceStop;
             Configuration.Default.ServerTraceStart = this.ServerTraceSettings.TraceStart;
