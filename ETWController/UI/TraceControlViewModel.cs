@@ -38,10 +38,10 @@ namespace ETWController.UI
             set { SetProperty<string>(ref _TraceStart, value); }
         }
 
-
+        private List<Preset> _Presets = new List<Preset>();
         public Preset[] Presets
         {
-            get { return Configuration.Default.Presets; }
+            get { return _Presets.ToArray(); }
         }
 
         Preset _SelectedPreset = null;
@@ -53,9 +53,17 @@ namespace ETWController.UI
                 SetProperty<Preset>(ref _SelectedPreset, value);
                 if( value != null)
                 {
-                    TraceStart = value.TraceStartCommand;
-                    TraceStop = value.TraceStopCommand;
-                    TraceCancel = value.TraceCancelCommand;
+                    if (value.TraceStartCommand != "~")
+                    {
+                        TraceStart = value.TraceStartCommand;
+                        TraceStop = value.TraceStopCommand;
+                        TraceCancel = value.TraceCancelCommand;
+                        IsCustomSetting = false;
+                    }
+                    else
+                    {
+                        IsCustomSetting = true;
+                    }
                 }
             }
         }
@@ -70,10 +78,20 @@ namespace ETWController.UI
             set { SetProperty<string>(ref _TraceStop, value); }
         }
 
+        public bool _IsCustomSetting;
+        public bool IsCustomSetting
+        {
+            get { return _IsCustomSetting; }
+            set
+            {
+                SetProperty<bool>(ref _IsCustomSetting, value);
+            }
+        }
         public string StatusPrefix => IsRemoteState ? "Remote Recording:" : "Local Recording:";
 
         public void UpdateSelectedPreset()
         {
+            bool found = false;
             foreach (var preset in Presets)
             {
                 if (preset.TraceStartCommand.Trim() == TraceStart.Trim()
@@ -81,8 +99,19 @@ namespace ETWController.UI
                     && preset.TraceCancelCommand.Trim() == TraceCancel.Trim())
                 {
                     SelectedPreset = preset;
+                    found = true;
                     break;
                 }
+            }
+
+            if (found)
+            {
+                IsCustomSetting = false;
+            }
+            else
+            {
+                IsCustomSetting = true;
+                SelectedPreset = _Presets[0];
             }
         }
 
@@ -218,6 +247,8 @@ namespace ETWController.UI
                 }
             }, 
             () => !IsRemoteState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
+            _Presets.Add(new Preset(){Name = "Custom", TraceStartCommand = "~"});
+            _Presets.AddRange(Configuration.Default.Presets);
         }
 
         /// <summary>
