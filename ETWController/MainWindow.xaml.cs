@@ -6,6 +6,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+using ETWController.UI;
+
+
 namespace ETWController
 {
     /// <summary>
@@ -114,5 +117,17 @@ namespace ETWController
         }
 
 
+        private void ShowTraceSessions_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (SessionsWindow == null)
+            {
+                SessionsWindow = new TraceSessionsWindow((ViewModel)DataContext);
+                SessionsWindow.Closed += (a, b) => SessionsWindow = null;
+            }
+            SessionsWindow.Show();
+            SessionsWindow.Activate();
+        }
+
+        public TraceSessionsWindow SessionsWindow { get; set; }
     }
 }

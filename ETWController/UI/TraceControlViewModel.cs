@@ -370,12 +370,13 @@ namespace ETWController.UI
             // remove empty lines
             string[] strippedOutput = wprCommandResult.Item2.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            string logMessage = string.Format("{0}: {1}{2}{3}",
-                                            DateTime.Now.ToString("hh:mm:ss.fff"),
-                                            Environment.ExpandEnvironmentVariables(command.StartsWith(ETWController.ViewModel.CustomCommandPrefix) ? 
-                                                                                   command.Substring(ETWController.ViewModel.CustomCommandPrefix.Length) : "wpr " + command),
-                                            Environment.NewLine,
-                                            string.Join(Environment.NewLine, strippedOutput.Where(x=>!string.IsNullOrEmpty(x))));
+            var resultString = string.Join(Environment.NewLine, strippedOutput.Where(x=>!string.IsNullOrEmpty(x)));
+            string logMessage = string.Format("[{0}] {1}{2}{3}",
+                                            DateTime.Now.ToString("HH:mm:ss.fff"),
+                                            Environment.ExpandEnvironmentVariables(command.StartsWith(ViewModel.CustomCommandPrefix) ? 
+                                                                                   command.Substring(ViewModel.CustomCommandPrefix.Length) : "wpr " + command),
+                                            resultString == String.Empty ? String.Empty : Environment.NewLine,
+                                            resultString);
             log.Add(logMessage);
         }
     }

@@ -1,13 +1,15 @@
 ﻿<Window x:Class="ETWController.UI.OutputWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WPR Command Output" Height="300" Width="997.675">
+        Title="WPR Command Output" Height="500" Width="800">
     <Grid>
-        <ListView Name="cView" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto"  ItemsSource="{Binding CommandOutputs}">
+        <ListView Name="cView" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                  ItemsSource="{Binding CommandOutputs}"
+                  FontFamily="Consolas">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Copy" Click="CopyMessage"></MenuItem>
-                    <MenuItem Header="Clear" Click="ClearAllMessages"></MenuItem>
+                    <MenuItem Header="Copy single message" Click="CopyMessage"></MenuItem>
+                    <MenuItem Header="Clear all" Click="ClearAllMessages"></MenuItem>
                 </ContextMenu>
             </ListView.ContextMenu>
         </ListView>

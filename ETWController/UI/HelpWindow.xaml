@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ETWController.UI"
         mc:Ignorable="d"
-        Title="Help" Height="150" Width="800" MinHeight="100" MinWidth="600" SizeToContent="Height">
+        Title="Help" Height="150" Width="1200" MinHeight="100" MinWidth="600" SizeToContent="Height">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

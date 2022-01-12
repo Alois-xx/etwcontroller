@@ -612,7 +612,7 @@ namespace ETWController
                                                     "This will eanble mouse click, encrypted keyboard tracing which will send to to your local machine again. If you want to hide the window you can add -hide." + Environment.NewLine + 
                                                     "These commands are useful if you only want to use ETWController as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
 
-        static readonly string About = String.Format("ETWController (c) by Alois Kraus 2015-2016 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
+        static readonly string About = String.Format("ETWController (c) by Alois Kraus 2015-2022 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
         private void AboutBox()
         {
             var window = new HelpWindow("About", About);
@@ -1037,6 +1037,20 @@ namespace ETWController
                 Hooker.Dispose();
                 Hooker = null;
             }
+        }
+    }
+
+    public class DesignTimeCustomerViewModel : ViewModel
+    {
+
+        public DesignTimeCustomerViewModel()
+            : base(null)
+        {
+
+            LocalTraceEnabled = true;
+            ServerTraceEnabled = true;
+            // CaptureMouseButtonDown = true;
+            // CaptureKeyboard = true;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace ETWController.UI
         {
             get
             {
-                return CreationTime.ToString("HH:mm:ss.fff") + " " + MessageText + (Data != null ? Data.ToString() : "");
+                return CreationTime.ToString("[HH:mm:ss.fff") + "] " + MessageText + (Data != null ? Data.ToString() : "");
             }
         }
 

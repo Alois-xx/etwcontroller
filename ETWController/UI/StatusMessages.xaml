@@ -1,9 +1,9 @@
 ﻿<Window x:Class="ETWController.UI.StatusMessages"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="StatusMessages" Height="315.498" Width="613.284">
+        Title="StatusMessage History" Height="500" Width="900">
     <Grid >
-        <ListBox Name="cList" ItemsSource="{Binding StatusMessages}" SelectionMode="Extended" >
+        <ListBox Name="cList" ItemsSource="{Binding StatusMessages}" SelectionMode="Extended" Margin="3" FontFamily="Consolas">
             <ListBox.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="Copy" Header="Copy"/>

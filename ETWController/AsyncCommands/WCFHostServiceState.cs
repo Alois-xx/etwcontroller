@@ -43,7 +43,7 @@ namespace ETWController.Commands
             }, Model, Scheduler)
             {
                 StartingError = "Could not start TraceControllerService service. Error: ",
-                Starting = "Starting TraceControllerService" + Model.LocalTraceServiceUrl,
+                Starting = "Starting TraceControllerService at " + Model.LocalTraceServiceUrl,
                 Started = "Started TraceControllerService at " + Model.LocalTraceServiceUrl
             };
         }

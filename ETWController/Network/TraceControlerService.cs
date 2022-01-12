@@ -55,7 +55,7 @@ namespace ETWController
         /// <returns>string array of with the trace session names</returns>
         public string[] GetTraceSessions()
         {
-            return TraceEventSession.GetActiveSessionNames().ToArray();
+            return TraceEventSession.GetActiveSessionNames().OrderBy(n => n).ToArray();
         }
 
         public TraceControlerService()

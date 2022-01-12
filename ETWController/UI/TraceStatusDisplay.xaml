@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="500">
     <StackPanel Orientation="Horizontal">
         <Label Margin="0" Width="140" VerticalAlignment="Center" Content="{Binding StatusPrefix}" />
-        <TextBox Width="80" Name="cTraceState" Text="{Binding TraceStates}" IsReadOnly="True" TextAlignment="Center">
+        <TextBox Width="80" Name="cTraceState" Text="{Binding TraceStates}" IsReadOnly="True" TextAlignment="Center" VerticalAlignment="Center">
             <TextBox.Background>
                 <SolidColorBrush x:Name="tbBrush" Color="White"/>
             </TextBox.Background>
@@ -16,22 +16,22 @@
                 <Storyboard x:Key="TraceRunningAnimation" Storyboard.TargetProperty="Background.Color">
                     <ColorAnimation  Duration="0:0:2.0"  
                                      AutoReverse="True"  RepeatBehavior="Forever" 
-                                     From="White" To="#D805C305" />
+                                     From="#88E1FFE1" To="#7CF97C" />
                 </Storyboard>
                 <Storyboard x:Key="TraceStoppingAnimation" Storyboard.TargetProperty="Background.Color">
                     <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
                                      RepeatBehavior="Forever" AutoReverse="True" 
-                                     From="White" To="#8B8BF9" />
+                                     From="#88EDEDFF" To="#C8C8FF" />
                 </Storyboard>
                 <Storyboard x:Key="TraceStartingAnimation" Storyboard.TargetProperty="Background.Color">
                     <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
                                      RepeatBehavior="Forever" AutoReverse="True" 
-                                     From="White" To="Yellow" />
+                                     From="White" To="#FFFF76" />
                 </Storyboard>
             </TextBox.Resources>
         </TextBox>
-        <Button Width="120" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR commands" Command="{Binding ShowCommand}">Show Output</Button>
-        <Button Width="120" Margin="10,0,0,0" ToolTip="Open the output ETL file (if present) with WPA" Command="{Binding OpenTraceCommand}">Run WPA</Button>
+        <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR commands" Command="{Binding ShowCommand}" VerticalAlignment="Center">Show Output</Button>
+        <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Open the output ETL file (if present) with WPA" Command="{Binding OpenTraceCommand}" VerticalAlignment="Center">Run WPA</Button>
     </StackPanel>
 
 </UserControl>
