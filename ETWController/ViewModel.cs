@@ -578,6 +578,11 @@ namespace ETWController
                     Configuration.Default.Save();
                     LoadSettings();
                 })},
+                {"EnableButtons", CreateCommand( _ => {
+                    StartButtonEnabled = true;
+                    StopButtonEnabled = true;
+                    CancelButtonEnabled = true;
+                })},
                 {"ShowMessages", CreateCommand( _ => ShowMessages() )},
                 {"NetworkSendToggle", CreateCommand( _ => NetworkSendState.NetworkSendChangeState() )},
                 {"EnableLocalTraceToggle", CreateCommand( _ => EnableLocalTraceToggle() )},

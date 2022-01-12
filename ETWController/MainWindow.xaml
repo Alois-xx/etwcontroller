@@ -35,6 +35,8 @@
             <MenuItem Header="Debug">
                 <MenuItem Header="Show Trace Sessions..." Click="ShowTraceSessions_OnClick"/>
                 <MenuItem Header="Status Message History..." Command="{Binding Commands[ShowMessages]}"/>
+                <Separator/>
+                <MenuItem Header="Enable all buttons (Caution!)" Command="{Binding Commands[EnableButtons]}"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Command line options" Command="{Binding Commands[ShowCommandLineOptions]}"/>
