@@ -86,7 +86,7 @@
                         <GroupBox Header="Output" Margin="5" Padding="3" >
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
@@ -110,7 +110,7 @@
                         </GroupBox>
 
 
-                        <GroupBox Header="_Local ETW Recording" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}" Margin="5" Padding="3" >
+                        <GroupBox Header="_Local recording" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}" Margin="5" Padding="3" >
                             <ui:TraceControl DataContext="{Binding LocalTraceSettings}"  Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}"/>
                         </GroupBox>
 
@@ -118,7 +118,7 @@
                             <GroupBox Margin="5" Padding="3">
                                 <GroupBox.Header>
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Padding="0">_Remote ETW Recording on</Label>
+                                        <Label Padding="0,0,5,0">_Remote recording on</Label>
                                         <TextBlock Text="{Binding Host}" Foreground="#FF0674B6" FontWeight="Bold" Margin="3,0,0,0" />
                                     </StackPanel>
                                 </GroupBox.Header>
@@ -201,8 +201,8 @@
                                           Content="Send locally logged events also to remote machine" IsChecked="{Binding NetworkSendEnabled}"/>
                             </Grid>
                         </GroupBox>
-                        <GroupBox Margin="5,2" Padding="3" Header="Screenshots">
-                            <CheckBox Content="Take _screenshot on each mouse click and on each 'Enter' key press" IsChecked="{Binding CaptureScreenShots}" ToolTip="Capture a screenshot on every mouse click or whenever Return key is pressed."/>
+                        <GroupBox Margin="5,2" Padding="3" Header="Display">
+                            <CheckBox Content="Take cyclic _screenshots" IsChecked="{Binding CaptureScreenShots}" ToolTip="Capture a cyclic screenshot (intervall is defined in configuration) as well as on every mouse click or whenever Return key is pressed. To change the interval, open the 'Configuration' window."/>
                         </GroupBox>
 
                         <GroupBox Margin="5,2" Padding="3,0" Header="State and Results">
