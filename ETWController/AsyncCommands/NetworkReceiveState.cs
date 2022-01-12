@@ -58,9 +58,9 @@ namespace ETWController.Commands
                 },
             Model, Scheduler)
             {
-                Started = String.Format("Server started at port {0}", Model.PortNumber),
-                Starting = String.Format("Starting server at port {0}", Model.PortNumber),
-                StartingError = "Failed to start server ",
+                Started = String.Format("MessageReceiver service started at port {0}", Model.PortNumber),
+                Starting = String.Format("Starting MessageReceiver service at port {0}", Model.PortNumber),
+                StartingError = "Failed to start MessageReceiver service",
             };
             StartCommand.Execute();
         }
@@ -79,9 +79,9 @@ namespace ETWController.Commands
                 }
             }, Model, Scheduler)
             {
-                Starting = String.Format("Closing server port {0}", Model.PortNumber),
-                Started = String.Format("Closed server port {0}", Model.PortNumber),
-                StartingError = String.Format("Failed to stop server port {0}", Model.PortNumber),
+                Starting = String.Format("Closing MessageReceiver service port {0}", Model.PortNumber),
+                Started = String.Format("Closed MessageReceiver service port {0}", Model.PortNumber),
+                StartingError = String.Format("Failed to stop MessageReceiver service port {0}", Model.PortNumber),
             };
             StopCommand.Execute();
         }
