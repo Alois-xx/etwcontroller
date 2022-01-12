@@ -472,6 +472,16 @@ namespace ETWController
             }
         }
 
+        bool _AlwaysShowCommandEditBoxes;
+        public bool AlwaysShowCommandEditBoxes
+        {
+            get { return _AlwaysShowCommandEditBoxes; }
+            set
+            {
+                SetProperty<bool>(ref _AlwaysShowCommandEditBoxes, value);
+            }
+        }
+
         string[] _TraceSessions;
         /// <summary>
         /// Local trace session names
@@ -803,7 +813,7 @@ namespace ETWController
                     }
                 }
 
-                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStartFullCommandLine))
+                Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(LocalTraceSettings.TraceStartFullCommandLine)); })
                             .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler);
             }
 
@@ -812,10 +822,25 @@ namespace ETWController
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Starting;
-                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStartFullCommandLine);
+                var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(ServerTraceSettings.TraceStartFullCommandLine));
                 command.Completed = (output) => ServerTraceSettings.ProcessStartCommand(output);
                 command.Execute();
             }
+        }
+
+        private string ApplyCommandSubstitutions(string rawCommandLine)
+        {
+            var fullCommandLine = rawCommandLine;
+            foreach (var nameSubstitution in Configuration.Default.CommandNameSubstitutions)
+            {
+                var parts = nameSubstitution.Split(new[] {'|'}, 2);
+                if (parts.Length == 2 && fullCommandLine.StartsWith(parts[0] + " "))
+                {
+                    fullCommandLine = parts[1] + fullCommandLine.Substring(parts[0].Length);
+                    break;
+                }
+            }
+            return fullCommandLine;
         }
 
 
@@ -845,13 +870,13 @@ namespace ETWController
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
                 // stop tracing asynchronously so we do not need to wait until local trace collection has stopped (while blocking the UI)
-                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(StopData.TraceStopFullCommandLine))
+                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine)))
                             .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UIScheduler);
             }
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Stopping;
-                var command = WCFHost.CreateExecuteWPRCommand(StopData.TraceStopFullCommandLine);
+                var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine));
                 command.Completed = (output) => ServerTraceSettings.ProcessStopCommand(output);
                 command.Execute();
             }
@@ -867,13 +892,13 @@ namespace ETWController
             StopButtonEnabled = CancelButtonEnabled = false;
             if (this.LocalTraceEnabled)
             {
-                var output = LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceCancel);
+                var output = LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(LocalTraceSettings.TraceCancel));
                 LocalTraceSettings.ProcessCancelCommand(output);
             }
 
             if (this.ServerTraceEnabled)
             {
-                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceCancel);
+                var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(ServerTraceSettings.TraceCancel));
                 command.Completed = (output) => ServerTraceSettings.ProcessCancelCommand(output);
                 command.Execute();
             }
@@ -912,6 +937,7 @@ namespace ETWController
             this.ServerTraceSettings.UpdateSelectedPreset();
             this.ServerTraceEnabled = Configuration.Default.ServerTraceEnabled;
             this.LocalTraceEnabled = Configuration.Default.LocalTraceEnabled;
+            this.AlwaysShowCommandEditBoxes = Configuration.Default.AlwaysShowCommandEditBoxes;
         }
 
         /// <summary>
@@ -944,6 +970,7 @@ namespace ETWController
             Configuration.Default.LocalTraceCancel = LocalTraceSettings.TraceCancel;
             Configuration.Default.ServerTraceCancel = ServerTraceSettings.TraceCancel;
             Configuration.Default.TraceFileName = this.UnexpandedTraceFileName;
+            Configuration.Default.AlwaysShowCommandEditBoxes = this.AlwaysShowCommandEditBoxes;
             Configuration.Default.Save();
         }
 

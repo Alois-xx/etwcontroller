@@ -53,12 +53,12 @@ namespace ETWController.UI
                 SetProperty<Preset>(ref _SelectedPreset, value);
                 if( value != null)
                 {
-                    if (value.TraceStartCommand != "~")
+                    if (value.ContainsData)
                     {
                         TraceStart = value.TraceStartCommand;
                         TraceStop = value.TraceStopCommand;
                         TraceCancel = value.TraceCancelCommand;
-                        IsCustomSetting = false;
+                        IsCustomSetting = value.NeedsManualEdit || Configuration.Default.AlwaysShowCommandEditBoxes;
                     }
                     else
                     {
@@ -94,7 +94,8 @@ namespace ETWController.UI
             bool found = false;
             foreach (var preset in Presets)
             {
-                if (preset.TraceStartCommand.Trim() == TraceStart.Trim()
+                if (preset.ContainsData
+                    && preset.TraceStartCommand.Trim() == TraceStart.Trim()
                     && preset.TraceStopCommand.Trim() == TraceStop.Trim()
                     && preset.TraceCancelCommand.Trim() == TraceCancel.Trim())
                 {
@@ -106,7 +107,7 @@ namespace ETWController.UI
 
             if (found)
             {
-                IsCustomSetting = false;
+                IsCustomSetting = SelectedPreset.NeedsManualEdit || Configuration.Default.AlwaysShowCommandEditBoxes;
             }
             else
             {
@@ -247,8 +248,16 @@ namespace ETWController.UI
                 }
             }, 
             () => !IsRemoteState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
-            _Presets.Add(new Preset(){Name = "Custom", TraceStartCommand = "~"});
+            _Presets.Add(new Preset{Name = "<Manual Editing>", NeedsManualEdit = true});
             _Presets.AddRange(Configuration.Default.Presets);
+            foreach (var preset in Presets)
+            {
+                // heuristic: if name or command contains "xxx" it must be edited by hand
+                if (preset.ContainsData && (preset.TraceStartCommand.Contains("xxx") || preset.Name.Contains("xxx")))
+                {
+                    preset.NeedsManualEdit = true;
+                }
+            }
         }
 
         /// <summary>
@@ -326,8 +335,16 @@ namespace ETWController.UI
 
         private bool IsErrorOutput(string txt)
         {
+            // TODO: make error patterns configurable in config file (?) [2022-01-11]
             if (txt.Contains("Invalid command")
-            || txt.Contains("Error code: "))
+            || txt.Contains("Error code: ")
+            || txt.Contains("Error:")
+            || txt.Contains("execute the script with administrative rights")
+            || txt.Contains("Invalid Scenario:")
+            || txt.Contains("Invalid command line argument")
+            || txt.Contains("Merge Error.")
+            || txt.Contains("file access error during merge")
+            || txt.Contains("xperf: error"))
             {
                 return true;
             }

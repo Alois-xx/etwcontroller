@@ -15,6 +15,7 @@ namespace ETWController.UI
         int BackupForcedScreenshotIntervalinMs;
         string BackupTraceOpenCmdLine;
         int BackupKeepNNewestScreenShots;
+        bool BackupAlwaysShowCommandEditBoxes;
 
         public ETWControllerConfiguration(ETWController.ViewModel model)
         {
@@ -24,6 +25,7 @@ namespace ETWController.UI
             BackupForcedScreenshotIntervalinMs = model.ForcedScreenshotIntervalinMs;
             BackupKeepNNewestScreenShots = model.KeepNNewestScreenShots;
             BackupTraceOpenCmdLine = model.TraceOpenCmdLine;
+            BackupAlwaysShowCommandEditBoxes = model.AlwaysShowCommandEditBoxes;
             this.DataContext = model;
             Model = model;
             InitializeComponent();
@@ -50,6 +52,7 @@ namespace ETWController.UI
             Model.ForcedScreenshotIntervalinMs = BackupForcedScreenshotIntervalinMs;
             Model.KeepNNewestScreenShots = BackupKeepNNewestScreenShots;
             Model.TraceOpenCmdLine = BackupTraceOpenCmdLine;
+            Model.AlwaysShowCommandEditBoxes = BackupAlwaysShowCommandEditBoxes;
             this.Close();
         }
     }
