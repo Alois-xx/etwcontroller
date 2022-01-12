@@ -819,16 +819,21 @@ namespace ETWController
                 }
 
                 Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(LocalTraceSettings.TraceStartFullCommandLine)); })
-                            .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler);
+                            .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler)
+                            .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
             }
 
-            StopButtonEnabled = CancelButtonEnabled = true;
+            CancelButtonEnabled = true;
             StartButtonEnabled = false;
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Starting;
                 var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(ServerTraceSettings.TraceStartFullCommandLine));
-                command.Completed = (output) => ServerTraceSettings.ProcessStartCommand(output);
+                command.Completed = (output) =>
+                {
+                    ServerTraceSettings.ProcessStartCommand(output);
+                    UpdateMainButtons();
+                };
                 command.Execute();
             }
         }
@@ -869,24 +874,35 @@ namespace ETWController
             };
 
             StopButtonEnabled = CancelButtonEnabled = false;
-            StartButtonEnabled = true;
 
             if (this.LocalTraceEnabled) 
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
                 // stop tracing asynchronously so we do not need to wait until local trace collection has stopped (while blocking the UI)
                 Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine)))
-                            .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UIScheduler);
+                            .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UIScheduler)
+                            .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
             }
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Stopping;
                 var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine));
-                command.Completed = (output) => ServerTraceSettings.ProcessStopCommand(output);
+                command.Completed = (output) =>
+                {
+                    ServerTraceSettings.ProcessStopCommand(output);
+                    UpdateMainButtons();
+                };
                 command.Execute();
             }
              
             this.TraceFileCounter++;
+        }
+
+        private void UpdateMainButtons()
+        {
+            StartButtonEnabled = LocalTraceSettings.TraceStates == TraceStates.Stopped && ServerTraceSettings.TraceStates == TraceStates.Stopped;
+            StopButtonEnabled = (LocalTraceSettings.TraceStates == TraceStates.Running || ServerTraceSettings.TraceStates == TraceStates.Running); ;
+            CancelButtonEnabled = (LocalTraceSettings.TraceStates != TraceStates.Stopped || ServerTraceSettings.TraceStates != TraceStates.Stopped);
         }
 
         /// <summary>
