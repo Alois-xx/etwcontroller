@@ -88,13 +88,6 @@
     &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
   &lt;/Preset&gt;
   &lt;Preset&gt;
-    &lt;Name&gt;WPR Default NEW&lt;/Name&gt;
-    &lt;TraceStartCommand&gt;xxwpr -start GeneralProfile -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
-    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
-    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
-    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
-  &lt;/Preset&gt;
-  &lt;Preset&gt;
     &lt;Name&gt;WPR Default + .NET&lt;/Name&gt;
     &lt;TraceStartCommand&gt;::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
     &lt;TraceStopCommand&gt;::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;

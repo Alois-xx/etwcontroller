@@ -639,6 +639,9 @@ namespace ETWController
 
         static readonly string About = Environment.NewLine + String.Format("ETWController (c) by Alois Kraus 2015-2022 v{0}", 
                                            Assembly.GetExecutingAssembly().GetName().Version);
+
+        private bool _useCommandNameSubstitutions = false;
+
         private void AboutBox()
         {
             var window = new HelpWindow("About", About);
@@ -875,13 +878,16 @@ namespace ETWController
         private string ApplyCommandSubstitutions(string rawCommandLine)
         {
             var fullCommandLine = rawCommandLine;
-            foreach (var nameSubstitution in Configuration.Default.CommandNameSubstitutions)
+            if (_useCommandNameSubstitutions)  // feature not finished yet
             {
-                var parts = nameSubstitution.Split(new[] {'|'}, 2);
-                if (parts.Length == 2 && fullCommandLine.StartsWith(parts[0] + " "))
+                foreach (var nameSubstitution in Configuration.Default.CommandNameSubstitutions)
                 {
-                    fullCommandLine = parts[1] + fullCommandLine.Substring(parts[0].Length);
-                    break;
+                    var parts = nameSubstitution.Split(new[] {'|'}, 2);
+                    if (parts.Length == 2 && fullCommandLine.StartsWith(parts[0] + " "))
+                    {
+                        fullCommandLine = parts[1] + fullCommandLine.Substring(parts[0].Length);
+                        break;
+                    }
                 }
             }
             return fullCommandLine;

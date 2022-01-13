@@ -337,13 +337,6 @@ namespace ETWController {
     <NeedsManualEdit>false</NeedsManualEdit>
   </Preset>
   <Preset>
-    <Name>WPR Default NEW</Name>
-    <TraceStartCommand>xxwpr -start GeneralProfile -start ETW\HookEvents.wprp</TraceStartCommand>
-    <TraceStopCommand>xxwpr -stop $FileName $ScreenshotDir</TraceStopCommand>
-    <TraceCancelCommand>xxwpr -cancel</TraceCancelCommand>
-    <NeedsManualEdit>false</NeedsManualEdit>
-  </Preset>
-  <Preset>
     <Name>WPR Default + .NET</Name>
     <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</TraceStartCommand>
     <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
