@@ -129,5 +129,16 @@ namespace ETWController
         }
 
         public TraceSessionsWindow SessionsWindow { get; set; }
+
+        private async void MainWindow_OnInitialized(object sender, EventArgs e)
+        {
+            if (!Configuration.Default.WelcomeScreenShown)
+            {
+                await Task.Delay(200);
+                Configuration.Default.WelcomeScreenShown = true;
+                var win = new HelpWindow("ETW Controller - Welcome", ViewModel.WelcomeText);
+                win.ShowDialog();
+            }
+        }
     }
 }

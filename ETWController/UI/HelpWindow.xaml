@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ETWController.UI"
         mc:Ignorable="d"
-        Title="Help" Height="150" Width="1200" MinHeight="100" MinWidth="600" SizeToContent="Height">
+        Title="Help" Height="150" Width="650" MinHeight="100" MinWidth="600" SizeToContent="Height">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <RichTextBox Grid.Row="0"  Name="cText" IsReadOnly="True" />
+        <TextBox Grid.Row="0" Margin="2" Padding="7" Background="Transparent"  Name="cText" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
     </Grid>
 </Window>

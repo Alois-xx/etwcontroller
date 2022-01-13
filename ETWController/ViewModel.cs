@@ -598,7 +598,27 @@ namespace ETWController
             return commands;
         }
 
-        static readonly string CommandLineOptions = "ETWController [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] [-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
+        internal static readonly string WelcomeText = "Hello, and welcome to ETW-Controller!" + Environment.NewLine + Environment.NewLine +
+                                                      "In this version, the UI was massively changed to make it better usable, especially for new users." + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "By default, only the options for local ETW recording are shown now." + Environment.NewLine +
+                                                      "If you want to use remote recording, you must enable it with 'Options->Enable remote machine ETW tracing'" + Environment.NewLine +
+                                                      "or by pressing F8. With F7 you can toggle local tracing" + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "When you choose a given preset for local or remote recording, the individual" + Environment.NewLine +
+                                                      "commands for starting and stopping are no longer shown in the UI to reduce clutter." + Environment.NewLine +
+                                                      "To see or edit them, choose the '<Manual Editing>' entry in the preset dropdown." + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "The hotkeys for logging 'Slow' and 'Fast' messages are active, but not shown" + Environment.NewLine +
+                                                      "in the UI to save screen real estate. To modify them, check the checkbox" + Environment.NewLine +
+                                                      "\"Redefine 'Fast'/'Slow' hotkeys and messages\" on the main tab." + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "Good luck with all your ETW investigations!" + Environment.NewLine +
+                                                      "" + Environment.NewLine;
+
+        static readonly string CommandLineOptions = "ETWController [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] " + Environment.NewLine +
+                                                    "\t[-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
+                                                    Environment.NewLine +
                                                     "\t-Hide                              Hide main window." + Environment.NewLine +
                                                     "\t-CaptureKeyboard                   Capture keyboard events." + Environment.NewLine +
                                                     "\t-ClearKeyboardEvents               By default the keys are all logged as SomeKey. If this is enabled the actual keyboard code is also logged." + Environment.NewLine +
@@ -617,7 +637,8 @@ namespace ETWController
                                                     "This will eanble mouse click, encrypted keyboard tracing which will send to to your local machine again. If you want to hide the window you can add -hide." + Environment.NewLine + 
                                                     "These commands are useful if you only want to use ETWController as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
 
-        static readonly string About = String.Format("ETWController (c) by Alois Kraus 2015-2022 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
+        static readonly string About = Environment.NewLine + String.Format("ETWController (c) by Alois Kraus 2015-2022 v{0}", 
+                                           Assembly.GetExecutingAssembly().GetName().Version);
         private void AboutBox()
         {
             var window = new HelpWindow("About", About);
@@ -937,6 +958,12 @@ namespace ETWController
         /// </summary>
         void LoadSettings()
         {
+            if (Configuration.Default.ConfigMigrationNeeded)
+            {
+                Configuration.Default.Upgrade();
+                Configuration.Default.ConfigMigrationNeeded = false;
+                Configuration.Default.Save();
+            }
             this.TraceOpenCmdLine = Configuration.Default.TraceOpenCmdLine;
             this.PortNumber = Configuration.Default.PortNumber;
             this.WCFPort = Configuration.Default.WCFPort;

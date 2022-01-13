@@ -10,7 +10,8 @@
         Background="#F0F0F0"
         Title="ETW Controller and Logger" 
         d:DataContext="{d:DesignInstance l:DesignTimeCustomerViewModel, IsDesignTimeCreatable=True}"
-        Height="850" Width="790" Closing="Window_Closing">
+        Height="850" Width="790" Closing="Window_Closing"
+        Initialized="MainWindow_OnInitialized">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -24,8 +25,8 @@
     <DockPanel LastChildFill="True">
         <Menu Grid.Row="0"  DockPanel.Dock="Top">
             <MenuItem Header="Options">
-                <CheckBox x:Name="LocalTraceEnabledCB" Content="Enable local ETW tracing   - F7" IsChecked="{Binding LocalTraceEnabled}" />
-                <CheckBox x:Name="ServerTraceEnabledCB" Content="Enable remote machine ETW tracing   - F8" IsChecked="{Binding ServerTraceEnabled}"/>
+                <MenuItem IsCheckable="True" x:Name="LocalTraceEnabledCB" Header="Enable local ETW tracing" InputGestureText="F7" IsChecked="{Binding LocalTraceEnabled}" />
+                <MenuItem IsCheckable="True" x:Name="ServerTraceEnabledCB" Header="Enable remote machine ETW tracing"  InputGestureText="F8" IsChecked="{Binding ServerTraceEnabled}"/>
                 <Separator />
                 <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
                 <Separator />

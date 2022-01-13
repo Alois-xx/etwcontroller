@@ -381,5 +381,29 @@ namespace ETWController {
                 return ((global::System.Collections.Specialized.StringCollection)(this["CommandNameSubstitutions"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool WelcomeScreenShown {
+            get {
+                return ((bool)(this["WelcomeScreenShown"]));
+            }
+            set {
+                this["WelcomeScreenShown"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ConfigMigrationNeeded {
+            get {
+                return ((bool)(this["ConfigMigrationNeeded"]));
+            }
+            set {
+                this["ConfigMigrationNeeded"] = value;
+            }
+        }
     }
 }
