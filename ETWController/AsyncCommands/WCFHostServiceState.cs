@@ -70,9 +70,9 @@ namespace ETWController.Commands
                 return service.UseService<Tuple<int,string>>(webservice => webservice.ExecuteWPRCommand(wprArgs));
             }, Model, Scheduler)
             {
-                Starting = String.Format("Executing on host '{0}': {1}", Model.Host, wprArgs),
-                Started = "WPR completed on host '" + Model.Host + "'",
-                StartingError = "WPR command could not be executed on host '" + Model.Host + "'",
+                Starting = $"Executing on host '{Model.Host}': {wprArgs}",
+                Started = $"Command completed on host '{Model.Host}': {wprArgs}",
+                StartingError = $"Could not execute on host '{Model.Host}': {wprArgs}"
             };
         }
 

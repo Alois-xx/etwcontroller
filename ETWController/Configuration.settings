@@ -24,7 +24,7 @@
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</Value>
     </Setting>
     <Setting Name="ServerTraceStart" Type="System.String" Scope="User">
-      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile</Value>
+      <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</Value>
     </Setting>
     <Setting Name="ServerTraceStop" Type="System.String" Scope="User">
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</Value>
@@ -63,7 +63,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="JpgCompressionLevel" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">100</Value>
+      <Value Profile="(Default)">85</Value>
     </Setting>
     <Setting Name="KeepNNewestScreenShots" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
@@ -118,6 +118,9 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="ConfigMigrationNeeded" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CaptureScreenShots" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>

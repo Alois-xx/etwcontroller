@@ -38,6 +38,7 @@ namespace ETWController
                 CaptureMouseButtonDown = Configuration.Default.CaptureMouseButtonDown;
                 CaptureMouseWheel = Configuration.Default.CaptureMouseWheel;
                 CaptureMouseMove = Configuration.Default.CaptureMouseMove;
+                CaptureScreenshots = Configuration.Default.CaptureScreenShots;
             }
 
             string currentArg = null;

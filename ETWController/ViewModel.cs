@@ -861,6 +861,13 @@ namespace ETWController
                     ServerTraceSettings.ProcessStartCommand(output);
                     UpdateMainButtons();
                 };
+                command.NotifyError = (s, exception) =>
+                {
+                    ServerTraceSettings.TraceStates = TraceStates.Stopped;
+                    SetStatusMessageWarning(s, exception);
+                    ServerTraceSettings.ProcessStartCommand(new Tuple<int, string>(1, "Error: " + s));
+                    UpdateMainButtons();
+                };
                 command.Execute();
             }
         }
@@ -923,6 +930,13 @@ namespace ETWController
                 command.Completed = (output) =>
                 {
                     ServerTraceSettings.ProcessStopCommand(output);
+                    UpdateMainButtons();
+                };
+                command.NotifyError = (s, exception) =>
+                {
+                    ServerTraceSettings.TraceStates = TraceStates.Running;
+                    SetStatusMessageWarning(s, exception);
+                    ServerTraceSettings.ProcessStartCommand(new Tuple<int, string>(1, "Error: " + s));
                     UpdateMainButtons();
                 };
                 command.Execute();
@@ -1021,6 +1035,7 @@ namespace ETWController
             Configuration.Default.CaptureMouseButtonDown = this.CaptureMouseButtonDown;
             Configuration.Default.CaptureMouseWheel = this.CaptureMouseWheel;
             Configuration.Default.CaptureMouseMove = this.CaptureMouseMove;
+            Configuration.Default.CaptureScreenShots = this.CaptureScreenShots;
             Configuration.Default.LocalTraceStart = this.LocalTraceSettings.TraceStart;
             Configuration.Default.LocalTraceStop = this.LocalTraceSettings.TraceStop;
             Configuration.Default.ServerTraceStart = this.ServerTraceSettings.TraceStart;

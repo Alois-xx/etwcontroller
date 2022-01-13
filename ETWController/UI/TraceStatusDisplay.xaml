@@ -30,8 +30,8 @@
                 </Storyboard>
             </TextBox.Resources>
         </TextBox>
-        <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR commands" Command="{Binding ShowCommand}" VerticalAlignment="Center">Show Output</Button>
-        <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Open the output ETL file (if present) with WPA" Command="{Binding OpenTraceCommand}" VerticalAlignment="Center">Run WPA</Button>
+        <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Open the created trace file in Windows Performance Analyzer" Command="{Binding OpenTraceCommand}" VerticalAlignment="Center">_Open in WPA</Button>
+        <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR commands" Command="{Binding ShowCommand}" VerticalAlignment="Center">Show Messages</Button>
     </StackPanel>
 
 </UserControl>

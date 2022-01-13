@@ -110,7 +110,8 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile")]
+        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\\HookEvents.w" +
+            "prp")]
         public string ServerTraceStart {
             get {
                 return ((string)(this["ServerTraceStart"]));
@@ -266,7 +267,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("85")]
         public int JpgCompressionLevel {
             get {
                 return ((int)(this["JpgCompressionLevel"]));
@@ -403,6 +404,18 @@ namespace ETWController {
             }
             set {
                 this["ConfigMigrationNeeded"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool CaptureScreenShots {
+            get {
+                return ((bool)(this["CaptureScreenShots"]));
+            }
+            set {
+                this["CaptureScreenShots"] = value;
             }
         }
     }
