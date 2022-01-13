@@ -472,7 +472,7 @@ namespace ETWController
             }
         }
 
-        bool _AlwaysShowCommandEditBoxes;
+        protected bool _AlwaysShowCommandEditBoxes;
         public bool AlwaysShowCommandEditBoxes
         {
             get { return _AlwaysShowCommandEditBoxes; }
@@ -806,6 +806,12 @@ namespace ETWController
         /// </summary>
         private void StartTracing()
         {
+            if (!StartButtonEnabled)
+            {
+                // prevent activation with hotkey, if button is disabled
+                return;
+            }
+
             if (!this.LocalTraceEnabled && !this.ServerTraceEnabled)
             {
                 MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.", "Error");
@@ -880,6 +886,12 @@ namespace ETWController
         /// </summary>
         internal void StopTracing()
         {
+            if (!StopButtonEnabled)
+            {
+                // prevent activation with hotkey, if button is disabled
+                return;
+            }
+
             if (this.CaptureScreenShots) // create html report also if no tracing was active perhaps someone finds this functionality in itself useful
             {
                 var htmlReportGenerator = new HtmlReportGenerator(this.ScreenshotDirectory);
@@ -1097,8 +1109,9 @@ namespace ETWController
 
             LocalTraceEnabled = true;
             ServerTraceEnabled = true;
-            // CaptureMouseButtonDown = true;
-            // CaptureKeyboard = true;
+            _AlwaysShowCommandEditBoxes = true;
+            _CaptureMouseButtonDown = true;
+            _CaptureKeyboard = true;
         }
     }
 }

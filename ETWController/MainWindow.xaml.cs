@@ -98,6 +98,12 @@ namespace ETWController
             Model.Dispose();
         }
 
+        private void MainWindow_OnClosed(object sender, EventArgs e)
+        {
+            // make sure all subwindows are also closed:
+            Application.Current.Shutdown();
+        }
+
         private void TraceRefreshSelected(object sender, RoutedEventArgs e)
         {
             if( TraceSessionsTab.IsSelected )
