@@ -51,7 +51,7 @@
       <Value Profile="(Default)">::.\Scripts\xxWPR.cmd -cancel</Value>
     </Setting>
     <Setting Name="TraceFileName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\temp\ETWController_%COMPUTERNAME%.etl</Value>
+      <Value Profile="(Default)">C:\temp\ETW_%TS%_%COMPUTERNAME%.etl</Value>
     </Setting>
     <Setting Name="ForcedScreenshotIntervalinMs" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2000</Value>

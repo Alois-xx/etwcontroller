@@ -832,6 +832,9 @@ namespace ETWController
             if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
             {
                 _TraceStartTime = DateTime.Now;
+                Environment.SetEnvironmentVariable("DATE", _TraceStartTime.ToString("yyyy-MM-dd"));
+                Environment.SetEnvironmentVariable("TIME", _TraceStartTime.ToString("HHmmss"));
+                Environment.SetEnvironmentVariable("TS", _TraceStartTime.ToString("yyyy-MM-dd_HHmmss"));
                 LocalTraceSettings.TraceStates = TraceStates.Starting;
 
                 if (File.Exists(TraceFileName))

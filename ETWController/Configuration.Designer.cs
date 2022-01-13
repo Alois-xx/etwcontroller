@@ -219,7 +219,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\temp\\ETWController_%COMPUTERNAME%.etl")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\temp\\ETW_%TS%_%COMPUTERNAME%.etl")]
         public string TraceFileName {
             get {
                 return ((string)(this["TraceFileName"]));
