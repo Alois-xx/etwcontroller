@@ -567,7 +567,8 @@ namespace ETWController
                     WCFHost.GetTraceSessions.Execute();
                 })},
                 {"StartTracing", CreateCommand( _ => StartTracing()) },
-                {"StopTracing", CreateCommand( _ => StopTracing())},
+                {"StopTracing", CreateCommand( _ => StopTracing(doChecks: true))},
+                {"StopTracingUnconditionally", CreateCommand( _ => StopTracing(doChecks: false))},
                 {"CancelTracing", CreateCommand( _ => CancelTracing())},
                 {"RegisterETWProvider", CreateCommand( _ =>
                     {
@@ -921,9 +922,10 @@ namespace ETWController
         /// <summary>
         /// stop tracing command 
         /// </summary>
-        internal void StopTracing()
+        /// <param name="b"></param>
+        internal void StopTracing(bool doChecks)
         {
-            if (!StopButtonEnabled)
+            if (doChecks && !StopButtonEnabled)
             {
                 // prevent activation with hotkey, if button is disabled
                 return;
