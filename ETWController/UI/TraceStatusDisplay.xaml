@@ -5,12 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:ui="clr-namespace:ETWController.UI"
-             mc:Ignorable="d" d:DesignWidth="500">
-    <StackPanel Orientation="Horizontal">
+             mc:Ignorable="d" d:DesignWidth="600">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
         <Label Margin="0" Width="140" VerticalAlignment="Center" Content="{Binding StatusPrefix}" />
-        <TextBox Width="80" Name="cTraceState" Text="{Binding TraceStates}" IsReadOnly="True" TextAlignment="Center" VerticalAlignment="Center">
+        <TextBox Width="80" Height="20" Name="cTraceState" Text="{Binding TraceStates}" IsReadOnly="True" TextAlignment="Center" VerticalAlignment="Center" FontFamily="Consolas" FontWeight="Bold" FontSize="11" VerticalContentAlignment="Center">
             <TextBox.Background>
-                <SolidColorBrush x:Name="tbBrush" Color="White"/>
+                <SolidColorBrush x:Name="tbBrush" Color="AliceBlue"/>
             </TextBox.Background>
             <TextBox.Resources>
                 <Storyboard x:Key="TraceRunningAnimation" Storyboard.TargetProperty="Background.Color">
@@ -31,7 +36,13 @@
             </TextBox.Resources>
         </TextBox>
         <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Open the created trace file in Windows Performance Analyzer" Command="{Binding OpenTraceCommand}" VerticalAlignment="Center">_Open in WPA</Button>
-        <Button Width="120" Height="24" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR commands" Command="{Binding ShowCommand}" VerticalAlignment="Center">Show Messages</Button>
+        <CheckBox Content="Auto-Open" VerticalAlignment="Center" Margin="9,0,0,0"  IsChecked="{Binding AutoOpenAfterStopped}"
+                  ToolTip="Automatically open WPA after the recording was successfully stopped" 
+                  Width="100" Visibility="{Binding IsLocalState, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <Label Content="Dummy placeholder for alignment" VerticalAlignment="Center" Margin="9,0,0,0"
+               Foreground="Transparent" Width="100" Visibility="{Binding IsRemoteState, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <Button Width="120" Height="24" Margin="10,0,0,0" 
+                ToolTip="Show the output of all executed WPR commands" Command="{Binding ShowCommand}" VerticalAlignment="Center">Show Messages</Button>
     </StackPanel>
 
 </UserControl>

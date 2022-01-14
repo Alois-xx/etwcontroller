@@ -87,6 +87,16 @@ namespace ETWController.UI
                 SetProperty<bool>(ref _IsCustomSetting, value);
             }
         }
+
+        public bool _AutoOpenAfterStopped = false;
+        public bool AutoOpenAfterStopped
+        {
+            get { return _AutoOpenAfterStopped; }
+            set
+            {
+                SetProperty<bool>(ref _AutoOpenAfterStopped, value);
+            }
+        }
         public string StatusPrefix => IsRemoteState ? "Remote Recording:" : "Local Recording:";
 
         public void UpdateSelectedPreset()
@@ -210,6 +220,8 @@ namespace ETWController.UI
             private set;
         }
 
+        public bool IsLocalState => !IsRemoteState;
+
 
 
         public TraceControlViewModel(ETWController.ViewModel rootModel, bool isRemoteState)
@@ -241,13 +253,14 @@ namespace ETWController.UI
                     options = Environment.ExpandEnvironmentVariables(options.Replace(TraceFileNameVariable, outFile));
                     var startInfo = new ProcessStartInfo(exe,  options)
                     {
-                        WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                        WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                        UseShellExecute = false
                     };
                     Process.Start(startInfo);
                     AddLogEntry(ETWController.ViewModel.CustomCommandPrefix + exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
                 }
             }, 
-            () => !IsRemoteState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
+            () => IsLocalState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
             _Presets.Add(new Preset{Name = "<Manual Editing>", NeedsManualEdit = true});
             _Presets.AddRange(Configuration.Default.Presets);
             foreach (var preset in Presets)
@@ -308,9 +321,11 @@ namespace ETWController.UI
                 RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
 
-            RootModel.StopData.VerifySuccessfulStop();
-
-
+            var isSuccessful = RootModel.StopData.VerifySuccessfulStop();
+            if (isSuccessful && IsLocalState && AutoOpenAfterStopped)
+            {
+                OpenTraceCommand.Execute(null);
+            }
             TraceStates = TraceStates.Stopped;
         }
 
