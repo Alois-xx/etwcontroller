@@ -677,6 +677,10 @@ namespace ETWController
             Commands = CreateUICommands();
             LoadSettings();
             StatusMessages.CollectionChanged += StatusMessages_CollectionChanged;
+            if (TraceFileName.Contains("%TS%") || TraceFileName.Contains("%TIME%"))
+            {
+                AppendIndexToOutputFileName = false;
+            }
         }
 
         void StatusMessages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
