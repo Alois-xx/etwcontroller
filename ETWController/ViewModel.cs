@@ -986,6 +986,9 @@ namespace ETWController
         {
             var dlg = new ETWControllerConfiguration(this);
             dlg.ShowDialog();
+            // if needed, show/hide command textboxes:
+            LocalTraceSettings.UpdateSelectedPreset();
+            ServerTraceSettings.UpdateSelectedPreset();
         }
 
         /// <summary>
