@@ -339,7 +339,10 @@ namespace ETWController.UI
 
             if (wprCommandOutput.Item1 == 0 && ! IsErrorOutput(wprCommandOutput.Item2))
             {
-                TraceStates = TraceStates.Running;
+                if (TraceStates == TraceStates.Starting)
+                {
+                    TraceStates = TraceStates.Running;
+                }
             }
             else
             {

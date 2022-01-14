@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -855,10 +856,17 @@ namespace ETWController
                 Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(wpaArgs); })
                             .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler)
                             .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
-                
+
+
                 // for safety, if this is a command that never returns from Start:
                 // we fake the "Running" state after a certain amount of time
-                Task.Delay(8000)
+                var delaySec = 30;  // max time to stay in "Starting"
+                if (wpaArgs.ToLowerInvariant().Contains("cmd.exe /c start"))
+                {
+                    // we know that this command will not return, so we enable the buttons after a short delay
+                    delaySec = 5;
+                }
+                Task.Delay(TimeSpan.FromSeconds(delaySec))
                     .ContinueWith(t =>
                     {
                         if (LocalTraceSettings.TraceStates == TraceStates.Starting)
