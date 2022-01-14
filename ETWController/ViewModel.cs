@@ -828,13 +828,13 @@ namespace ETWController
             }
 
             this.Hooker.ResetId();
+            _TraceStartTime = DateTime.Now;
+            Environment.SetEnvironmentVariable("DATE", _TraceStartTime.ToString("yyyy-MM-dd"));
+            Environment.SetEnvironmentVariable("TIME", _TraceStartTime.ToString("HHmmss"));
+            Environment.SetEnvironmentVariable("TS", _TraceStartTime.ToString("yyyy-MM-dd_HHmmss"));
 
             if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
             {
-                _TraceStartTime = DateTime.Now;
-                Environment.SetEnvironmentVariable("DATE", _TraceStartTime.ToString("yyyy-MM-dd"));
-                Environment.SetEnvironmentVariable("TIME", _TraceStartTime.ToString("HHmmss"));
-                Environment.SetEnvironmentVariable("TS", _TraceStartTime.ToString("yyyy-MM-dd_HHmmss"));
                 LocalTraceSettings.TraceStates = TraceStates.Starting;
 
                 if (File.Exists(TraceFileName))
@@ -851,9 +851,22 @@ namespace ETWController
                     }
                 }
 
-                Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(LocalTraceSettings.TraceStartFullCommandLine)); })
+                var wpaArgs = ApplyCommandSubstitutions(LocalTraceSettings.TraceStartFullCommandLine);
+                Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(wpaArgs); })
                             .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler)
                             .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
+                
+                // for safety, if this is a command that never returns from Start:
+                // we fake the "Running" state after a certain amount of time
+                Task.Delay(8000)
+                    .ContinueWith(t =>
+                    {
+                        if (LocalTraceSettings.TraceStates == TraceStates.Starting)
+                        {
+                            LocalTraceSettings.TraceStates = TraceStates.Running;
+                            UpdateMainButtons();
+                        }
+                    }, UIScheduler);
             }
 
             CancelButtonEnabled = true;
