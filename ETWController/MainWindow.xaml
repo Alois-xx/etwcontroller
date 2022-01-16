@@ -28,10 +28,12 @@
                 <MenuItem Header="Show Trace Sessions..." Click="ShowTraceSessions_OnClick" ToolTip="Open window which lists active trace sessions"/>
                 <MenuItem Header="Status Message History..." Command="{Binding Commands[ShowMessages]}" ToolTip="Open window which lists previous status messages"/>
                 <Separator/>
-                <MenuItem Header="Execute 'Stop' command" Command="{Binding Commands[StopTracingUnconditionally]}" ToolTip="Executes the 'Stop' command unconditionally, even if the Stop button is disabled"/>
-                <MenuItem Header="Execute 'Cancel' command" Command="{Binding Commands[CancelTracing]}" ToolTip="Executes the 'Cancel' command unconditionally, even if the Cancel button is disabled"/>
-                <Separator/>
-                <MenuItem Header="Enable all buttons (Caution!)" Command="{Binding Commands[EnableButtons]}"  ToolTip="If the application is in an inconsistent state with disabled buttons, this can force all buttons to be active. Use at your own risk, this is for troubleshooting only."/>
+                <MenuItem Header="Hacks">
+                    <MenuItem Header="Execute 'Stop' command" Command="{Binding Commands[StopTracingUnconditionally]}" ToolTip="Executes the 'Stop' command unconditionally, even if the Stop button is disabled"/>
+                    <MenuItem Header="Execute 'Cancel' command" Command="{Binding Commands[CancelTracing]}" ToolTip="Executes the 'Cancel' command unconditionally, even if the Cancel button is disabled"/>
+                    <Separator/>
+                    <MenuItem Header="Enable all buttons (Caution!)" Command="{Binding Commands[EnableButtons]}"  ToolTip="If the application is in an inconsistent state with disabled buttons, this can force all buttons to be active. Use at your own risk, this is for troubleshooting only."/>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="Options">
                 <MenuItem IsCheckable="True" x:Name="LocalTraceEnabledCB" Header="Enable local ETW tracing" InputGestureText="F7" 
