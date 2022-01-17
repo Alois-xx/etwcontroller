@@ -30,15 +30,15 @@
             <Label Content="Start Command:" Grid.Column="0" Grid.Row="1" Padding="5,0" Margin="0,6,0,0"
                    Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TraceStart}"  Margin="0,6,0,1"
-                     ToolTip="Enter here the WPR command line arguments to start tracing. Custom script must start with ::"
+                     ToolTip="Enter here the WPR command line arguments to start tracing"
                      Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <Label Content="Stop Command:" Grid.Column="0" Grid.Row="2" Padding="5,0"
                    Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file. Custom script command must start with :: Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"
+            <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file. Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"
                      Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <Label Content="Cancel Command:" Grid.Column="0" Grid.Row="3" Padding="5,0"
                    Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line to cancel tracing. Custom script command must start with ::  Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"
+            <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line to cancel tracing. Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"
                      Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
     </StackPanel>

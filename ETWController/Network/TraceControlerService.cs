@@ -37,13 +37,19 @@ namespace ETWController
         {
             RedirectedProcess proc = null;
             wpaArgs = Environment.ExpandEnvironmentVariables(wpaArgs);
-            if (wpaArgs.StartsWith(ViewModel.CustomCommandPrefix))
+            if (wpaArgs.StartsWith("-"))
             {
-                proc = new RedirectedProcess("cmd.exe", $"/C {wpaArgs.Substring(ViewModel.CustomCommandPrefix.Length)}");
-            }
-            else
-            {
+                // legacy: the command line does not contain the executable, assume wpr.exe
                 proc = new RedirectedProcess("wpr.exe", wpaArgs);
+            } else {
+                if (wpaArgs.StartsWith(ViewModel.CustomCommandPrefix))
+                {
+                    proc = new RedirectedProcess("cmd.exe", $"/C {wpaArgs.Substring(ViewModel.CustomCommandPrefix.Length)}");
+                }
+                else
+                {
+                    proc = new RedirectedProcess("cmd.exe", $"/C {wpaArgs}");
+                }
             }
             var lret = proc.Start(ThisExeStartDirectory);
             return lret;

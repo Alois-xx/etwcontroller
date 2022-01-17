@@ -85,8 +85,8 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\\HookEvents.w" +
-            "prp")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Scripts\\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\\HookEvents.wpr" +
+            "p")]
         public string LocalTraceStart {
             get {
                 return ((string)(this["LocalTraceStart"]));
@@ -98,7 +98,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -stop $FileName $ScreenshotDir")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Scripts\\xxWPR.cmd -stop $FileName $ScreenshotDir")]
         public string LocalTraceStop {
             get {
                 return ((string)(this["LocalTraceStop"]));
@@ -110,8 +110,8 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\\HookEvents.w" +
-            "prp")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Scripts\\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\\HookEvents.wpr" +
+            "p")]
         public string ServerTraceStart {
             get {
                 return ((string)(this["ServerTraceStart"]));
@@ -123,7 +123,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -stop $FileName $ScreenshotDir")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Scripts\\xxWPR.cmd -stop $FileName $ScreenshotDir")]
         public string ServerTraceStop {
             get {
                 return ((string)(this["ServerTraceStop"]));
@@ -195,7 +195,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -cancel")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Scripts\\xxWPR.cmd -cancel")]
         public string LocalTraceCancel {
             get {
                 return ((string)(this["LocalTraceCancel"]));
@@ -207,7 +207,7 @@ namespace ETWController {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("::.\\Scripts\\xxWPR.cmd -cancel")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Scripts\\xxWPR.cmd -cancel")]
         public string ServerTraceCancel {
             get {
                 return ((string)(this["ServerTraceCancel"]));
@@ -331,16 +331,16 @@ namespace ETWController {
 <ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
   <Preset>
     <Name>WPR Default</Name>
-    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start ETW\HookEvents.wprp</TraceStartCommand>
-    <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
-    <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
+    <TraceStartCommand>xxwpr -start GeneralProfile -start ETW\HookEvents.wprp</TraceStartCommand>
+    <TraceStopCommand>xxwpr -stop $FileName $ScreenshotDir</TraceStopCommand>
+    <TraceCancelCommand>xxwpr -cancel</TraceCancelCommand>
     <NeedsManualEdit>false</NeedsManualEdit>
   </Preset>
   <Preset>
     <Name>WPR Default + .NET</Name>
-    <TraceStartCommand>::.\Scripts\xxWPR.cmd -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</TraceStartCommand>
-    <TraceStopCommand>::.\Scripts\xxWPR.cmd -stop $FileName $ScreenshotDir</TraceStopCommand>
-    <TraceCancelCommand>::.\Scripts\xxWPR.cmd -cancel</TraceCancelCommand>
+    <TraceStartCommand>xxwpr -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</TraceStartCommand>
+    <TraceStopCommand>xxwpr -stop $FileName $ScreenshotDir</TraceStopCommand>
+    <TraceCancelCommand>xxwpr -cancel</TraceCancelCommand>
     <NeedsManualEdit>false</NeedsManualEdit>
   </Preset>
 </ArrayOfPreset>")]
@@ -366,9 +366,9 @@ namespace ETWController {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <string>xxwpr|::.\Scripts\xxWPR.cmd</string>
-  <string>wpr|::wpr.exe</string>
-  <string>xxprofile|::""%perftools%\xxprofile.cmd""</string>
+  <string>xxwpr|.\Scripts\xxWPR.cmd</string>
+  <string>wpr|wpr.exe</string>
+  <string>xxprofile|""%perftools%\xxprofile.cmd""</string>
 </ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection CommandNameSubstitutions {
             get {

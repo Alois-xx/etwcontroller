@@ -163,15 +163,18 @@ namespace ETWController.UI
             {
                 string traceFileName = RootModel.UnexpandedCountedTraceFileName;
 
-                // some day we might specify the output file already with the start command ... 
-                string lret = TraceStart.Replace(TraceFileNameVariable, traceFileName);
+                string commandLine = TraceStart.Replace(TraceFileNameVariable, traceFileName);
 
-                if (!lret.StartsWith(ETWController.ViewModel.CustomCommandPrefix)) // its still WPR
+                if (commandLine.StartsWith("-")) // its still WPR, no command at start, only the args
                 {
                     string ownManifest = Path.Combine("ETW", "HookEvents.wprp");
-                    lret += " -start " + ownManifest;
+
+                    if (!commandLine.ToLowerInvariant().Contains("hookevents.wprp"))
+                    {
+                        commandLine += " -start " + ownManifest;
+                    }
                 }
-                return lret;
+                return commandLine;
             }
         }
         TraceStates _TraceStates;
@@ -257,7 +260,7 @@ namespace ETWController.UI
                         UseShellExecute = false
                     };
                     Process.Start(startInfo);
-                    AddLogEntry(ETWController.ViewModel.CustomCommandPrefix + exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
+                    AddLogEntry(exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
                 }
             }, 
             () => IsLocalState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
@@ -391,8 +394,7 @@ namespace ETWController.UI
             var resultString = string.Join(Environment.NewLine, strippedOutput.Where(x=>!string.IsNullOrEmpty(x)));
             string logMessage = string.Format("[{0}] {1}{2}{3}",
                                             DateTime.Now.ToString("HH:mm:ss.fff"),
-                                            Environment.ExpandEnvironmentVariables(command.StartsWith(ViewModel.CustomCommandPrefix) ? 
-                                                                                   command.Substring(ViewModel.CustomCommandPrefix.Length) : "wpr " + command),
+                                            Environment.ExpandEnvironmentVariables(command.StartsWith("-") ? "wpr " + command : command),
                                             resultString == String.Empty ? String.Empty : Environment.NewLine,
                                             resultString);
             log.Add(logMessage);

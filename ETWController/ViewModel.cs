@@ -658,7 +658,7 @@ namespace ETWController
         static readonly string About = Environment.NewLine + String.Format("ETWController (c) by Alois Kraus 2015-2022 v{0}", 
                                            Assembly.GetExecutingAssembly().GetName().Version);
 
-        private bool _useCommandNameSubstitutions = false;
+        private bool _useCommandNameSubstitutions = true;
 
         private void AboutBox()
         {
