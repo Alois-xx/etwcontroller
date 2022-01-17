@@ -232,10 +232,10 @@
                             <Button IsDefault="True" Content="Start Re_cording (F5)" Width="120" 
                                 IsEnabled="{Binding StartButtonEnabled}"
                                 Command="{Binding Commands[StartTracing]}" Margin="10,0,0,0"></Button>
-                            <Button Content="Sto_p Recording (F6)" Width="120"  
+                            <Button Content="{Binding StopButtonLabel}" Width="120" Name="StopButton"
                                 IsEnabled="{Binding StopButtonEnabled}"
                                 Command="{Binding Commands[StopTracing]}" Margin="10,0,0,0"></Button>
-                            <Button Content="Cancel Recording" Width="120" 
+                            <Button Content="{Binding CancelButtonLabel}" Width="120" Name="CancelButton"
                                 IsEnabled="{Binding CancelButtonEnabled}"
                                 Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"/>
                         </StackPanel>

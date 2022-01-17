@@ -17,6 +17,9 @@ namespace ETWController.UI
         public string TraceStopCommand  { get; set;  }
         public string TraceCancelCommand { get; set;  }
 
+        public string TraceStopLabel { get; set; }
+        public string TraceCancelLabel { get; set; }
+
         public bool NeedsManualEdit { get; set;  }
         public bool ContainsData => TraceStartCommand != null;
 

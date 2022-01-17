@@ -226,6 +226,8 @@ namespace ETWController
         }
 
         public const string CaptureScreenShotsProperty = "CaptureScreenShots";
+        private const string StopButtonLabelDefault = "Sto_p Recording (F6)";
+        private const string CancelButtonLabelDefault = "Cancel Recording";
 
         public bool _CaptureScreenShots;
         public bool CaptureScreenShots
@@ -361,6 +363,20 @@ namespace ETWController
             {
                 SetProperty<string>(ref _StatusText, value); 
             }
+        }
+
+        string _StopButtonLabel = StopButtonLabelDefault;
+        public string StopButtonLabel
+        {
+            get => _StopButtonLabel;
+            set => SetProperty<string>(ref _StopButtonLabel, value);
+        }
+
+        string _CancelButtonLabel = CancelButtonLabelDefault;
+        public string CancelButtonLabel
+        {
+            get => _CancelButtonLabel;
+            set => SetProperty<string>(ref _CancelButtonLabel, value);
         }
 
         Brush _StatusColor;
@@ -839,6 +855,9 @@ namespace ETWController
             Environment.SetEnvironmentVariable("TIME", _TraceStartTime.ToString("HHmmss"));
             Environment.SetEnvironmentVariable("TS", _TraceStartTime.ToString("yyyy-MM-dd_HHmmss"));
 
+            CancelButtonLabel = !string.IsNullOrEmpty(LocalTraceSettings.SelectedPreset.TraceCancelLabel) ? LocalTraceSettings.SelectedPreset.TraceCancelLabel : CancelButtonLabelDefault;
+            StopButtonLabel = !string.IsNullOrEmpty(LocalTraceSettings.SelectedPreset.TraceStopLabel) ? LocalTraceSettings.SelectedPreset.TraceStopLabel : StopButtonLabelDefault;
+
             if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
             {
                 LocalTraceSettings.TraceStates = TraceStates.Starting;
@@ -950,6 +969,8 @@ namespace ETWController
             };
 
             StopButtonEnabled = CancelButtonEnabled = false;
+            StopButtonLabel = StopButtonLabelDefault;
+            CancelButtonLabel = CancelButtonLabelDefault;
 
             if (this.LocalTraceEnabled) 
             {
@@ -994,6 +1015,8 @@ namespace ETWController
         private void CancelTracing()
         {
             StopButtonEnabled = CancelButtonEnabled = false;
+            StopButtonLabel = StopButtonLabelDefault;
+            CancelButtonLabel = CancelButtonLabelDefault;
             if (this.LocalTraceEnabled)
             {
                 var output = LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(LocalTraceSettings.TraceCancel));
