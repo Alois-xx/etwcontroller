@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Serialization;
+
 
 namespace ETWController
 {
@@ -683,8 +685,9 @@ namespace ETWController
         public ViewModel(IMessageBoxDisplay messageBoxDisplay)
         {
             MessageBoxDisplay = messageBoxDisplay;
-            LocalTraceSettings = new TraceControlViewModel(this, false);
-            ServerTraceSettings = new TraceControlViewModel(this, true);
+            var addonData = ReadAddonData();
+            LocalTraceSettings = new TraceControlViewModel(this, false, addonData);
+            ServerTraceSettings = new TraceControlViewModel(this, true, addonData);
             _ReceivedMessages = new ObservableCollection<string>();
             _ServerTraceSessions = new string[]{ "Not yet read."};
             _TraceSessions = new string[] {"Not yet read."};
@@ -1030,6 +1033,37 @@ namespace ETWController
                 command.Execute();
             }
             StartButtonEnabled = true;
+        }
+
+        private void WriteAddonData()
+        {
+            var fn = @"C:\temp\addondata.xml";
+            var data = new AddonData();
+            data.Presets = new[]
+            {
+                new Preset {Name = "Test name 1", TraceStartCommand = "StartCmd", TraceStopCommand = "Stop Command",
+                    TraceCancelCommand = "Cancel Command", TraceStopLabel = "Stop Label", TraceCancelLabel = "Cancel Label"},
+                new Preset {Name = "Test2", TraceStartCommand = "StartCmd2"},
+            };
+            TextWriter writer = new StreamWriter(fn);
+            new XmlSerializer(typeof(AddonData)).Serialize(writer, data);
+            writer.Close();
+        }
+
+        private AddonData ReadAddonData()
+        {
+            //WriteAddonData();  // only used to create initial file
+            var fn = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\ETWController\AddonData.xml";
+            if (File.Exists(fn))
+            {
+                var stream = new FileStream(fn, FileMode.Open);
+                using (stream)
+                {
+                    var data = new XmlSerializer(typeof(AddonData)).Deserialize(stream) as AddonData;
+                    return data;
+                }   
+            }
+            return null;
         }
 
         private void ShowConfigDialog()

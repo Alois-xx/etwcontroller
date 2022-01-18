@@ -227,7 +227,7 @@ namespace ETWController.UI
 
 
 
-        public TraceControlViewModel(ETWController.ViewModel rootModel, bool isRemoteState)
+        public TraceControlViewModel(ViewModel rootModel, bool isRemoteState, AddonData addonData)
         {
             RootModel = rootModel;
             IsRemoteState = isRemoteState;
@@ -265,7 +265,15 @@ namespace ETWController.UI
             }, 
             () => IsLocalState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
             _Presets.Add(new Preset{Name = "<Manual Editing>", NeedsManualEdit = true});
-            _Presets.AddRange(Configuration.Default.Presets);
+            if (addonData != null)
+            {
+                _Presets.AddRange(addonData.Presets);
+            }
+            if (addonData == null || !addonData.HideStandardPresets)
+            {
+                _Presets.AddRange(Configuration.Default.Presets);
+            }
+
             foreach (var preset in Presets)
             {
                 // heuristic: if name or command contains "xxx" it must be edited by hand
