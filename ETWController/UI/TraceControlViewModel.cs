@@ -11,6 +11,25 @@ using System.Windows.Input;
 
 namespace ETWController.UI
 {
+    public class LogEntry
+    {
+        public DateTimeOffset Timestamp { get; set; }
+        public DateTimeOffset EndTime { get; set; }
+        public string Command { get; set; }
+        public string Output { get; set; }
+        public bool HasError { get; set; }
+        public bool HasFinished => Output != null;
+        public string EntryKind => HasFinished ? (HasError ? "Error" : "Done") : "Start";
+
+        public override string ToString()
+        {
+            return string.Format("[{0:HH:mm:ss.fff}] {1}{2}{3}", Timestamp,
+                Environment.ExpandEnvironmentVariables(Command.StartsWith("-") ? "wpr " + Command : Command),
+                Output == String.Empty ? String.Empty : Environment.NewLine,
+                Output);
+        }
+    }
+
     /// <summary>
     /// ViewModel for TraceControl which contains the start/stop command line args, the current trace state 
     /// and the command outputs.
@@ -191,7 +210,7 @@ namespace ETWController.UI
         /// <summary>
         /// Command line output from each executed command line
         /// </summary>
-        public ObservableCollection<string> CommandOutputs
+        public ObservableCollection<LogEntry> CommandOutputs
         {
             get;
             set;
@@ -231,7 +250,7 @@ namespace ETWController.UI
         {
             RootModel = rootModel;
             IsRemoteState = isRemoteState;
-            CommandOutputs = new ObservableCollection<string>();
+            CommandOutputs = new ObservableCollection<LogEntry>();
 
             ShowCommand = new DelegateCommand((o) =>
                 {
@@ -260,7 +279,7 @@ namespace ETWController.UI
                         UseShellExecute = false
                     };
                     Process.Start(startInfo);
-                    AddLogEntry(exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
+                    AddLogEntry(exe + options);
                 }
             }, 
             () => IsLocalState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
@@ -320,7 +339,7 @@ namespace ETWController.UI
         /// <param name="wprCommandOutput"></param>
         internal void ProcessStopCommand(Tuple<int, string> wprCommandOutput)
         {
-            AddLogEntry(RootModel.StopData.TraceStopFullCommandLine, wprCommandOutput, CommandOutputs);
+            AddLogEntry(RootModel.StopData.TraceStopFullCommandLine, wprCommandOutput);
             OpenTraceCommand.RaiseCanExecuteChanged();
             if ((wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) && !IsErrorOutput(wprCommandOutput.Item2)) 
             {
@@ -346,9 +365,9 @@ namespace ETWController.UI
         /// <param name="wprCommandOutput"></param>
         internal void ProcessStartCommand(Tuple<int, string> wprCommandOutput)
         {
-            AddLogEntry(TraceStartFullCommandLine, wprCommandOutput, CommandOutputs);
+            var entry = AddLogEntry(TraceStartFullCommandLine, wprCommandOutput);
 
-            if (wprCommandOutput.Item1 == 0 && ! IsErrorOutput(wprCommandOutput.Item2))
+            if (!entry.HasError)
             {
                 if (TraceStates == TraceStates.Starting)
                 {
@@ -389,23 +408,35 @@ namespace ETWController.UI
         {
             if (wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) // either it was cancelled or no session was running 
             {
-                this.TraceStates = TraceStates.Stopped;
+                TraceStates = TraceStates.Stopped;
             }
-            AddLogEntry(this.TraceCancel, wprCommandOutput, CommandOutputs);
+            AddLogEntry(TraceCancel, wprCommandOutput);
         }
 
-        void AddLogEntry(string command, Tuple<int, string> wprCommandResult, Collection<string> log)
+        public LogEntry AddLogEntry(string command, Tuple<int, string> wprCommandResult)
         {
             // remove empty lines
             string[] strippedOutput = wprCommandResult.Item2.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
             var resultString = string.Join(Environment.NewLine, strippedOutput.Where(x=>!string.IsNullOrEmpty(x)));
-            string logMessage = string.Format("[{0}] {1}{2}{3}",
-                                            DateTime.Now.ToString("HH:mm:ss.fff"),
-                                            Environment.ExpandEnvironmentVariables(command.StartsWith("-") ? "wpr " + command : command),
-                                            resultString == String.Empty ? String.Empty : Environment.NewLine,
-                                            resultString);
-            log.Add(logMessage);
+            if (string.IsNullOrWhiteSpace(resultString))
+            {
+                resultString = "[no output from command]";
+            }
+            var logEntry = new LogEntry{Command = command, Output = resultString, 
+                HasError = wprCommandResult.Item1 != 0 || IsErrorOutput(wprCommandResult.Item2), 
+                Timestamp = DateTimeOffset.Now
+            };
+            CommandOutputs.Add(logEntry);
+            return logEntry;
+        }
+
+        public LogEntry AddLogEntry(string command)
+        {
+            var logEntry = new LogEntry{Command = command, Output = null, 
+                HasError = false, Timestamp = DateTimeOffset.Now
+            };
+            CommandOutputs.Add(logEntry);
+            return logEntry;
         }
     }
 }

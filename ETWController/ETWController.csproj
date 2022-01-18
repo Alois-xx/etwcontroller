@@ -150,6 +150,7 @@
     <Compile Include="UI\ETWControllerConfiguration.xaml.cs">
       <DependentUpon>ETWControllerConfiguration.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\MessageToColorConverter.cs" />
     <Compile Include="UI\NotifyBase.cs" />
     <Compile Include="UI\OutputWindow.xaml.cs">
       <DependentUpon>OutputWindow.xaml</DependentUpon>

@@ -880,6 +880,7 @@ namespace ETWController
                 }
 
                 var wpaArgs = ApplyCommandSubstitutions(LocalTraceSettings.TraceStartFullCommandLine);
+                LocalTraceSettings.AddLogEntry(wpaArgs);
                 Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(wpaArgs); })
                             .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler)
                             .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
@@ -909,7 +910,8 @@ namespace ETWController
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Starting;
-                var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(ServerTraceSettings.TraceStartFullCommandLine));
+                var finalCommandLine = ApplyCommandSubstitutions(ServerTraceSettings.TraceStartFullCommandLine);
+                var command = WCFHost.CreateExecuteWPRCommand(finalCommandLine);
                 command.Completed = (output) =>
                 {
                     ServerTraceSettings.ProcessStartCommand(output);
@@ -922,6 +924,7 @@ namespace ETWController
                     ServerTraceSettings.ProcessStartCommand(new Tuple<int, string>(1, "Error: " + s));
                     UpdateMainButtons();
                 };
+                ServerTraceSettings.AddLogEntry(finalCommandLine);
                 command.Execute();
             }
         }
@@ -975,18 +978,20 @@ namespace ETWController
             StopButtonLabel = StopButtonLabelDefault;
             CancelButtonLabel = CancelButtonLabelDefault;
 
+            var finalCommandLine = ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine);
             if (this.LocalTraceEnabled) 
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
                 // stop tracing asynchronously so we do not need to wait until local trace collection has stopped (while blocking the UI)
-                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine)))
+                LocalTraceSettings.AddLogEntry(finalCommandLine);
+                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(finalCommandLine))
                             .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UIScheduler)
                             .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
             }
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Stopping;
-                var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine));
+                var command = WCFHost.CreateExecuteWPRCommand(finalCommandLine);
                 command.Completed = (output) =>
                 {
                     ServerTraceSettings.ProcessStopCommand(output);
@@ -999,6 +1004,7 @@ namespace ETWController
                     ServerTraceSettings.ProcessStartCommand(new Tuple<int, string>(1, "Error: " + s));
                     UpdateMainButtons();
                 };
+                ServerTraceSettings.AddLogEntry(finalCommandLine);
                 command.Execute();
             }
              
@@ -1022,14 +1028,18 @@ namespace ETWController
             CancelButtonLabel = CancelButtonLabelDefault;
             if (this.LocalTraceEnabled)
             {
-                var output = LocalTraceControler.ExecuteWPRCommand(ApplyCommandSubstitutions(LocalTraceSettings.TraceCancel));
+                var finalCommandLine = ApplyCommandSubstitutions(LocalTraceSettings.TraceCancel);
+                LocalTraceSettings.AddLogEntry(finalCommandLine);
+                var output = LocalTraceControler.ExecuteWPRCommand(finalCommandLine);
                 LocalTraceSettings.ProcessCancelCommand(output);
             }
 
             if (this.ServerTraceEnabled)
             {
-                var command = WCFHost.CreateExecuteWPRCommand(ApplyCommandSubstitutions(ServerTraceSettings.TraceCancel));
+                var finalCommandLine = ApplyCommandSubstitutions(ServerTraceSettings.TraceCancel);
+                var command = WCFHost.CreateExecuteWPRCommand(finalCommandLine);
                 command.Completed = (output) => ServerTraceSettings.ProcessCancelCommand(output);
+                ServerTraceSettings.AddLogEntry(finalCommandLine);
                 command.Execute();
             }
             StartButtonEnabled = true;

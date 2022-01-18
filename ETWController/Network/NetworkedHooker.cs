@@ -216,7 +216,7 @@ namespace ETWController
                 {
                     if (screenshotTask.Result.Key != null)
                     {
-                        Model.ReceivedMessages.Add($"Saved Screenshot to {screenshotTask.Result}");
+                        Model.ReceivedMessages.Add($"Saved Screenshot to {screenshotTask.Result.Key}");
                     }
                     if(screenshotTask.Result.Value != null)
                     {

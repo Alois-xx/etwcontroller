@@ -20,6 +20,7 @@
                 <ResourceDictionary Source="UI\Validation.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <ui:MessageToColorConverter x:Key="MessageToColorConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -244,7 +245,7 @@
             </TabItem>
             <TabItem Header="Event History">
                 <Grid MinHeight="400">
-                    <ListView ItemsSource="{Binding ReceivedMessages}" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                    <ListView ItemsSource="{Binding ReceivedMessages}" ScrollViewer.VerticalScrollBarVisibility="Visible" FontFamily="Consolas">
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Clear" Click="ClearMessages"></MenuItem>
@@ -252,9 +253,16 @@
                         </ListView.ContextMenu>
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Width="600"/>
+                                <GridViewColumn Width="700"/>
                             </GridView>
                         </ListView.View>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="1,-1" />
+                                <Setter Property="Background" Value="{Binding Converter={StaticResource MessageToColorConverter}}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
                     </ListView>
                 </Grid>
             </TabItem>
