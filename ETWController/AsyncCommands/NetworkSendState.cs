@@ -83,9 +83,9 @@ namespace ETWController.Commands
             },
             Model, Scheduler)
             {
-                Started =  String.Format("Connected to {0}", Model.Host),
-                Starting = String.Format("Connecting to server {0}:{1} ...", Model.Host, Model.PortNumber),
-                StartingError = String.Format("Failed to connect to server {0}:{1} ...", Model.Host, Model.PortNumber),
+                Started =  String.Format("Connected to MessageReceiver service at {0}", Model.Host),
+                Starting = String.Format("Connecting to MessageReceiver service {0}:{1} ...", Model.Host, Model.PortNumber),
+                StartingError = String.Format("Failed to connect to MessageReceiver service {0}:{1} ...", Model.Host, Model.PortNumber),
             };
             StartCommand.Execute();
         }

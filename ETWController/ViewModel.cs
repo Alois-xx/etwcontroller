@@ -1,21 +1,18 @@
 ﻿using ETWController.Commands;
 using ETWController.ETW;
-using ETWController.Network;
 using ETWController.Screenshots;
 using ETWController.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Serialization;
+
 
 namespace ETWController
 {
@@ -31,7 +28,7 @@ namespace ETWController
 
         public const string CustomCommandPrefix = "::";
 
-        public TaskScheduler UISheduler
+        public TaskScheduler UIScheduler
         {
             get;
             set;
@@ -231,6 +228,8 @@ namespace ETWController
         }
 
         public const string CaptureScreenShotsProperty = "CaptureScreenShots";
+        private const string StopButtonLabelDefault = "Sto_p Recording (F6)";
+        private const string CancelButtonLabelDefault = "Cancel Recording";
 
         public bool _CaptureScreenShots;
         public bool CaptureScreenShots
@@ -239,6 +238,17 @@ namespace ETWController
             set { SetProperty<bool>(ref _CaptureScreenShots, value, CaptureScreenShotsProperty); }
         }
         
+
+        public bool _CaptureMouseWheel;
+        /// <summary>
+        /// Check state of Checkbox
+        /// </summary>
+        public bool CaptureMouseWheel
+        {
+            get { return _CaptureMouseWheel; }
+            set { SetProperty<bool>(ref _CaptureMouseWheel, value); }
+        }
+
 
         public bool _CaptureMouseMove;
         /// <summary>
@@ -270,7 +280,7 @@ namespace ETWController
 
         bool _LocalTraceEnabled;
         /// <summary>
-        /// When true tracing is started/stopped/canelled on local machine when one of the trace start/stop/cancel buttons is pressed.
+        /// When true tracing is started/stopped/cancelled on local machine when one of the trace start/stop/cancel buttons is pressed.
         /// </summary>
         public bool LocalTraceEnabled
         {
@@ -313,6 +323,27 @@ namespace ETWController
             set { SetProperty<bool>(ref _NetworkSendEnabled, value); }
         }
 
+        bool _StartButtonEnabled = true;
+        public bool StartButtonEnabled
+        {
+            get { return _StartButtonEnabled; }
+            set { SetProperty<bool>(ref _StartButtonEnabled, value); }
+        }
+
+        bool _StopButtonEnabled;
+        public bool StopButtonEnabled
+        {
+            get { return _StopButtonEnabled; }
+            set { SetProperty<bool>(ref _StopButtonEnabled, value); }
+        }
+
+        bool _CancelButtonEnabled;
+        public bool CancelButtonEnabled
+        {
+            get { return _CancelButtonEnabled; }
+            set { SetProperty<bool>(ref _CancelButtonEnabled, value); }
+        }
+
         ObservableCollection<string> _ReceivedMessages;
         /// <summary>
         /// List of messages received from remote machines
@@ -334,6 +365,20 @@ namespace ETWController
             {
                 SetProperty<string>(ref _StatusText, value); 
             }
+        }
+
+        string _StopButtonLabel = StopButtonLabelDefault;
+        public string StopButtonLabel
+        {
+            get => _StopButtonLabel;
+            set => SetProperty<string>(ref _StopButtonLabel, value);
+        }
+
+        string _CancelButtonLabel = CancelButtonLabelDefault;
+        public string CancelButtonLabel
+        {
+            get => _CancelButtonLabel;
+            set => SetProperty<string>(ref _CancelButtonLabel, value);
         }
 
         Brush _StatusColor;
@@ -446,6 +491,16 @@ namespace ETWController
             }
         }
 
+        protected bool _AlwaysShowCommandEditBoxes;
+        public bool AlwaysShowCommandEditBoxes
+        {
+            get { return _AlwaysShowCommandEditBoxes; }
+            set
+            {
+                SetProperty<bool>(ref _AlwaysShowCommandEditBoxes, value);
+            }
+        }
+
         string[] _TraceSessions;
         /// <summary>
         /// Local trace session names
@@ -530,7 +585,8 @@ namespace ETWController
                     WCFHost.GetTraceSessions.Execute();
                 })},
                 {"StartTracing", CreateCommand( _ => StartTracing()) },
-                {"StopTracing", CreateCommand( _ => StopTracing())},
+                {"StopTracing", CreateCommand( _ => StopTracing(doChecks: true))},
+                {"StopTracingUnconditionally", CreateCommand( _ => StopTracing(doChecks: false))},
                 {"CancelTracing", CreateCommand( _ => CancelTracing())},
                 {"RegisterETWProvider", CreateCommand( _ =>
                     {
@@ -542,8 +598,15 @@ namespace ETWController
                     Configuration.Default.Save();
                     LoadSettings();
                 })},
+                {"EnableButtons", CreateCommand( _ => {
+                    StartButtonEnabled = true;
+                    StopButtonEnabled = true;
+                    CancelButtonEnabled = true;
+                })},
                 {"ShowMessages", CreateCommand( _ => ShowMessages() )},
                 {"NetworkSendToggle", CreateCommand( _ => NetworkSendState.NetworkSendChangeState() )},
+                {"EnableLocalTraceToggle", CreateCommand( _ => EnableLocalTraceToggle() )},
+                {"EnableRemoteTraceToggle", CreateCommand( _ => EnableRemoteTraceToggle() )},
                 {"NetworkReceiveToggle", CreateCommand( _ => NetworkReceiveState.NetworkReceiveChangeState() )},
                 {"ClearStatusMessages", CreateCommand( _ => StatusMessages.Clear() )},
                 {"ShowCommandLineOptions", CreateCommand( _ => ShowCommandLineOptions()) },
@@ -555,14 +618,35 @@ namespace ETWController
             return commands;
         }
 
-        static readonly string CommandLineOptions = "ETWController [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] [-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
+        internal static readonly string WelcomeText = "Hello, and welcome to ETW-Controller!" + Environment.NewLine + Environment.NewLine +
+                                                      "In this version, the UI was massively changed to make it better usable, especially for new users." + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "By default, only the options for local ETW recording are shown now." + Environment.NewLine +
+                                                      "If you want to use remote recording, you must enable it with 'Options->Enable remote machine ETW tracing'" + Environment.NewLine +
+                                                      "or by pressing F8. With F7 you can toggle local tracing" + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "When you choose a given preset for local or remote recording, the individual" + Environment.NewLine +
+                                                      "commands for starting and stopping are no longer shown in the UI to reduce clutter." + Environment.NewLine +
+                                                      "To see or edit them, choose the '<Manual Editing>' entry in the preset dropdown." + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "The hotkeys for logging 'Slow' and 'Fast' messages are active, but not shown" + Environment.NewLine +
+                                                      "in the UI to save screen real estate. To modify them, check the checkbox" + Environment.NewLine +
+                                                      "\"Redefine 'Fast'/'Slow' hotkeys and messages\" on the main tab." + Environment.NewLine +
+                                                      "" + Environment.NewLine +
+                                                      "Good luck with all your ETW investigations!" + Environment.NewLine +
+                                                      "" + Environment.NewLine;
+
+        static readonly string CommandLineOptions = "ETWController [-Hide] [-CaptureKeyboard] [-CaptureMouseClick] " + Environment.NewLine +
+                                                    "\t[-CaptureMouseMove] [-SendToServer Server [Port1 Port2]] [-ClearKeyboardEvents] [-RegisterEtwProvider]" + Environment.NewLine +
+                                                    Environment.NewLine +
                                                     "\t-Hide                              Hide main window." + Environment.NewLine +
                                                     "\t-CaptureKeyboard                   Capture keyboard events." + Environment.NewLine +
                                                     "\t-ClearKeyboardEvents               By default the keys are all logged as SomeKey. If this is enabled the actual keyboard code is also logged." + Environment.NewLine +
                                                     "\t                                   Be careful that you do not enter your password while clear keyboard logging is enabled!" + Environment.NewLine +
                                                     "\t-CaptureMouseClick                 Capture muse click events." + Environment.NewLine +
+                                                    "\t-CaptureMouseWheel                 Capture mouse wheel events. " + Environment.NewLine +
                                                     "\t-CaptureMouseMove                  Capture mouse mouse events. " + Environment.NewLine +
-                                      String.Format("\t-DisableCaptureScreenshots         Disables the save a screenshot feature where for each mouse click to the directory {0} or specify an explicit locaton with -ScreenshotDir xxx", Configuration.Default.ScreenshotDirectory) + Environment.NewLine +
+                                                    String.Format("\t-DisableCaptureScreenshots         Disables the save a screenshot feature where for each mouse click to the directory {0} or specify an explicit locaton with -ScreenshotDir xxx", Configuration.Default.ScreenshotDirectory) + Environment.NewLine +
                                                     "\t-ScreenshotDir xxxx                Directory to where the screenshots are saved if -CaptureScreenshots is set" + Environment.NewLine  +
                                                     "\t-SendToServer Server [Port1 Port2] Enable sending events to remote server. If Port1/2 are omitted the configured ports are used. " + Environment.NewLine +
                                                     "\t-RegisterEtwProvider               Register the HookEvents ETW provider and then exit. This needs to be done only once e.g. during installation." + Environment.NewLine +
@@ -573,7 +657,11 @@ namespace ETWController
                                                     "This will eanble mouse click, encrypted keyboard tracing which will send to to your local machine again. If you want to hide the window you can add -hide." + Environment.NewLine + 
                                                     "These commands are useful if you only want to use ETWController as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
 
-        static readonly string About = String.Format("ETWController (c) by Alois Kraus 2015-2016 v{0}", Assembly.GetExecutingAssembly().GetName().Version);
+        static readonly string About = Environment.NewLine + String.Format("ETWController (c) by Alois Kraus 2015-2022 v{0}", 
+                                           Assembly.GetExecutingAssembly().GetName().Version);
+
+        private bool _useCommandNameSubstitutions = true;
+
         private void AboutBox()
         {
             var window = new HelpWindow("About", About);
@@ -597,8 +685,9 @@ namespace ETWController
         public ViewModel(IMessageBoxDisplay messageBoxDisplay)
         {
             MessageBoxDisplay = messageBoxDisplay;
-            LocalTraceSettings = new TraceControlViewModel(this, false);
-            ServerTraceSettings = new TraceControlViewModel(this, true);
+            var addonData = ReadAddonData();
+            LocalTraceSettings = new TraceControlViewModel(this, false, addonData);
+            ServerTraceSettings = new TraceControlViewModel(this, true, addonData);
             _ReceivedMessages = new ObservableCollection<string>();
             _ServerTraceSessions = new string[]{ "Not yet read."};
             _TraceSessions = new string[] {"Not yet read."};
@@ -607,6 +696,10 @@ namespace ETWController
             Commands = CreateUICommands();
             LoadSettings();
             StatusMessages.CollectionChanged += StatusMessages_CollectionChanged;
+            if (TraceFileName.Contains("%TS%") || TraceFileName.Contains("%TIME%"))
+            {
+                AppendIndexToOutputFileName = false;
+            }
         }
 
         void StatusMessages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -631,10 +724,10 @@ namespace ETWController
         /// </summary>
         public void InitUIDependantVariables(App args, TaskScheduler scheduler)
         {
-            UISheduler = scheduler;
-            NetworkSendState = new NetworkSendState(this, UISheduler);
-            NetworkReceiveState = new NetworkReceiveState(this, UISheduler);
-            WCFHost = new WCFHostServiceState(this, UISheduler);
+            UIScheduler = scheduler;
+            NetworkSendState = new NetworkSendState(this, UIScheduler);
+            NetworkReceiveState = new NetworkReceiveState(this, UIScheduler);
+            WCFHost = new WCFHostServiceState(this, UIScheduler);
             Hooker = new NetworkedHooker(this);
             if( !HookEvents.IsAlreadyRegistered() )
             {
@@ -644,6 +737,7 @@ namespace ETWController
             // use settings from command line if present
             CaptureKeyboard = args.CaptureKeyboard;
             CaptureMouseButtonDown = args.CaptureMouseButtonDown;
+            CaptureMouseWheel = args.CaptureMouseWheel;
             CaptureMouseMove = args.CaptureMouseMove;
             ScreenshotDirectoryUnexpanded = (args.ScreenshotDirectory ?? Configuration.Default.ScreenshotDirectory);
 
@@ -740,17 +834,35 @@ namespace ETWController
         /// </summary>
         private void StartTracing()
         {
+            if (!StartButtonEnabled)
+            {
+                // prevent activation with hotkey, if button is disabled
+                return;
+            }
+
             if (!this.LocalTraceEnabled && !this.ServerTraceEnabled)
             {
-                MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.", "Warning");
+                MessageBoxDisplay.ShowMessage("Please enable tracing at the remote host and/or on your local machine.", "Error");
+                return;
+            }
+
+            if (this.ServerTraceEnabled && (Configuration.Default.Host == "localhost" || Configuration.Default.Host == "127.0.0.1"))
+            {
+                MessageBoxDisplay.ShowMessage($"Remote tracing needs a real remote address, not \"{Configuration.Default.Host}\"", "Error");
                 return;
             }
 
             this.Hooker.ResetId();
+            _TraceStartTime = DateTime.Now;
+            Environment.SetEnvironmentVariable("DATE", _TraceStartTime.ToString("yyyy-MM-dd"));
+            Environment.SetEnvironmentVariable("TIME", _TraceStartTime.ToString("HHmmss"));
+            Environment.SetEnvironmentVariable("TS", _TraceStartTime.ToString("yyyy-MM-dd_HHmmss"));
+
+            CancelButtonLabel = !string.IsNullOrEmpty(LocalTraceSettings.SelectedPreset.TraceCancelLabel) ? LocalTraceSettings.SelectedPreset.TraceCancelLabel : CancelButtonLabelDefault;
+            StopButtonLabel = !string.IsNullOrEmpty(LocalTraceSettings.SelectedPreset.TraceStopLabel) ? LocalTraceSettings.SelectedPreset.TraceStopLabel : StopButtonLabelDefault;
 
             if (this.LocalTraceEnabled) // start async to allow the web service to start tracing simultanously on the target host
             {
-                _TraceStartTime = DateTime.Now;
                 LocalTraceSettings.TraceStates = TraceStates.Starting;
 
                 if (File.Exists(TraceFileName))
@@ -767,25 +879,87 @@ namespace ETWController
                     }
                 }
 
-                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceStartFullCommandLine))
-                            .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UISheduler);
+                var wpaArgs = ApplyCommandSubstitutions(LocalTraceSettings.TraceStartFullCommandLine);
+                LocalTraceSettings.AddLogEntry(wpaArgs);
+                Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(wpaArgs); })
+                            .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler)
+                            .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
+
+
+                // for safety, if this is a command that never returns from Start:
+                // we fake the "Running" state after a certain amount of time
+                var delaySec = 30;  // max time to stay in "Starting"
+                if (wpaArgs.ToLowerInvariant().Contains("cmd.exe /c start"))
+                {
+                    // we know that this command will not return, so we enable the buttons after a short delay
+                    delaySec = 5;
+                }
+                Task.Delay(TimeSpan.FromSeconds(delaySec))
+                    .ContinueWith(t =>
+                    {
+                        if (LocalTraceSettings.TraceStates == TraceStates.Starting)
+                        {
+                            LocalTraceSettings.TraceStates = TraceStates.Running;
+                            UpdateMainButtons();
+                        }
+                    }, UIScheduler);
             }
 
+            CancelButtonEnabled = true;
+            StartButtonEnabled = false;
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Starting;
-                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceStartFullCommandLine);
-                command.Completed = (output) => ServerTraceSettings.ProcessStartCommand(output);
+                var finalCommandLine = ApplyCommandSubstitutions(ServerTraceSettings.TraceStartFullCommandLine);
+                var command = WCFHost.CreateExecuteWPRCommand(finalCommandLine);
+                command.Completed = (output) =>
+                {
+                    ServerTraceSettings.ProcessStartCommand(output);
+                    UpdateMainButtons();
+                };
+                command.NotifyError = (s, exception) =>
+                {
+                    ServerTraceSettings.TraceStates = TraceStates.Stopped;
+                    SetStatusMessageWarning(s, exception);
+                    ServerTraceSettings.ProcessStartCommand(new Tuple<int, string>(1, "Error: " + s));
+                    UpdateMainButtons();
+                };
+                ServerTraceSettings.AddLogEntry(finalCommandLine);
                 command.Execute();
             }
+        }
+
+        private string ApplyCommandSubstitutions(string rawCommandLine)
+        {
+            var fullCommandLine = rawCommandLine;
+            if (_useCommandNameSubstitutions)  // feature not finished yet
+            {
+                foreach (var nameSubstitution in Configuration.Default.CommandNameSubstitutions)
+                {
+                    var parts = nameSubstitution.Split(new[] {'|'}, 2);
+                    if (parts.Length == 2 && fullCommandLine.StartsWith(parts[0] + " "))
+                    {
+                        fullCommandLine = parts[1] + fullCommandLine.Substring(parts[0].Length);
+                        break;
+                    }
+                }
+            }
+            return fullCommandLine;
         }
 
 
         /// <summary>
         /// stop tracing command 
         /// </summary>
-        internal void StopTracing()
+        /// <param name="b"></param>
+        internal void StopTracing(bool doChecks)
         {
+            if (doChecks && !StopButtonEnabled)
+            {
+                // prevent activation with hotkey, if button is disabled
+                return;
+            }
+
             if (this.CaptureScreenShots) // create html report also if no tracing was active perhaps someone finds this functionality in itself useful
             {
                 var htmlReportGenerator = new HtmlReportGenerator(this.ScreenshotDirectory);
@@ -800,22 +974,48 @@ namespace ETWController
                 TraceStartTime = this._TraceStartTime,
             };
 
+            StopButtonEnabled = CancelButtonEnabled = false;
+            StopButtonLabel = StopButtonLabelDefault;
+            CancelButtonLabel = CancelButtonLabelDefault;
+
+            var finalCommandLine = ApplyCommandSubstitutions(StopData.TraceStopFullCommandLine);
             if (this.LocalTraceEnabled) 
             {
                 LocalTraceSettings.TraceStates = TraceStates.Stopping;
                 // stop tracing asynchronously so we do not need to wait until local trace collection has stopped (while blocking the UI)
-                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(StopData.TraceStopFullCommandLine))
-                            .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UISheduler);
+                LocalTraceSettings.AddLogEntry(finalCommandLine);
+                Task.Factory.StartNew<Tuple<int, string>>(() => LocalTraceControler.ExecuteWPRCommand(finalCommandLine))
+                            .ContinueWith((t) => LocalTraceSettings.ProcessStopCommand(t.Result), UIScheduler)
+                            .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
             }
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Stopping;
-                var command = WCFHost.CreateExecuteWPRCommand(StopData.TraceStopFullCommandLine);
-                command.Completed = (output) => ServerTraceSettings.ProcessStopCommand(output);
+                var command = WCFHost.CreateExecuteWPRCommand(finalCommandLine);
+                command.Completed = (output) =>
+                {
+                    ServerTraceSettings.ProcessStopCommand(output);
+                    UpdateMainButtons();
+                };
+                command.NotifyError = (s, exception) =>
+                {
+                    ServerTraceSettings.TraceStates = TraceStates.Running;
+                    SetStatusMessageWarning(s, exception);
+                    ServerTraceSettings.ProcessStartCommand(new Tuple<int, string>(1, "Error: " + s));
+                    UpdateMainButtons();
+                };
+                ServerTraceSettings.AddLogEntry(finalCommandLine);
                 command.Execute();
             }
              
             this.TraceFileCounter++;
+        }
+
+        private void UpdateMainButtons()
+        {
+            StartButtonEnabled = LocalTraceSettings.TraceStates == TraceStates.Stopped && ServerTraceSettings.TraceStates == TraceStates.Stopped;
+            StopButtonEnabled = (LocalTraceSettings.TraceStates == TraceStates.Running || ServerTraceSettings.TraceStates == TraceStates.Running); ;
+            CancelButtonEnabled = (LocalTraceSettings.TraceStates != TraceStates.Stopped || ServerTraceSettings.TraceStates != TraceStates.Stopped);
         }
 
         /// <summary>
@@ -823,23 +1023,66 @@ namespace ETWController
         /// </summary>
         private void CancelTracing()
         {
+            StopButtonEnabled = CancelButtonEnabled = false;
+            StopButtonLabel = StopButtonLabelDefault;
+            CancelButtonLabel = CancelButtonLabelDefault;
             if (this.LocalTraceEnabled)
             {
-                var output = LocalTraceControler.ExecuteWPRCommand(LocalTraceSettings.TraceCancel);
+                var finalCommandLine = ApplyCommandSubstitutions(LocalTraceSettings.TraceCancel);
+                LocalTraceSettings.AddLogEntry(finalCommandLine);
+                var output = LocalTraceControler.ExecuteWPRCommand(finalCommandLine);
                 LocalTraceSettings.ProcessCancelCommand(output);
             }
+
             if (this.ServerTraceEnabled)
             {
-                var command = WCFHost.CreateExecuteWPRCommand(ServerTraceSettings.TraceCancel);
+                var finalCommandLine = ApplyCommandSubstitutions(ServerTraceSettings.TraceCancel);
+                var command = WCFHost.CreateExecuteWPRCommand(finalCommandLine);
                 command.Completed = (output) => ServerTraceSettings.ProcessCancelCommand(output);
+                ServerTraceSettings.AddLogEntry(finalCommandLine);
                 command.Execute();
             }
+            StartButtonEnabled = true;
+        }
+
+        private void WriteAddonData()
+        {
+            var fn = @"C:\temp\addondata.xml";
+            var data = new AddonData();
+            data.Presets = new[]
+            {
+                new Preset {Name = "Test name 1", TraceStartCommand = "StartCmd", TraceStopCommand = "Stop Command",
+                    TraceCancelCommand = "Cancel Command", TraceStopLabel = "Stop Label", TraceCancelLabel = "Cancel Label"},
+                new Preset {Name = "Test2", TraceStartCommand = "StartCmd2"},
+            };
+            TextWriter writer = new StreamWriter(fn);
+            new XmlSerializer(typeof(AddonData)).Serialize(writer, data);
+            writer.Close();
+        }
+
+        private AddonData ReadAddonData()
+        {
+            //WriteAddonData();  // only used to create initial file
+            var fn = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\ETWController\AddonData.xml";
+            if (File.Exists(fn))
+            {
+                var stream = new FileStream(fn, FileMode.Open);
+                using (stream)
+                {
+                    var data = new XmlSerializer(typeof(AddonData)).Deserialize(stream) as AddonData;
+                    return data;
+                }   
+            }
+            return null;
         }
 
         private void ShowConfigDialog()
         {
             var dlg = new ETWControllerConfiguration(this);
             dlg.ShowDialog();
+            // if needed, show/hide command textboxes:
+            LocalTraceSettings.UpdateSelectedPreset();
+            ServerTraceSettings.UpdateSelectedPreset();
         }
 
         /// <summary>
@@ -847,6 +1090,12 @@ namespace ETWController
         /// </summary>
         void LoadSettings()
         {
+            if (Configuration.Default.ConfigMigrationNeeded)
+            {
+                Configuration.Default.Upgrade();
+                Configuration.Default.ConfigMigrationNeeded = false;
+                Configuration.Default.Save();
+            }
             this.TraceOpenCmdLine = Configuration.Default.TraceOpenCmdLine;
             this.PortNumber = Configuration.Default.PortNumber;
             this.WCFPort = Configuration.Default.WCFPort;
@@ -861,11 +1110,14 @@ namespace ETWController
             this.LocalTraceSettings.TraceStart = Configuration.Default.LocalTraceStart;
             this.LocalTraceSettings.TraceStop = Configuration.Default.LocalTraceStop;
             this.LocalTraceSettings.TraceCancel = Configuration.Default.LocalTraceCancel;
+            this.LocalTraceSettings.UpdateSelectedPreset();
             this.ServerTraceSettings.TraceStart = Configuration.Default.ServerTraceStart;
             this.ServerTraceSettings.TraceStop = Configuration.Default.ServerTraceStop;
             this.ServerTraceSettings.TraceCancel = Configuration.Default.ServerTraceCancel;
+            this.ServerTraceSettings.UpdateSelectedPreset();
             this.ServerTraceEnabled = Configuration.Default.ServerTraceEnabled;
             this.LocalTraceEnabled = Configuration.Default.LocalTraceEnabled;
+            this.AlwaysShowCommandEditBoxes = Configuration.Default.AlwaysShowCommandEditBoxes;
         }
 
         /// <summary>
@@ -887,6 +1139,9 @@ namespace ETWController
             Configuration.Default.FastEventHotkey = this.FastEventHotkey;
             Configuration.Default.CaptureKeyboard = this.CaptureKeyboard;
             Configuration.Default.CaptureMouseButtonDown = this.CaptureMouseButtonDown;
+            Configuration.Default.CaptureMouseWheel = this.CaptureMouseWheel;
+            Configuration.Default.CaptureMouseMove = this.CaptureMouseMove;
+            Configuration.Default.CaptureScreenShots = this.CaptureScreenShots;
             Configuration.Default.LocalTraceStart = this.LocalTraceSettings.TraceStart;
             Configuration.Default.LocalTraceStop = this.LocalTraceSettings.TraceStop;
             Configuration.Default.ServerTraceStart = this.ServerTraceSettings.TraceStart;
@@ -896,6 +1151,7 @@ namespace ETWController
             Configuration.Default.LocalTraceCancel = LocalTraceSettings.TraceCancel;
             Configuration.Default.ServerTraceCancel = ServerTraceSettings.TraceCancel;
             Configuration.Default.TraceFileName = this.UnexpandedTraceFileName;
+            Configuration.Default.AlwaysShowCommandEditBoxes = this.AlwaysShowCommandEditBoxes;
             Configuration.Default.Save();
         }
 
@@ -921,6 +1177,16 @@ namespace ETWController
             return proc.Start();
         }
 
+        private void EnableLocalTraceToggle()
+        {
+            LocalTraceEnabled = !LocalTraceEnabled;
+        }
+
+        private void EnableRemoteTraceToggle()
+        {
+            ServerTraceEnabled = !ServerTraceEnabled;
+        }
+
         public void OpenFirewallPorts()
         {
             Task.Factory.StartNew(() =>
@@ -932,7 +1198,7 @@ namespace ETWController
                 var proc = new RedirectedProcess("netsh.exe", openWCFPort);
                 return proc.Start();
             }).ContinueWith( ret => 
-                this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh output: {1}", this.WCFPort, ret.Result.Item2.Trim())), this.UISheduler);
+                this.SetStatusMessage(String.Format("Opened firewall for port {0}. {1}", this.WCFPort, ret.Result.Item2.Trim() == "Ok." ? "" : "Netsh output: " + ret.Result.Item2.Trim())), this.UIScheduler);
 
             Task.Factory.StartNew( () =>
              {
@@ -942,7 +1208,7 @@ namespace ETWController
                 var proc = new RedirectedProcess("netsh.exe", openSocketPort);
                 return proc.Start();
              }).ContinueWith(( ret =>
-                 this.SetStatusMessage(String.Format("Opened firewall for port {0}. Netsh ouputput: {1}", this.PortNumber, ret.Result.Item2.Trim()))), this.UISheduler);
+                 this.SetStatusMessage(String.Format("Opened firewall for port {0}. {1}", this.PortNumber, ret.Result.Item2.Trim() == "Ok." ? "" : "Netsh output: " + ret.Result.Item2.Trim()))), this.UIScheduler);
         }
 
         public void Dispose()
@@ -952,6 +1218,21 @@ namespace ETWController
                 Hooker.Dispose();
                 Hooker = null;
             }
+        }
+    }
+
+    public class DesignTimeCustomerViewModel : ViewModel
+    {
+
+        public DesignTimeCustomerViewModel()
+            : base(null)
+        {
+
+            LocalTraceEnabled = true;
+            ServerTraceEnabled = true;
+            _AlwaysShowCommandEditBoxes = true;
+            _CaptureMouseButtonDown = true;
+            _CaptureKeyboard = true;
         }
     }
 }

@@ -11,9 +11,29 @@ using System.Windows.Input;
 
 namespace ETWController.UI
 {
+    public class LogEntry
+    {
+        public DateTimeOffset Timestamp { get; set; }
+        public DateTimeOffset EndTime { get; set; }
+        public string Command { get; set; }
+        public string Output { get; set; }
+        public bool HasError { get; set; }
+        public bool HasFinished => Output != null;
+        public string EntryKind => HasFinished ? (HasError ? "Error" : "Done") : "Start";
+
+        public override string ToString()
+        {
+            return string.Format("[{0:HH:mm:ss.fff}] {1}{2}{3}", Timestamp,
+                Environment.ExpandEnvironmentVariables(Command.StartsWith("-") ? "wpr " + Command : Command),
+                Output == String.Empty ? String.Empty : Environment.NewLine,
+                Output);
+        }
+    }
+
     /// <summary>
     /// ViewModel for TraceControl which contains the start/stop command line args, the current trace state 
-    /// and the command outputs
+    /// and the command outputs.
+    /// This view model is used for both the TraceControl control and the TraceStatusDisplay class!
     /// </summary>
     public class TraceControlViewModel : NotifyBase
     {
@@ -37,24 +57,32 @@ namespace ETWController.UI
             set { SetProperty<string>(ref _TraceStart, value); }
         }
 
-
+        private List<Preset> _Presets = new List<Preset>();
         public Preset[] Presets
         {
-            get { return Configuration.Default.Presets; }
+            get { return _Presets.ToArray(); }
         }
 
-        Preset _Preset = null;
+        Preset _SelectedPreset = null;
         public Preset SelectedPreset
         {
-            get { return _Preset; }
+            get { return _SelectedPreset; }
             set
             {
-                SetProperty<Preset>(ref _Preset, value);
+                SetProperty<Preset>(ref _SelectedPreset, value);
                 if( value != null)
                 {
-                    TraceStart = value.TraceStartCommand;
-                    TraceStop = value.TraceStopCommand;
-                    TraceCancel = value.TraceCancelCommand;
+                    if (value.ContainsData)
+                    {
+                        TraceStart = value.TraceStartCommand;
+                        TraceStop = value.TraceStopCommand;
+                        TraceCancel = value.TraceCancelCommand;
+                        IsCustomSetting = value.NeedsManualEdit || Configuration.Default.AlwaysShowCommandEditBoxes;
+                    }
+                    else
+                    {
+                        IsCustomSetting = true;
+                    }
                 }
             }
         }
@@ -68,6 +96,55 @@ namespace ETWController.UI
             get { return _TraceStop; }
             set { SetProperty<string>(ref _TraceStop, value); }
         }
+
+        public bool _IsCustomSetting;
+        public bool IsCustomSetting
+        {
+            get { return _IsCustomSetting; }
+            set
+            {
+                SetProperty<bool>(ref _IsCustomSetting, value);
+            }
+        }
+
+        public bool _AutoOpenAfterStopped = false;
+        public bool AutoOpenAfterStopped
+        {
+            get { return _AutoOpenAfterStopped; }
+            set
+            {
+                SetProperty<bool>(ref _AutoOpenAfterStopped, value);
+            }
+        }
+        public string StatusPrefix => IsRemoteState ? "Remote Recording:" : "Local Recording:";
+
+        public void UpdateSelectedPreset()
+        {
+            bool found = false;
+            foreach (var preset in Presets)
+            {
+                if (preset.ContainsData
+                    && preset.TraceStartCommand.Trim() == TraceStart.Trim()
+                    && preset.TraceStopCommand.Trim() == TraceStop.Trim()
+                    && preset.TraceCancelCommand.Trim() == TraceCancel.Trim())
+                {
+                    SelectedPreset = preset;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                IsCustomSetting = SelectedPreset.NeedsManualEdit || Configuration.Default.AlwaysShowCommandEditBoxes;
+            }
+            else
+            {
+                IsCustomSetting = true;
+                SelectedPreset = _Presets[0];
+            }
+        }
+
 
         public string TraceStopFullCommandLine
         {
@@ -105,15 +182,18 @@ namespace ETWController.UI
             {
                 string traceFileName = RootModel.UnexpandedCountedTraceFileName;
 
-                // some day we might specify the output file already with the start command ... 
-                string lret = TraceStart.Replace(TraceFileNameVariable, traceFileName);
+                string commandLine = TraceStart.Replace(TraceFileNameVariable, traceFileName);
 
-                if (!lret.StartsWith(ETWController.ViewModel.CustomCommandPrefix)) // its still WPR
+                if (commandLine.StartsWith("-")) // its still WPR, no command at start, only the args
                 {
                     string ownManifest = Path.Combine("ETW", "HookEvents.wprp");
-                    lret += " -start " + ownManifest;
+
+                    if (!commandLine.ToLowerInvariant().Contains("hookevents.wprp"))
+                    {
+                        commandLine += " -start " + ownManifest;
+                    }
                 }
-                return lret;
+                return commandLine;
             }
         }
         TraceStates _TraceStates;
@@ -130,7 +210,7 @@ namespace ETWController.UI
         /// <summary>
         /// Command line output from each executed command line
         /// </summary>
-        public ObservableCollection<string> CommandOutputs
+        public ObservableCollection<LogEntry> CommandOutputs
         {
             get;
             set;
@@ -162,13 +242,15 @@ namespace ETWController.UI
             private set;
         }
 
+        public bool IsLocalState => !IsRemoteState;
 
 
-        public TraceControlViewModel(ETWController.ViewModel rootModel, bool isRemoteState)
+
+        public TraceControlViewModel(ViewModel rootModel, bool isRemoteState, AddonData addonData)
         {
             RootModel = rootModel;
             IsRemoteState = isRemoteState;
-            CommandOutputs = new ObservableCollection<string>();
+            CommandOutputs = new ObservableCollection<LogEntry>();
 
             ShowCommand = new DelegateCommand((o) =>
                 {
@@ -193,13 +275,32 @@ namespace ETWController.UI
                     options = Environment.ExpandEnvironmentVariables(options.Replace(TraceFileNameVariable, outFile));
                     var startInfo = new ProcessStartInfo(exe,  options)
                     {
-                        WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                        WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                        UseShellExecute = false
                     };
                     Process.Start(startInfo);
-                    AddLogEntry(ETWController.ViewModel.CustomCommandPrefix + exe + options, new Tuple<int, string>(0, ""), CommandOutputs);
+                    AddLogEntry(exe + options);
                 }
             }, 
-            () => !IsRemoteState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
+            () => IsLocalState && RootModel.StopData != null && File.Exists(RootModel.StopData.TraceFileName)); // dynamically update the button enabled state if the output file does exist.
+            _Presets.Add(new Preset{Name = "<Manual Editing>", NeedsManualEdit = true});
+            if (addonData != null)
+            {
+                _Presets.AddRange(addonData.Presets);
+            }
+            if (addonData == null || !addonData.HideStandardPresets)
+            {
+                _Presets.AddRange(Configuration.Default.Presets);
+            }
+
+            foreach (var preset in Presets)
+            {
+                // heuristic: if name or command contains "xxx" it must be edited by hand
+                if (preset.ContainsData && (preset.TraceStartCommand.Contains("xxx") || preset.Name.Contains("xxx")))
+                {
+                    preset.NeedsManualEdit = true;
+                }
+            }
         }
 
         /// <summary>
@@ -238,20 +339,23 @@ namespace ETWController.UI
         /// <param name="wprCommandOutput"></param>
         internal void ProcessStopCommand(Tuple<int, string> wprCommandOutput)
         {
-            AddLogEntry(RootModel.StopData.TraceStopFullCommandLine, wprCommandOutput, CommandOutputs);
+            AddLogEntry(RootModel.StopData.TraceStopFullCommandLine, wprCommandOutput);
             OpenTraceCommand.RaiseCanExecuteChanged();
-            if (wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) 
+            if ((wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) && !IsErrorOutput(wprCommandOutput.Item2)) 
             {
                 // Trace not running
             }
             else
             {
+                TraceStates = TraceStates.Stopped;
                 RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
 
-            RootModel.StopData.VerifySuccesfulStop();
-
-
+            var isSuccessful = RootModel.StopData.VerifySuccessfulStop();
+            if (isSuccessful && IsLocalState && AutoOpenAfterStopped)
+            {
+                OpenTraceCommand.Execute(null);
+            }
             TraceStates = TraceStates.Stopped;
         }
 
@@ -261,16 +365,39 @@ namespace ETWController.UI
         /// <param name="wprCommandOutput"></param>
         internal void ProcessStartCommand(Tuple<int, string> wprCommandOutput)
         {
-            AddLogEntry(TraceStartFullCommandLine, wprCommandOutput, CommandOutputs);
+            var entry = AddLogEntry(TraceStartFullCommandLine, wprCommandOutput);
 
-            if (wprCommandOutput.Item1 == 0)
+            if (!entry.HasError)
             {
-                TraceStates = TraceStates.Running;
+                if (TraceStates == TraceStates.Starting)
+                {
+                    TraceStates = TraceStates.Running;
+                }
             }
             else
             {
+                TraceStates = TraceStates.Stopped;
                 RootModel.MessageBoxDisplay.ShowMessage($"Error occured: {wprCommandOutput.Item2}", "Error");
             }
+        }
+
+        private bool IsErrorOutput(string txt)
+        {
+            // TODO: make error patterns configurable in config file (?) [2022-01-11]
+            if (txt.Contains("Invalid command")
+            || txt.Contains("Error code: ")
+            || txt.Contains("Error:")
+            || txt.Contains("execute the script with administrative rights")
+            || txt.Contains("Invalid Scenario:")
+            || txt.Contains("Invalid command line argument")
+            || txt.Contains("Merge Error.")
+            || txt.Contains("file access error during merge")
+            || txt.Contains("xperf: error"))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -281,23 +408,35 @@ namespace ETWController.UI
         {
             if (wprCommandOutput.Item1 == 0 || wprCommandOutput.Item1 == Wpr_Code_NoTraceRunning) // either it was cancelled or no session was running 
             {
-                this.TraceStates = TraceStates.Stopped;
+                TraceStates = TraceStates.Stopped;
             }
-            AddLogEntry(this.TraceCancel, wprCommandOutput, CommandOutputs);
+            AddLogEntry(TraceCancel, wprCommandOutput);
         }
 
-        void AddLogEntry(string command, Tuple<int, string> wprCommandResult, Collection<string> log)
+        public LogEntry AddLogEntry(string command, Tuple<int, string> wprCommandResult)
         {
             // remove empty lines
             string[] strippedOutput = wprCommandResult.Item2.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var resultString = string.Join(Environment.NewLine, strippedOutput.Where(x=>!string.IsNullOrEmpty(x)));
+            if (string.IsNullOrWhiteSpace(resultString))
+            {
+                resultString = "[no output from command]";
+            }
+            var logEntry = new LogEntry{Command = command, Output = resultString, 
+                HasError = wprCommandResult.Item1 != 0 || IsErrorOutput(wprCommandResult.Item2), 
+                Timestamp = DateTimeOffset.Now
+            };
+            CommandOutputs.Add(logEntry);
+            return logEntry;
+        }
 
-            string logMessage = string.Format("{0}: {1}{2}{3}",
-                                            DateTime.Now.ToString("hh:mm:ss.fff"),
-                                            Environment.ExpandEnvironmentVariables(command.StartsWith(ETWController.ViewModel.CustomCommandPrefix) ? 
-                                                                                   command.Substring(ETWController.ViewModel.CustomCommandPrefix.Length) : "wpr " + command),
-                                            Environment.NewLine,
-                                            string.Join(Environment.NewLine, strippedOutput.Where(x=>!string.IsNullOrEmpty(x))));
-            log.Add(logMessage);
+        public LogEntry AddLogEntry(string command)
+        {
+            var logEntry = new LogEntry{Command = command, Output = null, 
+                HasError = false, Timestamp = DateTimeOffset.Now
+            };
+            CommandOutputs.Add(logEntry);
+            return logEntry;
         }
     }
 }

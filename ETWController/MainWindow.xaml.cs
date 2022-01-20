@@ -1,8 +1,13 @@
-﻿using ETWController.Hooking;
+﻿using System;
+
+using ETWController.Hooking;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+
+using ETWController.UI;
+
 
 namespace ETWController
 {
@@ -93,9 +98,15 @@ namespace ETWController
             Model.Dispose();
         }
 
+        private void MainWindow_OnClosed(object sender, EventArgs e)
+        {
+            // make sure all subwindows are also closed:
+            Application.Current.Shutdown();
+        }
+
         private void TraceRefreshSelected(object sender, RoutedEventArgs e)
         {
-            if( cTraceSessionsTab.IsSelected == true )
+            if( TraceSessionsTab.IsSelected )
             {
                 Model.Commands["TraceRefresh"].Execute(null);
             }
@@ -112,5 +123,28 @@ namespace ETWController
         }
 
 
+        private void ShowTraceSessions_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (SessionsWindow == null)
+            {
+                SessionsWindow = new TraceSessionsWindow((ViewModel)DataContext);
+                SessionsWindow.Closed += (a, b) => SessionsWindow = null;
+            }
+            SessionsWindow.Show();
+            SessionsWindow.Activate();
+        }
+
+        public TraceSessionsWindow SessionsWindow { get; set; }
+
+        private async void MainWindow_OnInitialized(object sender, EventArgs e)
+        {
+            if (!Configuration.Default.WelcomeScreenShown)
+            {
+                await Task.Delay(200);
+                Configuration.Default.WelcomeScreenShown = true;
+                var win = new HelpWindow("ETW Controller - Welcome", ViewModel.WelcomeText);
+                win.ShowDialog();
+            }
+        }
     }
 }

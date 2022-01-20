@@ -5,79 +5,41 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:ui="clr-namespace:ETWController.UI"
-             mc:Ignorable="d" d:DesignWidth="559" Height="127">
-    <StackPanel >
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="5"/>
-            </Grid.RowDefinitions>
-        </Grid>
-        <StackPanel Orientation="Horizontal" Height="25">
-            <Label Margin="0,-5,0,0">Trace State:</Label>
-            <TextBox Width="60" Name="cTraceState" Text="{Binding TraceStates}" IsReadOnly="True">
-                <TextBox.Background>
-                    <SolidColorBrush x:Name="tbBrush" Color="White"/>
-                </TextBox.Background>
-                <TextBox.Resources>
-                    <Storyboard x:Key="TraceRunningAnimation" Storyboard.TargetProperty="Background.Color">
-                        <ColorAnimation  Duration="0:0:2.0"  
-                                                AutoReverse="True"  RepeatBehavior="Forever" 
-                                                From="White" To="Green" />
-                    </Storyboard>
-                    <Storyboard x:Key="TraceStoppingAnimation" Storyboard.TargetProperty="Background.Color">
-                        <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
-                                                RepeatBehavior="Forever" AutoReverse="True" 
-                                                From="White" To="Blue" />
-                    </Storyboard>
-                    <Storyboard x:Key="TraceStartingAnimation" Storyboard.TargetProperty="Background.Color">
-                        <ColorAnimation  Duration="0:0:2.0" IsAdditive="False"
-                                                RepeatBehavior="Forever" AutoReverse="True" 
-                                                From="White" To="Yellow" />
-                    </Storyboard>
-                </TextBox.Resources>
-            </TextBox>
-            <Button Width="100" Margin="10,0,0,0" ToolTip="Show the output of all executed WPR comamnds." Command="{Binding ShowCommand}">Show Output</Button>
-            <Button Width="100" Margin="10,0,0,0" ToolTip="Open the output etl file when present with WPA." Command="{Binding OpenTraceCommand}">Open Trace</Button>
-            <Label Margin="10,0,0,0">Presets</Label>
-            <ComboBox ItemsSource="{Binding Presets}"  SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"></ComboBox>
-        </StackPanel>
-        <Grid Margin="0,5,0,0">
+             mc:Ignorable="d" d:DesignWidth="559">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <StackPanel>
+        <Grid Margin="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="25"></RowDefinition>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="23*"/>
+                <RowDefinition Height="20*"/>
+                <RowDefinition Height="20*"/>
             </Grid.RowDefinitions>
-            <Label Content="Start Comand" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceStart}"  ToolTip="Enter here the WPR command line arguments to start tracing. Custom script must start with ::" Margin="0,0,0,0"/>
-        </Grid>
-        <Grid Margin="0,5,0,0" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="25"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Label Content="Stop Command" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file. Custom script command must start with :: Supported variables are $FileName, $FileDirectory and $ScreenshotDir"/>
-        </Grid>
-        <Grid Margin="0,5,0,0" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="439"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
-            </Grid.RowDefinitions>
-            <Label Content="Cancel Command" Grid.Column="0" Grid.Row="0" Margin="0,-5,0,0"/>
-            <TextBox Grid.Column="1" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line to cancel tracing. Custom script command must start with ::  Supported variables are $FileName, $FileDirectory and $ScreenshotDir"/>
-        </Grid>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="5"/>
-            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Padding="5,0" VerticalAlignment="Center">Preset:</Label>
+            <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset, Mode=TwoWay}" 
+                      MinWidth="200" HorizontalAlignment="Left"
+                      Margin="0" VerticalAlignment="Center"/>
+            <Label Content="Start Command:" Grid.Column="0" Grid.Row="1" Padding="5,0" Margin="0,6,0,0"
+                   Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TraceStart}"  Margin="0,6,0,1"
+                     ToolTip="Enter here the WPR command line arguments to start tracing"
+                     Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Label Content="Stop Command:" Grid.Column="0" Grid.Row="2" Padding="5,0"
+                   Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding TraceStop}" ToolTip="Enter here the WPR command line arguments to stop capturing the trace and save the output file. Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"
+                     Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Label Content="Cancel Command:" Grid.Column="0" Grid.Row="3" Padding="5,0"
+                   Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding TraceCancel}" ToolTip="Enter here the WPR command line to cancel tracing. Supported variables are $FileName, $FileDirectory and $ScreenshotDir" Margin="1"
+                     Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
     </StackPanel>
 </UserControl>

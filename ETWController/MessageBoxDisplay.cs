@@ -11,7 +11,19 @@ namespace ETWController
     {
         public void ShowMessage(string message, string caption)
         {
-            MessageBox.Show(message, caption);
+            var captionExtended = "ETW Controller - " + caption;
+            if (caption == "Error")
+            {
+                MessageBox.Show(message, captionExtended, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else if (caption == "Warning")
+            {
+                MessageBox.Show(message, captionExtended, MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                MessageBox.Show(message, captionExtended, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }

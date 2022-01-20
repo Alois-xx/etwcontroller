@@ -36,6 +36,9 @@ namespace ETWController
             {
                 CaptureKeyboard = Configuration.Default.CaptureKeyboard;
                 CaptureMouseButtonDown = Configuration.Default.CaptureMouseButtonDown;
+                CaptureMouseWheel = Configuration.Default.CaptureMouseWheel;
+                CaptureMouseMove = Configuration.Default.CaptureMouseMove;
+                CaptureScreenshots = Configuration.Default.CaptureScreenShots;
             }
 
             string currentArg = null;
@@ -60,6 +63,9 @@ namespace ETWController
 
                     case "-capturemouseclick":
                         CaptureMouseButtonDown = true;
+                        break;
+                    case "-capturemousewheel":
+                        CaptureMouseWheel = true;
                         break;
                     case "-capturemousemove":
                         CaptureMouseMove = true;
@@ -140,7 +146,8 @@ namespace ETWController
             get; set;
         }
         public bool CaptureKeyboard { get; private set; }
-        public bool CaptureMouseButtonDown { get; private set; }
+        public bool CaptureMouseButtonDown { get; private set; } 
+        public bool CaptureMouseWheel { get; private set; }
         public bool CaptureMouseMove { get; private set; }
         public string SendToServer { get; private set; }
         public string SendToServerPort { get; private set; }

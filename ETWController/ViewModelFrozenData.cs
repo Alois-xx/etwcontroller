@@ -41,13 +41,15 @@ namespace ETWController
         /// <summary>
         /// Validation checks when tracing was stopped. E.g. the output file was created if the command line did contain a $FileName parameter
         /// </summary>
-        public void VerifySuccesfulStop()
+        public bool VerifySuccessfulStop()
         {
+            var retval = true;
             if( TraceStopNotExpanded.Contains(TraceControlViewModel.TraceFileNameVariable) )
             {
                 if( !File.Exists(TraceFileName) )
                 {
-                    RootModel.MessageBoxDisplay.ShowMessage($"Error: Output file {RootModel.StopData.TraceFileName} was not found!", "Error");
+                    retval = false;
+                    RootModel.MessageBoxDisplay.ShowMessage($"Expected output file '{RootModel.StopData.TraceFileName}' was not found!", "Error");
                 }
             }
             else if( TraceStopNotExpanded.Contains(TraceControlViewModel.TraceFileDirVariable) )
@@ -56,7 +58,8 @@ namespace ETWController
 
                 if (!Directory.Exists(outputDir))
                 {
-                    RootModel.MessageBoxDisplay.ShowMessage($"Error: Output directory {outputDir} does not exist", "Error");
+                    retval = false;
+                    RootModel.MessageBoxDisplay.ShowMessage($"Output directory '{outputDir}' does not exist", "Error");
                 }
                 else
                 {
@@ -64,10 +67,13 @@ namespace ETWController
 
                     if (newEtlFiles == 0)
                     {
-                        RootModel.MessageBoxDisplay.ShowMessage($"Error: No new etl files were created in directory {outputDir} since trace start!", "Error");
+                        retval = false;
+                        RootModel.MessageBoxDisplay.ShowMessage($"No new *.etl files were created in directory '{outputDir}' since trace start!", "Error");
                     }
                 }
             }
+
+            return retval;
         }
     }
 }

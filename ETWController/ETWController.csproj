@@ -108,6 +108,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -117,6 +118,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AddonData.cs" />
     <Compile Include="AsyncCommands\AsyncCommand.cs" />
     <Compile Include="AsyncCommands\AsyncUICommand.cs" />
     <Compile Include="AsyncCommands\NetworkReceiveState.cs" />
@@ -148,6 +150,7 @@
     <Compile Include="UI\ETWControllerConfiguration.xaml.cs">
       <DependentUpon>ETWControllerConfiguration.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\MessageToColorConverter.cs" />
     <Compile Include="UI\NotifyBase.cs" />
     <Compile Include="UI\OutputWindow.xaml.cs">
       <DependentUpon>OutputWindow.xaml</DependentUpon>
@@ -161,6 +164,12 @@
     <Compile Include="Network\TraceControlerService.cs" />
     <Compile Include="UI\DelegateCommand.cs" />
     <Compile Include="UI\PortnumberValidator.cs" />
+    <Compile Include="UI\TraceSessionsWindow.xaml.cs">
+      <DependentUpon>TraceSessionsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\TraceStatusDisplay.xaml.cs">
+      <DependentUpon>TraceStatusDisplay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\TraceControl.xaml.cs">
       <DependentUpon>TraceControl.xaml</DependentUpon>
     </Compile>
@@ -206,6 +215,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UI\TraceSessionsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\TraceStatusDisplay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\TraceControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -230,26 +247,37 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="ETW\default.stacktags">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
     <Content Include="ETW\GC.wprp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ETW\Simple.wpaProfile">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ETW\PageFault.stacktags">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Documentation\ReadMe.md" />
-    <None Include="ETW\.NET.stacktags" />
-    <None Include="ETW\OverView.wpaProfile" />
-    <None Include="ETW\VirusScanners.stacktags" />
-    <None Include="ETW\Wait.stacktags" />
-    <None Include="ETW\Windows.stacktags" />
+    <Content Include="ETW\.NET.stacktags">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\Overview.wpaProfile">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\VirusScanners.stacktags">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\Wait.stacktags">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ETW\Windows.stacktags">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
@@ -260,7 +288,7 @@
     </None>
     <Content Include="ETW\HookEvents.wprp">
       <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <AppDesigner Include="Properties\" />
     <None Include="Scripts\xxWPR.cmd">
@@ -273,14 +301,14 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="ETW\GC.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ETW\HookRegions.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
     <Content Include="ETW\JIT.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Screenshots\HtmlTemplate.html" />
     <Content Include="Scripts\7z.dll">

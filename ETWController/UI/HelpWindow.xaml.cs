@@ -24,6 +24,7 @@ namespace ETWController.UI
             if( bUseFixedFont)
             {
                 cText.FontFamily = new FontFamily("Lucida Console");
+                Width = 1200;
             }
             this.Title = caption;
             cText.AppendText(helpText);

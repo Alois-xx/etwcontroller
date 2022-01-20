@@ -130,7 +130,7 @@ namespace ETWController.Commands
                     {
                         if (task.IsFaulted)
                         {
-                            SafeNotifyError(String.Format("{0}{1}", StartingError, task.Exception.InnerException.Message), task.Exception);
+                            SafeNotifyError(String.Format("{0}\n{1}", StartingError, task.Exception.InnerException.Message), task.Exception);
                         }
                         else
                         {
@@ -150,7 +150,7 @@ namespace ETWController.Commands
                 {
                     if( task.IsFaulted )
                     {
-                        SafeNotifyError(String.Format("{0}{1}", StartingError, task.Exception.InnerException.Message), task.Exception);
+                        SafeNotifyError(String.Format("{0}\n{1}", StartingError, task.Exception.InnerException.Message), task.Exception);
                         ExecutionState = CommandState.Finished;
                         return null;
                     }

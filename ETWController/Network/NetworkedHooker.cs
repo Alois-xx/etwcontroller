@@ -35,7 +35,15 @@ namespace ETWController
             "Down",
             "Left",
             "Right",
+            "Home",
+            "End",
+            "PageUp",
+            "Next",
+            "Insert",
+            "Delete",
+            "Escape",
             "Return",
+            "Capital",
             "F1",
             "F2",
             "F3",
@@ -49,10 +57,37 @@ namespace ETWController
             "F11",
             "F12",
             "LeftAlt",
+            "LeftCtrl",
             "LeftShift",
             "RightShift",
             "RightAlt",
+            "RightCtrl",
+            "LWin",
+            "RWin",
+            "Apps",
             "Tab",
+            "Oem1",
+            "Oem2",
+            "Oem3",
+            "Oem4",
+            "Oem5",
+            "Oem6",
+            "Oem7",
+            "Oem8",
+            "Oem9",
+            "OemPlus",
+            "OemMinus",
+            "OemPeriod",
+            "OemComma",
+            "Snapshot",
+            "Scroll",
+            "Pause",
+            "NumLock",
+            "Divide",
+            "Multiply",
+            "Subtract",
+            "Add",
+            "Decimal",
             "Space"
         };
 
@@ -133,10 +168,13 @@ namespace ETWController
 
         void Hooker_OnMouseWheel(int wheelDelta, int x, int y)
         {
-            int id = CurrentId;
-            HookEvents.ETWProvider.MouseWheel(id, wheelDelta, x, y); // write to ETW
-            string message = String.Format("MouseWheel Delta {0}, ({1},{2})", wheelDelta, x, y);
-            SendToNetworkAsync(id, message); // Send over network when present 
+            if (Model.CaptureMouseWheel)
+            {
+                int id = CurrentId;
+                HookEvents.ETWProvider.MouseWheel(id, wheelDelta, x, y); // write to ETW
+                string message = String.Format("MouseWheel Delta {0}, ({1},{2})", wheelDelta, x, y);
+                SendToNetworkAsync(id, message); // Send over network when present 
+            }
         }
 
         void Hooker_OnMouseMove(int x, int y)
@@ -178,14 +216,14 @@ namespace ETWController
                 {
                     if (screenshotTask.Result.Key != null)
                     {
-                        Model.ReceivedMessages.Add($"Saved Screenshot to {screenshotTask.Result}");
+                        Model.ReceivedMessages.Add($"Saved Screenshot to {screenshotTask.Result.Key}");
                     }
                     if(screenshotTask.Result.Value != null)
                     {
                         Model.ReceivedMessages.Add($"Got Exception while taking screenshot {screenshotTask.Result.Value}");
                     }
 
-                }, CancellationToken.None, TaskContinuationOptions.None, Model.UISheduler);
+                }, CancellationToken.None, TaskContinuationOptions.None, Model.UIScheduler);
             }
 
             SendToNetworkAsync(id, message);
@@ -217,6 +255,7 @@ namespace ETWController
             int id = CurrentId;
             HookEvents.ETWProvider.KeyDown(id, strKey);
 
+            
             if (Model.CaptureScreenShots && Recorder != null) // Many actions start with enter take a screenshot from Enter as well. 
             {
                 switch (key)

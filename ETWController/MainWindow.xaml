@@ -3,10 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="clr-namespace:ETWController"
         xmlns:h="clr-namespace:ETWController.Hooking"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
         xmlns:ui="clr-namespace:ETWController.UI"
-        MinHeight="440"
-        MinWidth="640"
-        Title="ETW Controller And Logger" Height="500" Width="773.5" Closing="Window_Closing">
+        Background="#F0F0F0"
+        Title="ETW Controller and Logger" 
+        d:DataContext="{d:DesignInstance l:DesignTimeCustomerViewModel, IsDesignTimeCreatable=True}"
+        Height="760" Width="700" Closing="Window_Closing" Closed="MainWindow_OnClosed"
+        Initialized="MainWindow_OnInitialized">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -14,22 +19,43 @@
                 <ResourceDictionary Source="UI\GlassButton.xaml"/>
                 <ResourceDictionary Source="UI\Validation.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <ui:MessageToColorConverter x:Key="MessageToColorConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu Grid.Row="0"  DockPanel.Dock="Top">
-            <MenuItem Header="Configuration">
-                <MenuItem Header="Configuration" Command="{Binding Commands[Config]}"/>
-                <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Create manifest and register hook key ETW provider in system. This needs to be done only once."/>
-                <MenuItem Header="Reset Configuration" Command="{Binding Commands[ConfigReset]}" ToolTip="Reset any user configured values to the defaults of ETWController in its current version. This can help to see updated settings provided by a newer version of ETWController."/>
+            <MenuItem Header="Commands">
+                <MenuItem Header="Show Trace Sessions..." Click="ShowTraceSessions_OnClick" ToolTip="Open window which lists active trace sessions"/>
+                <MenuItem Header="Status Message History..." Command="{Binding Commands[ShowMessages]}" ToolTip="Open window which lists previous status messages"/>
+                <Separator/>
+                <MenuItem Header="Hacks">
+                    <MenuItem Header="Execute 'Stop' command" Command="{Binding Commands[StopTracingUnconditionally]}" ToolTip="Executes the 'Stop' command unconditionally, even if the Stop button is disabled"/>
+                    <MenuItem Header="Execute 'Cancel' command" Command="{Binding Commands[CancelTracing]}" ToolTip="Executes the 'Cancel' command unconditionally, even if the Cancel button is disabled"/>
+                    <Separator/>
+                    <MenuItem Header="Enable all buttons (Caution!)" Command="{Binding Commands[EnableButtons]}"  ToolTip="If the application is in an inconsistent state with disabled buttons, this can force all buttons to be active. Use at your own risk, this is for troubleshooting only."/>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Options">
+                <MenuItem IsCheckable="True" x:Name="LocalTraceEnabledCB" Header="Enable local ETW tracing" InputGestureText="F7" 
+                          ToolTip="When checked, start local ETW recording when the Start button is hit" 
+                          IsChecked="{Binding LocalTraceEnabled}" />
+                <MenuItem IsCheckable="True" x:Name="ServerTraceEnabledCB" Header="Enable remote machine ETW tracing"  InputGestureText="F8" 
+                          ToolTip="When checked, start remote ETW recording when the Start button is hit" 
+                          IsChecked="{Binding ServerTraceEnabled}"/>
+                <Separator />
+                <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Register ETW Provider to record mouse and keyboard. &#x0a;Creates manifest and registers ETW provider in system. &#x0a;&#x0a;This needs to be done once on a machine only, it is persisted even over reboots."/>
+                <Separator />
+                <MenuItem Header="Edit Configuration..." Command="{Binding Commands[Config]}" ToolTip="Open config window"/>
+                <MenuItem Header="Reset Configuration" Command="{Binding Commands[ConfigReset]}" ToolTip="Reset any user configured values to the defaults of ETWController in its current version.&#x0a;This can help to see updated settings provided by a newer version of ETWController."/>
             </MenuItem>
             <MenuItem Header="Help">
-                <MenuItem Header="Command line options" Command="{Binding Commands[ShowCommandLineOptions]}"/>
-                <MenuItem Header="About" Command="{Binding Commands[About]}"/>
+                <MenuItem Header="Command line options..." Command="{Binding Commands[ShowCommandLineOptions]}" InputGestureText="F1" ToolTip="Show help window"/>
+                <MenuItem Header="About..." Command="{Binding Commands[About]}" ToolTip="Show help window with version string"/>
             </MenuItem>
 
         </Menu>
-        <StatusBar MaxHeight="100"
+        <StatusBar MaxHeight="100" Background="#F8F8F0"
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Stretch" DockPanel.Dock="Bottom"
             >
@@ -66,75 +92,160 @@
                 </TextBlock.Style>
             </TextBlock>
         </StatusBar>
-        <TabControl>
-            <TabItem Header="Network And Capturing">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="150"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Expander Header="Capture keyboard and mouse" IsExpanded="True" Grid.Row="0" Expanded="Expander_Expanded" >
-                        <Grid Height="120">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="90"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150" />
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Capture keyboard" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureKeyboard}" Height="15" ToolTip="Log all keyboard down events to ETW."/>
-                            <CheckBox Grid.Row="0" Grid.Column="1" Content="Capture mouse clicks" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureMouseButtonDown}" Height="16" Grid.ColumnSpan="2" ToolTip="Log all mouse button down events to ETW."/>
-                            <CheckBox Grid.Row="0" Grid.Column="3" Content="Capture mouse move"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseMove}"  VerticalAlignment="Top" Height="15" Grid.ColumnSpan="2" ToolTip="Log all mouse move events to ETW. There can be many of them!"/>
-                            <CheckBox Grid.Row="1" Grid.Column="1" Content="Take Screenshots"  HorizontalAlignment="Left" IsChecked="{Binding CaptureScreenShots}"  VerticalAlignment="Top" Height="15" Grid.ColumnSpan="2" ToolTip="Capture a screenshot at every mouse click."/>
-                            <CheckBox Grid.Row="1" Grid.Column="0"  Content="Encrypt keyboard keys" IsChecked="{Binding IsKeyBoardEncrypted}" ToolTip="Enabled by default so you do not record passwords or other sensitive information by accident. Only a generic SomeKey mesage is logged if checked. But the keys F1-F10, Enter, Space, Alt, Tab, Shift and the cursor keys are still preserved." />
-                            <Grid Grid.Row="2" Grid.ColumnSpan="4">
+        <TabControl DockPanel.Dock="Top">
+            <TabItem Header="Recording Control">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <GroupBox Header="Output" Margin="5" Padding="3" >
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Padding="5,0,15,0" VerticalAlignment="Center">_Filename:</Label>
+                                <TextBox Grid.Column="1" Text="{Binding UnexpandedTraceFileName}" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="2" Grid.RowSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <CheckBox Margin="5,0"  IsChecked="{Binding AppendIndexToOutputFileName}" Content="Append Index"
+                                        VerticalAlignment="Center"
+                                        ToolTip="Append a counter to the output file name to prevent overwriting old trace data by accident in the current trace session." />
+                                    <TextBox Margin="5,0" VerticalAlignment="Center" Width="40" IsEnabled="{Binding AppendIndexToOutputFileName}" TextAlignment="Right">
+                                        <TextBox.Text>
+                                            <Binding Path="TraceFileCounter" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                                                <Binding.ValidationRules>
+                                                    <ui:PortnumberValidator Min="1" Max="1000"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+
+
+                        <GroupBox Header="_Local recording" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}" Margin="5" Padding="3" >
+                            <ui:TraceControl DataContext="{Binding LocalTraceSettings}"  Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}"/>
+                        </GroupBox>
+
+                        <Grid Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ServerTraceEnabledCB}">
+                            <GroupBox Margin="5" Padding="3">
+                                <GroupBox.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Padding="0,0,5,0">_Remote recording on</Label>
+                                        <TextBlock Text="{Binding Host}" Foreground="#FF0674B6" FontWeight="Bold" Margin="3,0,0,0" />
+                                    </StackPanel>
+                                </GroupBox.Header>
+                                <ui:TraceControl DataContext="{Binding ServerTraceSettings}"></ui:TraceControl>
+                            </GroupBox>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,6"
+                                    Background="#F9F9F9" Visibility="Hidden">
+                                <TextBlock Text="Control-Port:" Margin="3,0,0,0" Foreground="#69A3C6" />
+                                <TextBlock Text="{Binding WCFPort}" Margin="2,0,3,0" Foreground="#69A3C6" />
+                            </StackPanel>
+                        </Grid>
+
+                        <GroupBox Margin="5,2" Padding="3" Header="Keyboard and Mouse">
+                            <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="30"/>
-                                    <RowDefinition Height="30"/>
-                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="150" />
                                     <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Row="0" Grid.Column="0" Content="Log Slow message when key is pressed" HorizontalAlignment="Left"  Height="28"  ToolTip="Log this message when the Slow event key was pressed."/>
-                                <Button  Grid.Row="0" Grid.Column="1" Style="{StaticResource GlassButton}" Width="28" Height="23" Background="#FF1DB97A"  Content="Slow" HorizontalAlignment="Left" VerticalAlignment="Top"  Click="DefineSlowHotkeyClick" ToolTip="Define hotkey to log a Slow event with message text to the right." />
-                                <TextBox Grid.Row="0" Grid.Column="2" Height="25" Width="130" TextWrapping="Wrap" Name="cSlowHotkyeTextBox" Text="{Binding SlowEventHotkey}"  IsEnabled="False"  ToolTip="Press the Slow Button to define a hotkey for the slow event."/>
-                                <TextBox Grid.Row="0" Grid.Column="3" Width="240" HorizontalAlignment="Left" Height="25" Text="{Binding SlowEventMessage}"  Style="{StaticResource enableSlowMessage}" ToolTip="Log this message when the Slow event key was pressed."  />
-                                <Button Grid.Row="0" Grid.Column="4" Width="50" HorizontalAlignment="Left" Height="25" IsDefault="True" Command="{Binding Commands[LogSlow]}" Content="Log" ToolTip="Log directly the slow event message to ETW."/>
-
-                                <Label Grid.Row="1" Grid.Column="0" Content="Log Fast message when key is pressed" HorizontalAlignment="Left"  Height="28"  ToolTip="Log this message when the Fast event key was pressed."/>
-                                <Button  Grid.Row="1" Grid.Column="1" Style="{StaticResource GlassButton}" Width="28" Height="23" Background="#FF1DB97A"  Content="Fast" HorizontalAlignment="Left" VerticalAlignment="Top"  Click="DefineFastHotkeyClick" ToolTip="Define hotkey to log a Fast event with message text to the right." />
-                                <TextBox Grid.Row="1" Grid.Column="2" Height="25" Width="130" TextWrapping="Wrap" Name="cFastHotkeyTextBox" Text="{Binding FastEventHotkey}"  IsEnabled="False"  ToolTip="Press the Fast button to define a hotkey for the Fast event."/>
-                                <TextBox Grid.Row="1" Grid.Column="3" Width="240" HorizontalAlignment="Left" Height="25" Text="{Binding FastEventMessage}"  Style="{StaticResource enableFastMessage}" ToolTip="Log this message when the Fast event key was pressed."  />
-                                <Button Grid.Row="1" Grid.Column="4" Width="50" HorizontalAlignment="Left" Height="25"  Command="{Binding Commands[LogFast]}" Content="Log" ToolTip="Log directly the slow event message to ETW."/>
-
-
-                                <Grid Grid.Row="2" Grid.ColumnSpan="5">
+                                <CheckBox Grid.Row="1" Grid.Column="0" Content="Record _key presses" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureKeyboard}" Height="15" ToolTip="Log all keyboard down events to ETW." Name="LogKeyboardCB"/>
+                                <CheckBox Grid.Row="1" Grid.Column="1"  Content="Secure key logging" IsChecked="{Binding IsKeyBoardEncrypted}" 
+                                      ToolTip="For regular characters, only a generic 'SomeKey' message is logged for security reasons.&#x0a;Special keys like F1-F12, Enter, Space, Alt, Tab, Shift and cursor keys are still recorded verbatim.&#x0a;&#x0a;Enabled by default so you do not record passwords or other sensitive information by accident!" 
+                                      IsEnabled="{Binding IsChecked, ElementName=LogKeyboardCB}" />
+                                <CheckBox Grid.Column="0" Content="Record _mouse clicks" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="{Binding CaptureMouseButtonDown}" Grid.ColumnSpan="2" ToolTip="Log all mouse button down events to ETW."/>
+                                <CheckBox Grid.Column="1" Content="Record mouse _wheel"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseWheel}"  VerticalAlignment="Top" Grid.ColumnSpan="2" ToolTip="Log all mouse wheel events to ETW. There can be many of them!"/>
+                                <CheckBox Grid.Column="2" Content="Record mouse moves"  HorizontalAlignment="Left" IsChecked="{Binding CaptureMouseMove}"  VerticalAlignment="Top" Grid.ColumnSpan="2" ToolTip="Log all mouse move events to ETW. There can be many of them!"/>
+                                <CheckBox Grid.Column="2" Content="Redefine 'Fast'/'Slow' _hotkeys and messages"  HorizontalAlignment="Left" IsChecked="False"  VerticalAlignment="Top"
+                                          Grid.Row="1" Grid.ColumnSpan="2" ToolTip="Check this to enable the definition of two special hotkeys to insert markers into the recorded trace"
+                                          Name="RedefHotkeysCB" />
+                                <Grid Grid.Row="2" Grid.ColumnSpan="3" Grid.Column="0" Margin="0,6,0,0" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=RedefHotkeysCB}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="3"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="250"/>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="33"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="60"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Margin="5,0,0,0">Send captured data over network</TextBlock>
-                                    <CheckBox Grid.Column="1"  Command="{Binding Commands[NetworkSendToggle]}"  Content="Start sending" IsChecked="{Binding NetworkSendEnabled}"   Margin="5,0,0,0"/>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Expander>
+                                    <Label Padding="33,0,10,0" Grid.Row="0" Grid.Column="0" Content="Hotkey for logging 'Slow' message:" HorizontalAlignment="Left" 
+                                       ToolTip="Log given message when the defined hotkey is pressed" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Width="80" TextWrapping="Wrap" Name="cSlowHotkyeTextBox" Text="{Binding SlowEventHotkey}"  
+                                         IsReadOnly="True"  TextAlignment="Center" Background="AliceBlue"
+                                         ToolTip="Click the small button to define a hotkey for the 'Slow' event" VerticalAlignment="Center"/>
+                                    <Button  Grid.Row="0" Grid.Column="2" Style="{StaticResource GlassButton}" Width="12" Height="12" Background="#1D95B9" 
+                                         Click="DefineSlowHotkeyClick" HorizontalAlignment="Left" Margin="2,0"
+                                         ToolTip="Press this button to define hotkey to log a 'Slow' event with message text given to the right. The next key press will be taken as the hotkey." />
+                                    <Label Padding="3,0" Grid.Row="0" Grid.Column="3" HorizontalAlignment="Stretch" Content="Msg:" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="4" HorizontalAlignment="Stretch" Text="{Binding SlowEventMessage}"  Style="{StaticResource enableSlowMessage}" 
+                                             ToolTip="Log this message when the 'Slow' event key was pressed." VerticalAlignment="Center" Padding="1"  />
+                                    <Button Grid.Row="0" Grid.Column="5" Width="60" HorizontalAlignment="Left" IsDefault="True" Command="{Binding Commands[LogSlow]}" Content="Log now" 
+                                        ToolTip="Log the 'Slow' event message to ETW now, without the need to press a key" VerticalAlignment="Center"/>
 
-                    <GridSplitter HorizontalAlignment="Stretch" 
-                  VerticalAlignment="Top" 
-                  Grid.Row="1" ResizeBehavior="PreviousAndNext"
-                  Height="5" Background="#FFBCBCBC"/>
-                    <ListView Grid.Row="2" ItemsSource="{Binding ReceivedMessages}" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <Label Padding="33,0,10,0" Grid.Row="2" Grid.Column="0" Content="Hotkey for logging 'Fast' message:" HorizontalAlignment="Left" ToolTip="Log given message when the defined hotkey is pressed" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Width="80" TextWrapping="Wrap" Name="cFastHotkeyTextBox" Text="{Binding FastEventHotkey}"
+                                         IsReadOnly="True"  TextAlignment="Center" Background="AliceBlue"
+                                         ToolTip="Click the small button to define a hotkey for the 'Fast' event" VerticalAlignment="Center"/>
+                                    <Button  Grid.Row="2" Grid.Column="2" Style="{StaticResource GlassButton}" Width="12" Height="12" Background="#1D95B9" 
+                                         Click="DefineFastHotkeyClick" HorizontalAlignment="Left" Margin="2,0"
+                                         ToolTip="Press this button to define hotkey to log a 'Fast' event with message text given to the right. The next key press will be taken as the hotkey." />
+                                    <Label Padding="3,0" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Stretch" Content="Msg:" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="4" HorizontalAlignment="Stretch" Text="{Binding FastEventMessage}"  Style="{StaticResource enableFastMessage}" 
+                                             ToolTip="Log this message when the 'Fast' event key was pressed" VerticalAlignment="Center" Padding="1"  />
+                                    <Button Grid.Row="2" Grid.Column="5" Width="60" HorizontalAlignment="Left" Command="{Binding Commands[LogFast]}" Content="Log now" 
+                                        ToolTip="Log the 'Fast' event message to ETW now, without the need to press a key" VerticalAlignment="Center"/>
+                                </Grid>
+                                <CheckBox Grid.Row="3" Grid.ColumnSpan="3" Grid.Column="0" Margin="0,10,0,0" Command="{Binding Commands[NetworkSendToggle]}" 
+                                          Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ServerTraceEnabledCB}"
+                                          Content="Send locally logged events also to remote machine" IsChecked="{Binding NetworkSendEnabled}"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Margin="5,2" Padding="3" Header="Display">
+                            <CheckBox Content="Take cyclic _screenshots" IsChecked="{Binding CaptureScreenShots}" ToolTip="Capture a cyclic screenshot (intervall is defined in configuration) as well as on every mouse click or whenever Return key is pressed. To change the interval, open the 'Configuration' window."/>
+                        </GroupBox>
+
+                        <GroupBox Margin="5,2" Padding="3,0" Header="State and Results">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,1" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=LocalTraceEnabledCB}">
+                                    <ui:TraceStatusDisplay DataContext="{Binding LocalTraceSettings}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,1" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ServerTraceEnabledCB}">
+                                    <ui:TraceStatusDisplay DataContext="{Binding ServerTraceSettings}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <StackPanel Name="MainButtonPanel" DockPanel.Dock="Bottom" Height="24" Margin="10,12" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button IsDefault="True" Content="Start Re_cording (F5)" Width="120" 
+                                IsEnabled="{Binding StartButtonEnabled}"
+                                Command="{Binding Commands[StartTracing]}" Margin="10,0,0,0"></Button>
+                            <Button Content="{Binding StopButtonLabel}" Width="120" Name="StopButton"
+                                IsEnabled="{Binding StopButtonEnabled}"
+                                Command="{Binding Commands[StopTracing]}" Margin="10,0,0,0"></Button>
+                            <Button Content="{Binding CancelButtonLabel}" Width="120" Name="CancelButton"
+                                IsEnabled="{Binding CancelButtonEnabled}"
+                                Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Event History">
+                <Grid MinHeight="400">
+                    <ListView ItemsSource="{Binding ReceivedMessages}" ScrollViewer.VerticalScrollBarVisibility="Visible" FontFamily="Consolas">
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Clear" Click="ClearMessages"></MenuItem>
@@ -142,96 +253,52 @@
                         </ListView.ContextMenu>
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Width="600"/>
+                                <GridViewColumn Width="700"/>
                             </GridView>
                         </ListView.View>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="1,-1" />
+                                <Setter Property="Background" Value="{Binding Converter={StaticResource MessageToColorConverter}}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
                     </ListView>
                 </Grid>
             </TabItem>
-            <TabItem Header="Trace Collection">
-                <StackPanel>
-                    <GroupBox>
-                        <GroupBox.Header>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="25"/>
-                                    <RowDefinition Height="10"/>
-                                    <RowDefinition Height="25"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition Width="450"/>
-                                    <ColumnDefinition Width="180"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Grid.Row="0" >$FileName</Label>
-                                <TextBox Grid.Row="0" Grid.Column="1"  Text="{Binding UnexpandedTraceFileName}"/>
-                                <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Orientation="Horizontal">
-                                <CheckBox Margin="5"  IsChecked="{Binding AppendIndexToOutputFileName}" Content="Append Index"
-                                          ToolTip="Append a counter to the output file name to prevent overwriting old trace data by accident in the current trace session." />
-                                    <TextBox Margin="5">
-                                        <TextBox.Text>
-                                            <Binding Path="TraceFileCounter" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
-                                                <Binding.ValidationRules>
-                                                    <ui:PortnumberValidator Min="1" Max="100"/>
-                                                </Binding.ValidationRules>
-                                            </Binding>
-                                        </TextBox.Text>
-                                    </TextBox>
-                                </StackPanel>
-
-                                <TextBlock Grid.Row="2" Grid.Column ="0" Margin="5,0,0,0">Local Host</TextBlock>
-                                <CheckBox Grid.Row="2"  Grid.Column="1" Content="Enable" Margin="5,0,0,0" Width="70" IsChecked="{Binding LocalTraceEnabled}"/>
-                            </Grid>
-                        </GroupBox.Header>
-                        <ui:TraceControl DataContext="{Binding LocalTraceSettings}"></ui:TraceControl>
-                    </GroupBox>
-                    <GroupBox>
-                        <GroupBox.Header>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="150"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock>Server</TextBlock>
-                                    <TextBlock Grid.Column ="0" Text="{Binding Host}" Margin="5,0,0,0"/>
-                                    <TextBlock Grid.Column ="0" Text="{Binding WCFPort}" Margin="5,0,0,0"/>
-                                </StackPanel>
-                                <CheckBox Grid.Column="1" Content="Enable" Margin="5,0,0,0" Width="70" IsChecked="{Binding ServerTraceEnabled}"/>
-                            </Grid>
-                        </GroupBox.Header>
-                        <ui:TraceControl  DataContext="{Binding ServerTraceSettings}"></ui:TraceControl>
-                    </GroupBox>
-                    <StackPanel Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button IsDefault="True" Content="_Start" Width="80" Command="{Binding Commands[StartTracing]}" Margin="10,0,0,0"></Button>
-                        <Button Content="S_top" Width="80"  Command="{Binding Commands[StopTracing]}" Margin="10,0,0,0"></Button>
-                        <Button Content="Can_cel" Width="80" Command="{Binding Commands[CancelTracing]}" Margin="10,0,0,0"/>
+            <TabItem Name="TraceSessionsTab"  Header="Trace Sessions" GotFocus="TraceRefreshSelected" Visibility="Collapsed">
+                <Grid VerticalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="1*" MinHeight="100"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="1*" MinHeight="100"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Grid.ColumnSpan="2">Local Events:</Label>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding TraceSessions}" Grid.ColumnSpan="2" />
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Grid.ColumnSpan="2">
+                        <Label Content="Remote Host: "/>
+                        <Label Content="{Binding TraceServiceUrl}"/>
                     </StackPanel>
-                </StackPanel>
-            </TabItem>
-            <TabItem Name="cTraceSessionsTab"  Header="Trace Sessions" GotFocus="TraceRefreshSelected">
-                <DockPanel>
-                    <Button Width="50" DockPanel.Dock="Top" Command="{Binding Commands[TraceRefresh]}">Refresh</Button>
-                    <StackPanel DockPanel.Dock="Top">
-                        <Expander Header="Local" IsExpanded="True">
-                            <ListBox Height="150" ItemsSource="{Binding TraceSessions}">
-                            </ListBox>
-                        </Expander>
-                    </StackPanel>
-                    <StackPanel DockPanel.Dock="Bottom">
-                        <Expander IsExpanded="True">
-                            <Expander.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Remote Host: "/>
-                                    <Label Content="{Binding TraceServiceUrl}"/>
-                                </StackPanel>
-                            </Expander.Header>
-                            <ListBox  Height="150" ItemsSource="{Binding ServerTraceSessions}"></ListBox>
-                        </Expander>
-                    </StackPanel>
-                </DockPanel>
+                    <ListBox Grid.Row="3" ItemsSource="{Binding ServerTraceSessions}" Grid.ColumnSpan="2" />
+                    <Button Grid.Row="4" Margin="7,2" Width="120" Height="25" HorizontalAlignment="Right"
+                            Command="{Binding Commands[TraceRefresh]}" Grid.ColumnSpan="2">Refresh Data</Button>
+                </Grid>
             </TabItem>
         </TabControl>
 
     </DockPanel>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding Commands[ShowCommandLineOptions]}" 
+                    Key="F1"/>
+        <KeyBinding Command="{Binding Commands[StartTracing]}" 
+                    Key="F5"/>
+        <KeyBinding Command="{Binding Commands[StopTracing]}" 
+                    Key="F6"/>
+        <KeyBinding Command="{Binding Commands[EnableLocalTraceToggle]}" 
+                    Key="F7"/>
+        <KeyBinding Command="{Binding Commands[EnableRemoteTraceToggle]}" 
+                    Key="F8"/>
+    </Window.InputBindings>
 </Window>

@@ -1,15 +1,92 @@
 ﻿<Window x:Class="ETWController.UI.OutputWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WPR Command Output" Height="300" Width="997.675">
+        Title="Command Output" Height="500" Width="800">
     <Grid>
-        <ListView Name="cView" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto"  ItemsSource="{Binding CommandOutputs}">
+        <ListView Name="cView" ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                  ItemsSource="{Binding CommandOutputs}" SelectionMode="Single"
+                  FontFamily="Consolas">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Copy" Click="CopyMessage"></MenuItem>
-                    <MenuItem Header="Clear" Click="ClearAllMessages"></MenuItem>
+                    <MenuItem Header="Copy single message" Click="CopyMessage"></MenuItem>
+                    <MenuItem Header="Clear all" Click="ClearAllMessages"></MenuItem>
                 </ContextMenu>
             </ListView.ContextMenu>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border Name="Line" BorderThickness="0,0,0,2" BorderBrush="AliceBlue">
+                        <Grid Name="FullEntry" Background="AliceBlue">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Name="Timestamp"
+                                       Text="{Binding Timestamp, Mode=OneWay, StringFormat=HH:mm:ss.fff}"
+                                       TextAlignment="Right"
+                                       Margin="3,0" Padding="1,0"
+                                       Foreground="#94B0D4" FontSize="12"
+                                       VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Name="KindIndicator" Text="{Binding EntryKind, Mode=OneWay}"
+                                       Foreground="#3F87E3" 
+                                       Padding="3,0" HorizontalAlignment="Stretch"
+                                       FontSize="12" VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Name="Command" Text="{Binding Command, Mode=OneWay}"
+                                       Foreground="Black" 
+                                       Padding="3,0" HorizontalAlignment="Stretch"
+                                       FontSize="12" VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Name="Output" Text="{Binding Output, Mode=OneWay}"
+                                       Foreground="Green" 
+                                       Padding="3,0" HorizontalAlignment="Stretch"
+                                       FontSize="12" VerticalAlignment="Top" />
+                        </Grid>
+
+                    </Border>
+
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding HasFinished, Mode=OneWay}" Value="True">
+                            <Setter TargetName="FullEntry" Property="Background" Value="White" />
+                            <Setter TargetName="Command" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding HasFinished, Mode=OneWay}" Value="False">
+                            <Setter TargetName="Output" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding HasError, Mode=OneWay}"
+                                     Value="True">
+                            <Setter TargetName="Output" Property="Foreground" Value="#B30505" />
+                            <Setter TargetName="FullEntry" Property="Background" Value="#FFFFC4" />
+                            <Setter TargetName="KindIndicator" Property="Background" Value="Yellow" />
+                            <Setter TargetName="KindIndicator" Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+
+            </ListView.ItemTemplate>
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Resources>
+                        <!-- Background for Selected ListViewItem -->
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Aquamarine" />
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Aquamarine" />
+                    </Style.Resources>
+
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Aquamarine" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
         </ListView>
     </Grid>
 </Window>

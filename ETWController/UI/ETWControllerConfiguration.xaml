@@ -1,8 +1,9 @@
-﻿<Window x:Class="ETWController.UI.ETWControllerConfiguration"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="clr-namespace:ETWController.UI"
-        Title="Configuration Settings" Height="399.641" Width="571">
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="ETWController.UI.ETWControllerConfiguration"
+        Title="ETW Controller - Configuration Settings" Width="580" Height="410">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -10,12 +11,13 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid>
+    <Grid Margin="5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="110"/>
-            <RowDefinition Height="130"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         <GroupBox Grid.Row="0" Header="Network">
             <Grid>
@@ -24,36 +26,29 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="5"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="5"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Label Margin="0,-5,0,0" Grid.Column="0">Remote Host</Label>
+                <Label Margin="0,-5,0,0" Grid.Column="0" Content="Remote Host"/>
                 <TextBox Grid.Column="1" Text="{Binding Host}" ToolTip="Remote host to send the hooked keyboard and mouse events." KeyboardNavigation.TabIndex="0" />
-                <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="2">Port Number</Label>
-                <TextBox Grid.Column="1" Grid.Row="2" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Over this port are the captured mouse and keyboard events sent." KeyboardNavigation.TabIndex="1" >
-                    <TextBox.Text>
-                        <Binding Path="PortNumber" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
-                            <Binding.ValidationRules>
-                                <ui:PortnumberValidator Min="500" Max="65000"/>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
+                <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="2" Content="Port for HookEvents"/>
+                <TextBox Grid.Column="1" Grid.Row="2" Width="60" HorizontalAlignment="Left" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Over this port are the captured mouse and keyboard events sent." KeyboardNavigation.TabIndex="1" >
+                    <Binding Path="PortNumber" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                        <Binding.ValidationRules>
+                            <ui:PortnumberValidator Min="500" Max="65000"/>
+                        </Binding.ValidationRules>
+                    </Binding>
                 </TextBox>
-                <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="4">Secondary Port</Label>
-                <TextBox Grid.Column="1" Grid.Row="4" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Over this port the WCF service does exchange its messages to control and query trace sesssions. If it does not work try to disable the firewall on the server." KeyboardNavigation.TabIndex="2" >
-                    <TextBox.Text>
-                        <Binding Path="WCFPort" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
-                            <Binding.ValidationRules>
-                                <ui:PortnumberValidator Min="500" Max="65000"/>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
+                <Label Margin="0,-5,0,0" Grid.Column="0" Grid.Row="4" Content="Port for WCF Control"/>
+                <TextBox Grid.Column="1" Grid.Row="4" Width="60" HorizontalAlignment="Left" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Over this port the WCF service does exchange its messages to control and query trace sesssions. If it does not work try to disable the firewall on the server." KeyboardNavigation.TabIndex="2" >
+                    <Binding Path="WCFPort" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                        <Binding.ValidationRules>
+                            <ui:PortnumberValidator Min="500" Max="65000"/>
+                        </Binding.ValidationRules>
+                    </Binding>
                 </TextBox>
             </Grid>
 
@@ -65,45 +60,39 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="5"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="5"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="5"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Label Margin="0,-5,0,0" Grid.Row="0" Grid.Column="0" >Screenshot Directory</Label>
+                <Label Margin="0,-5,0,0" Grid.Row="0" Grid.Column="0" Content="Screenshot Directory" />
                 <TextBox Grid.Row="0" Grid.Column="1" Text ="{Binding ScreenshotDirectoryUnexpanded}"  ToolTip="Screenshots files are saved to this directory." KeyboardNavigation.TabIndex="3" />
-                <Label Margin="0,-5,0,0" Grid.Row="2" Grid.Column="0" >Jpg Compression (0-100)</Label>
-                <TextBox  Grid.Row="2" Grid.Column="1"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="The JPG compression level can be a value between 0-100. 100 is no compression." KeyboardNavigation.TabIndex="4">
-                    <TextBox.Text>
-                        <Binding Path="JpgCompressionLevel" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
-                            <Binding.ValidationRules>
-                                <ui:PortnumberValidator Min="0" Max="100"/>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
+                <Label Margin="0,-5,0,0" Grid.Row="2" Grid.Column="0" Content="Jpg Compression (0-100)" />
+                <TextBox  Grid.Row="2" Grid.Column="1"  Width="60" HorizontalAlignment="Left" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="The JPG compression level can be a value between 0-100. 100 is no compression." KeyboardNavigation.TabIndex="4">
+                    <Binding Path="JpgCompressionLevel" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                        <Binding.ValidationRules>
+                            <ui:PortnumberValidator Min="0" Max="100"/>
+                        </Binding.ValidationRules>
+                    </Binding>
                 </TextBox>
-                <Label Margin="0,-5,0,0" Grid.Row="4" Grid.Column="0" >Screenshot Timer in ms</Label>
-                <TextBox  Grid.Row="4" Grid.Column="1"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Time in ms between two screenshots regardless if a mouse click or keyboard press did happen (100ms-60000ms)." KeyboardNavigation.TabIndex="4">
-                    <TextBox.Text>
-                        <Binding Path="ForcedScreenshotIntervalinMs" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
-                            <Binding.ValidationRules>
-                                <ui:PortnumberValidator Min="100" Max="60000"/>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
+                <Label Margin="0,-5,0,0" Grid.Row="4" Grid.Column="0" Content="Screenshot Timer in ms" />
+                <TextBox  Grid.Row="4" Grid.Column="1"  Width="60" HorizontalAlignment="Left" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Time in ms between two screenshots regardless if a mouse click or keyboard press did happen (100ms-60000ms)." KeyboardNavigation.TabIndex="4">
+                    <Binding Path="ForcedScreenshotIntervalinMs" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                        <Binding.ValidationRules>
+                            <ui:PortnumberValidator Min="100" Max="60000"/>
+                        </Binding.ValidationRules>
+                    </Binding>
                 </TextBox>
-                <Label Margin="0,-5,0,0" Grid.Row="6" Grid.Column="0" >Keep last N Screenshots</Label>
-                <TextBox  Grid.Row="6" Grid.Column="1"  Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="If in screenshot directory more than N files are present the oldest ones are deleted until no more than N files are in the screenshot directory." KeyboardNavigation.TabIndex="4">
-                    <TextBox.Text>
-                        <Binding Path="KeepNNewestScreenShots" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
-                            <Binding.ValidationRules>
-                                <ui:PortnumberValidator Min="100" Max="60000"/>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
+                <Label Margin="0,-5,0,0" Grid.Row="6" Grid.Column="0" Content="Keep last N Screenshots" />
+                <TextBox  Grid.Row="6" Grid.Column="1"  Width="60" HorizontalAlignment="Left" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="If in screenshot directory more than N files are present the oldest ones are deleted until no more than N files are in the screenshot directory." KeyboardNavigation.TabIndex="4">
+                    <Binding Path="KeepNNewestScreenShots" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
+                        <Binding.ValidationRules>
+                            <ui:PortnumberValidator Min="100" Max="60000"/>
+                        </Binding.ValidationRules>
+                    </Binding>
                 </TextBox>
 
             </Grid>
@@ -115,15 +104,28 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Label Margin="0,-5,0,0" Grid.Row="0" Grid.Column="0" >Trace Open Command</Label>
+                <Label Margin="0,-5,0,0" Grid.Row="0" Grid.Column="0" Content="Trace Open Command" />
                 <TextBox Grid.Row="0" Grid.Column="1" Text ="{Binding TraceOpenCmdLine}"  ToolTip="This is the command line used to open a trace file. The variable $TraceFile is expanded to the current etl output file name. The current working directory is the location of ETWController.exe" KeyboardNavigation.TabIndex="3" />
             </Grid>
         </GroupBox>
-        <StackPanel Grid.Row="3"  Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Width="50" Click="Ok" IsDefault="True" KeyboardNavigation.TabIndex="3" Content="Ok" />
-            <Button Width="50" Margin="10,0,0,0" Click="Cancel" KeyboardNavigation.TabIndex="4" Content="Cancel" />
+        <GroupBox Grid.Row="3" Header="Flags" Padding="5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <CheckBox Content="Always Show CommandEditBoxes" IsChecked="{Binding AlwaysShowCommandEditBoxes}"
+                          ToolTip="For experts: Do not hide the text boxes for StartCommand etc., even when a preset is selected"/>
+            </Grid>
+        </GroupBox>
+        <StackPanel Grid.Row="4"  Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
+            <Button Width="120" Height="28" Click="Ok" IsDefault="True" KeyboardNavigation.TabIndex="3" Content="Ok" />
+            <Button Width="120" Height="28" Margin="10,0,0,0" Click="Cancel" KeyboardNavigation.TabIndex="4" Content="Cancel" />
         </StackPanel>
     </Grid>
 </Window>
