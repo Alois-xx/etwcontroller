@@ -91,34 +91,37 @@ namespace ETWController.Screenshots
 
         internal static void ClearFiles(string screenshotDirectory, int keepNewestNFiles=0)
         {
-            // Delete old files from previous runs
-            foreach (var jpg in Directory.GetFiles(screenshotDirectory, "*.jpg")
-                                         .Select(x=> new FileInfo(x))
-                                         .OrderByDescending(x=>x.CreationTime)
-                                         .Skip(keepNewestNFiles))
+            if (Directory.Exists(screenshotDirectory))
             {
-                try
+                // Delete old files from previous runs
+                foreach (var jpg in Directory.GetFiles(screenshotDirectory, "*.jpg")
+                    .Select(x => new FileInfo(x))
+                    .OrderByDescending(x => x.CreationTime)
+                    .Skip(keepNewestNFiles))
                 {
-                    File.Delete(jpg.FullName);
+                    try
+                    {
+                        File.Delete(jpg.FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError($"Could not delete screenshot file {jpg} because of {ex}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Could not delete screenshot file {jpg} because of {ex}");
-                }
-            }
 
-            // Ensure that all files in screenshot directory are deleted so no old remanents 
-            // are kept in newere traces if screenshot capture is turned off
-            string report = Path.Combine(screenshotDirectory, HtmlReportGenerator.HtmlReportFileName);
-            if (File.Exists(report))
-            {
-                try
+                // Ensure that all files in screenshot directory are deleted so no old remanents 
+                // are kept in newere traces if screenshot capture is turned off
+                string report = Path.Combine(screenshotDirectory, HtmlReportGenerator.HtmlReportFileName);
+                if (File.Exists(report))
                 {
-                    File.Delete(report);
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Could not delete report file {report} because of {ex}");
+                    try
+                    {
+                        File.Delete(report);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError($"Could not delete report file {report} because of {ex}");
+                    }
                 }
             }
         }
