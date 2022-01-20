@@ -646,7 +646,7 @@ namespace ETWController
                                                     "\t-CaptureMouseClick                 Capture muse click events." + Environment.NewLine +
                                                     "\t-CaptureMouseWheel                 Capture mouse wheel events. " + Environment.NewLine +
                                                     "\t-CaptureMouseMove                  Capture mouse mouse events. " + Environment.NewLine +
-                                                    String.Format("\t-DisableCaptureScreenshots         Disables the save a screenshot feature where for each mouse click to the directory {0} or specify an explicit locaton with -ScreenshotDir xxx", Configuration.Default.ScreenshotDirectory) + Environment.NewLine +
+                                                   $"\t-DisableCaptureScreenshots         Disables the save a screenshot feature where for each mouse click to the directory {Configuration.Default.ScreenshotDirectory} or specify an explicit locaton with -ScreenshotDir xxx" + Environment.NewLine +
                                                     "\t-ScreenshotDir xxxx                Directory to where the screenshots are saved if -CaptureScreenshots is set" + Environment.NewLine  +
                                                     "\t-SendToServer Server [Port1 Port2] Enable sending events to remote server. If Port1/2 are omitted the configured ports are used. " + Environment.NewLine +
                                                     "\t-RegisterEtwProvider               Register the HookEvents ETW provider and then exit. This needs to be done only once e.g. during installation." + Environment.NewLine +
