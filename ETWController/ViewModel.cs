@@ -655,10 +655,13 @@ namespace ETWController
                                                     "Example:" + Environment.NewLine +
                                                     "\tETWController.exe -capturemouseclick -capturekeyboard -sendtoserver localhost" + Environment.NewLine +
                                                     "This will eanble mouse click, encrypted keyboard tracing which will send to to your local machine again. If you want to hide the window you can add -hide." + Environment.NewLine + 
-                                                    "These commands are useful if you only want to use ETWController as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;                 
+                                                    "These commands are useful if you only want to use ETWController as keyboard/mouse event logger but the ETW recording is performed by your own script/wpr profile." + Environment.NewLine;
 
-        static readonly string About = Environment.NewLine + String.Format("ETWController (c) by Alois Kraus 2015-2022 v{0}", 
-                                           Assembly.GetExecutingAssembly().GetName().Version);
+        static readonly string About = Environment.NewLine +
+                             $"ETWController (c) by Alois Kraus 2015-2022 v{Assembly.GetExecutingAssembly().GetName().Version}" + Environment.NewLine + Environment.NewLine +
+                              "    With massive UI improvements made by Achim Bursian" + Environment.NewLine;
+                                        
+                                           
 
         private bool _useCommandNameSubstitutions = true;
 
