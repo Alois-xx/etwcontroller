@@ -36,9 +36,9 @@ namespace ETWController_uTest
 
                     WaitUntilLocalTargetState(model, TraceStates.Stopped);
 
-                    ContainsMessage("hi trace start");
-                    ContainsMessage($"trace stop performed {model.StopData.TraceFileName}");
-                    MessageBoxShown($"Output file {model.StopData.TraceFileName} was not found");
+                    ContainsMessage("hi trace start",null,2);
+                    ContainsMessage($"trace stop performed {model.StopData.TraceFileName}",null,2);
+                    MessageBoxShown($"Expected output file '{model.StopData.TraceFileName}' was not found!");
                 }
             }
         }
@@ -58,10 +58,10 @@ namespace ETWController_uTest
 
                     WaitUntilLocalTargetState(model, TraceStates.Stopped);
 
-                    ContainsMessage("hi trace start");
-                    ContainsMessage($"trace stop performed {tmp.Name}");
+                    ContainsMessage("hi trace start",null, 2);
+                    ContainsMessage($"trace stop performed {tmp.Name}",null, 2);
 
-                    MessageBoxShown($"Error: No new etl files were created in directory {tmp.Name}");
+                    MessageBoxShown($"No new *.etl files were created in directory '{tmp.Name}'");
                 }
             }
         }
@@ -83,8 +83,8 @@ namespace ETWController_uTest
 
                     WaitUntilLocalTargetState(model, TraceStates.Stopped);
 
-                    ContainsMessage("hi trace start");
-                    ContainsMessage($"trace stop performed {tmp.Name}");
+                    ContainsMessage("hi trace start",null,2);
+                    ContainsMessage($"trace stop performed {tmp.Name}",null,2);
 
                     MessageBoxNotShown();
                 }
@@ -111,10 +111,10 @@ namespace ETWController_uTest
 
                     WaitUntilLocalTargetState(model, TraceStates.Stopped);
 
-                    ContainsMessage("hi trace start");
-                    ContainsMessage($"trace stop performed {tmp.Name}");
+                    ContainsMessage("hi trace start",null,2);
+                    ContainsMessage($"trace stop performed {tmp.Name}",null,2);
 
-                    MessageBoxShown($"Error: No new etl files were created in directory {tmp.Name}");
+                    MessageBoxShown($"No new *.etl files were created in directory '{tmp.Name}'");
                 }
             }
         }
@@ -142,9 +142,9 @@ namespace ETWController_uTest
 
         const string MessageBoxStringPrefix = "MessageBox";
 
-        void MessageBoxShown(string message)
+        void MessageBoxShown(string message, int count =1)
         {
-            ContainsMessage(message, MessageBoxStringPrefix);
+            ContainsMessage(message, MessageBoxStringPrefix, count);
         }
 
         void MessageBoxNotShown()
