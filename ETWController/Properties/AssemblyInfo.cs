@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ETWController")]
-[assembly: AssemblyCopyright("Copyright © by Alois Kraus 2016")]
+[assembly: AssemblyCopyright("Copyright © by Alois Kraus 2016-2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly:InternalsVisibleTo("ETWController_uTest")]
