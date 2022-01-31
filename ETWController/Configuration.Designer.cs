@@ -12,7 +12,7 @@ namespace ETWController {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
     internal sealed partial class Configuration : global::System.Configuration.ApplicationSettingsBase {
         
         private static Configuration defaultInstance = ((Configuration)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Configuration())));
@@ -325,31 +325,6 @@ namespace ETWController {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
-<ArrayOfPreset xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <Preset>
-    <Name>WPR Default</Name>
-    <TraceStartCommand>xxwpr -start GeneralProfile -start ETW\HookEvents.wprp</TraceStartCommand>
-    <TraceStopCommand>xxwpr -stop $FileName $ScreenshotDir</TraceStopCommand>
-    <TraceCancelCommand>xxwpr -cancel</TraceCancelCommand>
-    <NeedsManualEdit>false</NeedsManualEdit>
-  </Preset>
-  <Preset>
-    <Name>WPR Default + .NET</Name>
-    <TraceStartCommand>xxwpr -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</TraceStartCommand>
-    <TraceStopCommand>xxwpr -stop $FileName $ScreenshotDir</TraceStopCommand>
-    <TraceCancelCommand>xxwpr -cancel</TraceCancelCommand>
-    <NeedsManualEdit>false</NeedsManualEdit>
-  </Preset>
-</ArrayOfPreset>")]
-        public ETWController.UI.Preset[] Presets {
-            get {
-                return ((ETWController.UI.Preset[])(this["Presets"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -359,20 +334,6 @@ namespace ETWController {
             }
             set {
                 this["AlwaysShowCommandEditBoxes"] = value;
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
-<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <string>xxwpr|.\Scripts\xxWPR.cmd</string>
-  <string>wpr|wpr.exe</string>
-  <string>xxprofile|""%perftools%\xxprofile.cmd""</string>
-</ArrayOfString>")]
-        public global::System.Collections.Specialized.StringCollection CommandNameSubstitutions {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["CommandNameSubstitutions"]));
             }
         }
         
@@ -409,6 +370,45 @@ namespace ETWController {
             }
             set {
                 this["CaptureScreenShots"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfPreset xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <Preset>
+    <Name>WPR Default</Name>
+    <TraceStartCommand>xxwpr -start GeneralProfile -start ETW\HookEvents.wprp</TraceStartCommand>
+    <TraceStopCommand>xxwpr -stop $FileName $ScreenshotDir</TraceStopCommand>
+    <TraceCancelCommand>xxwpr -cancel</TraceCancelCommand>
+    <NeedsManualEdit>false</NeedsManualEdit>
+  </Preset>
+  <Preset>
+    <Name>WPR Default + .NET</Name>
+    <TraceStartCommand>xxwpr -start GeneralProfile -start DotNET -start ETW\HookEvents.wprp</TraceStartCommand>
+    <TraceStopCommand>xxwpr -stop $FileName $ScreenshotDir</TraceStopCommand>
+    <TraceCancelCommand>xxwpr -cancel</TraceCancelCommand>
+    <NeedsManualEdit>false</NeedsManualEdit>
+  </Preset>
+</ArrayOfPreset>")]
+        public ETWController.UI.Preset[] Presets {
+            get {
+                return ((ETWController.UI.Preset[])(this["Presets"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfString xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <string>xxwpr|.\Scripts\xxWPR.cmd</string>
+  <string>wpr|wpr.exe</string>
+  <string>xxprofile|""%perftools%\xxprofile.cmd""</string>
+</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection CommandNameSubstitutions {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["CommandNameSubstitutions"]));
             }
         }
     }
