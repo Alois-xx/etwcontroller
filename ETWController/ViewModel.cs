@@ -857,8 +857,8 @@ namespace ETWController
 
             this.Hooker.ResetId();
             _TraceStartTime = DateTime.Now;
-            Environment.SetEnvironmentVariable("DATE", _TraceStartTime.ToString("yyyy-MM-dd"));
-            Environment.SetEnvironmentVariable("TIME", _TraceStartTime.ToString("HHmmss"));
+            Environment.SetEnvironmentVariable("DATENOW", _TraceStartTime.ToString("yyyy-MM-dd"));
+            Environment.SetEnvironmentVariable("TIMENOW", _TraceStartTime.ToString("HHmmss"));
             Environment.SetEnvironmentVariable("TS", _TraceStartTime.ToString("yyyy-MM-dd_HHmmss"));
 
             CancelButtonLabel = !string.IsNullOrEmpty(LocalTraceSettings.SelectedPreset.TraceCancelLabel) ? LocalTraceSettings.SelectedPreset.TraceCancelLabel : CancelButtonLabelDefault;
