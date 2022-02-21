@@ -7,7 +7,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
-    <ApplicationIcon>ETWControler.ico</ApplicationIcon>
+    <ApplicationIcon>ETWController.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,7 +33,6 @@
     <Reference Include="PresentationCore" /><Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ETWControler.ico" />
     <Content Include="Scripts\License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -104,7 +103,7 @@
     <None Include="Resources\Microsoft.Diagnostics.Tracing.EventSource.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="ApplicationIcon.ico" />
+    <Resource Include="ETWController.ico" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="eventRegister.exe">
