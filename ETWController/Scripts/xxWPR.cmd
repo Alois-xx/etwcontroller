@@ -15,6 +15,16 @@ if "%1" EQU "-help" goto :Help
 if "%1" EQU "-stop" goto :Stop
 
 %WPR% %*
+
+:SetProfInt
+if "%1" EQU "-setprofint" (
+	echo Explicitly calling setprofint with value %2 to work around a bug in wpr which does not support setting the profiling interval at start.
+	%WPR% -setprofint %2
+)
+
+shift
+if "%1" NEQ "" goto :SetProfInt
+
 goto :EOF
 
 :Stop
