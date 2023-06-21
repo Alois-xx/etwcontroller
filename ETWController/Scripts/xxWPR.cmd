@@ -14,27 +14,40 @@ if "%1" EQU "" goto :Help
 if "%1" EQU "-help" goto :Help
 if "%1" EQU "-stop" goto :Stop
 
-%WPR% %*
-echo Wpr Call: %WPR% %*
+set CmdLine=
 
-:SetProfInt
-set Input=
+:Parse
+
+REM Escape %1 argument to prevent for already quoted arguments double quotes which would result in evaluation errors in if clause
+REM e.g. when %1 is "xxx sss" -> if "%1" EQU -> if ""xxx sss"" will lead to parsing error sss"" was unexpected at this time.
+set Arg1=
 for %%x in (%1) do (
-    set Input=%%~x
-)
-if "!Input!" EQU "-setprofint" (
-	echo Explicitly calling setprofint with value %2 to work around a bug in wpr which does not support setting the profiling interval at start.
-	%WPR% -setprofint %2
+		set Arg1=%%~x
+	)
+
+if "!Arg1!" EQU "-start" (
+  REM we cannot use !Arg1! because it will swallow ! characters. E.g. Arg1=Profile.wprp!Network will become Profile.wprpNetwork when assigned to Arg1
+  set CmdLine=!CmdLine! -start %2
+  shift
 )
 
+if "!Arg1!" EQU "-setprofint" (
+	set SetProfintCmdLine=-setprofint %2
+	shift
+)
+
+if "!Arg1!" EQU "" goto :Exec
 shift
+goto :Parse
 
-REM check if one of the arguments was -setprofint since we have sometimes quoted arguments. We need to unquote them otherwise we will run into errors
-set Input=
-for %%x in (%1) do (
-    set Input=%%~x
+:Exec
+echo Wpr Call: %WPR% !CmdLine!
+%WPR% !CmdLine!
+
+if "!SetProfintCmdLine!" NEQ "" (
+	echo Setprofint Cmd: %WPR% !SetProfintCmdLine!
+	%WPR% !SetProfintCmdLine!
 )
-if "!Input!" NEQ "" goto :SetProfInt
 
 goto :EOF
 
