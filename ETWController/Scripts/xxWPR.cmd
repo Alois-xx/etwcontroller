@@ -15,15 +15,26 @@ if "%1" EQU "-help" goto :Help
 if "%1" EQU "-stop" goto :Stop
 
 %WPR% %*
+echo Wpr Call: %WPR% %*
 
 :SetProfInt
-if "%1" EQU "-setprofint" (
+set Input=
+for %%x in (%1) do (
+    set Input=%%~x
+)
+if "!Input!" EQU "-setprofint" (
 	echo Explicitly calling setprofint with value %2 to work around a bug in wpr which does not support setting the profiling interval at start.
 	%WPR% -setprofint %2
 )
 
 shift
-if "%1" NEQ "" goto :SetProfInt
+
+REM check if one of the arguments was -setprofint since we have sometimes quoted arguments. We need to unquote them otherwise we will run into errors
+set Input=
+for %%x in (%1) do (
+    set Input=%%~x
+)
+if "!Input!" NEQ "" goto :SetProfInt
 
 goto :EOF
 
