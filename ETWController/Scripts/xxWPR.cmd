@@ -13,7 +13,6 @@ rem set WPR="C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\
 if "%1" EQU "" goto :Help
 if "%1" EQU "-help" goto :Help
 if "%1" EQU "-stop" goto :Stop
-
 set CmdLine=
 
 :Parse
@@ -29,11 +28,12 @@ if "!Arg1!" EQU "-start" (
   REM we cannot use !Arg1! because it will swallow ! characters. E.g. Arg1=Profile.wprp!Network will become Profile.wprpNetwork when assigned to Arg1
   set CmdLine=!CmdLine! -start %2
   shift
-)
-
-if "!Arg1!" EQU "-setprofint" (
+) else if "!Arg1!" EQU "-setprofint" (
 	set SetProfintCmdLine=-setprofint %2
 	shift
+) else (
+	REM pass through other command line options
+	set CmdLine=!CmdLine! %1
 )
 
 if "!Arg1!" EQU "" goto :Exec
