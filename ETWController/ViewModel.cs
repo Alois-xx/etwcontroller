@@ -131,7 +131,7 @@ namespace ETWController
 
         public string UnexpandedTraceFileName
         {
-            get { return Configuration.Default.TraceFileName;  }
+            get { return String.IsNullOrEmpty(Configuration.Default.TraceFileName) ? "C:\\temp\\ETW_%TS%_%COMPUTERNAME%.etl" : Configuration.Default.TraceFileName;  }
             set { Configuration.Default.TraceFileName = value; }
         }
 
