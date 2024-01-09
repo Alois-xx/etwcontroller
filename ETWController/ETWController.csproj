@@ -21,6 +21,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="ETW\MultiProfile.wprp" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel" />
@@ -33,6 +36,9 @@
     <Reference Include="PresentationCore" /><Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ETW\MultiProfile.wprp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Scripts\License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

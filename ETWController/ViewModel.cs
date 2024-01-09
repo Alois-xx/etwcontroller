@@ -939,7 +939,7 @@ namespace ETWController
             {
                 foreach (var nameSubstitution in Configuration.Default.CommandNameSubstitutions)
                 {
-                    var parts = nameSubstitution.Split(new[] {'|'}, 2);
+                    var parts = nameSubstitution.Split(new[] { '|' }, 2);
                     if (parts.Length == 2 && fullCommandLine.StartsWith(parts[0] + " "))
                     {
                         fullCommandLine = parts[1] + fullCommandLine.Substring(parts[0].Length);
@@ -947,6 +947,10 @@ namespace ETWController
                     }
                 }
             }
+
+            // Escape ! character to be able to call xxwpr script correctly
+            fullCommandLine = fullCommandLine.Replace("!", "^!");
+
             return fullCommandLine;
         }
 

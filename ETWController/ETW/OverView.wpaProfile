@@ -4,11 +4,7 @@
     <Sessions>
       <Session Index="0">
         <FileReferences>
-          <FileReference FileName="Windows.stacktags" ServiceMoniker="StackFrameTag.{67F56EBD-2E82-493B-BF4F-712A1D0F018B}" />
-          <FileReference FileName=".NET.stacktags" ServiceMoniker="StackFrameTag.{67F56EBD-2E82-493B-BF4F-712A1D0F018B}" />
-          <FileReference FileName="VirusScanners.stacktags" ServiceMoniker="StackFrameTag.{67F56EBD-2E82-493B-BF4F-712A1D0F018B}" />
-          <FileReference FileName="Wait.stacktags" ServiceMoniker="StackFrameTag.{67F56EBD-2E82-493B-BF4F-712A1D0F018B}" />
-          <FileReference FileName="GC.xml" ServiceMoniker="Regions.{51EF6868-EFEC-42A3-B284-1838673CC095}" />
+          <FileReference FileName="default.stacktags" ServiceMoniker="StackFrameTag.{67F56EBD-2E82-493B-BF4F-712A1D0F018B}" />
         </FileReferences>
       </Session>
     </Sessions>
