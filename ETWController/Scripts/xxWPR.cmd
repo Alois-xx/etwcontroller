@@ -55,11 +55,25 @@ goto :EOF
 set OutFileName=%2
 set WprOutFileName=%2
 set CompressEtl=0
+set StopOptions=
 
 if "%3" NEQ "" (
-	set ETWScreenshotDir=%3
+	if /I "%4" EQU "-skipPdbGen" (
+		set StopOptions=%4
+	) else  (
+		set ETWScreenshotDir=%3
+	)
 ) else (
 	set ETWScreenshotDir=C:\temp\ETWControllerScreenshots
+)
+
+
+if "%4" NEQ "" (
+	if /I "%4" EQU "-skipPdbGen" (
+		set StopOptions=%4
+	) else  (
+		set ETWScreenshotDir=%3
+	)
 )
 
 if "!OutFileName:~-4!" EQU ".zip" (
@@ -79,7 +93,19 @@ if "!OutFileName:~-3!" EQU ".7z" (
 
 
 echo Stopping Tracing 
-%WPR% -stop !WprOutFileName!
+%WPR% -stop !WprOutFileName! !StopOptions!
+
+set NgenPDBFolder=
+if EXIST "!WprOutFileName!.NGenPDB" (
+	set NgenPDBFolder=!WprOutFileName!.NGenPDB
+)
+
+set EmbeddedPDBFolder=
+if EXIST "!WprOutFileName!.EmbeddedPdbs" (
+	set EmbeddedPDBFolder=!WprOutFileName!.EmbeddedPdbs
+)
+
+
 
 set ScreenshotDir=!WprOutFileName!.Screenshots
 
@@ -100,7 +126,7 @@ if "!CompressEtl!" EQU "1" (
 	echo ETL File !WprOutFileName!
 	echo NGen !WprOutFileName!.NGenPDB
 	echo Screenshots !ScreenshotDir!
-	set CompressCommand="!ScriptDir!\7z" a !CompressionOption! !OutFileName! !WprOutFileName! -r !ScreenshotDir! !WprOutFileName!.NGenPDB  
+	set CompressCommand="!ScriptDir!\7z" a !CompressionOption! !OutFileName! !WprOutFileName! -r !ScreenshotDir! !NgenPDBFolder! !EmbeddedPDBFolder!
 	echo !CompressCommand!
 	echo !CompressCommand! >> !LogFile!
 	!CompressCommand! >> !LogFile!
@@ -116,8 +142,12 @@ if "!CompressEtl!" EQU "1" (
 			rd /q /s !ScreenshotDir!
 		)
 		
-		if  "!WprOutFileName!" NEQ "" (
-			rd /q /s !WprOutFileName!.NGenPDB
+		if  EXIST "!NgenPDBFolder!" (
+			rd /q /s !NgenPDBFolder!
+		)
+
+		if EXIST "!EmbeddedPDBFolder!" (
+			rd /q /s !EmbeddedPDBFolder!
 		)
 		call :ClearErrorLevel
 	)
