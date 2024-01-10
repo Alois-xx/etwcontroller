@@ -58,8 +58,8 @@ set CompressEtl=0
 set StopOptions=
 
 if "%3" NEQ "" (
-	if /I "%4" EQU "-skipPdbGen" (
-		set StopOptions=%4
+	if /I "%3" EQU "-skipPdbGen" (
+		set StopOptions=%3
 	) else  (
 		set ETWScreenshotDir=%3
 	)
@@ -72,7 +72,7 @@ if "%4" NEQ "" (
 	if /I "%4" EQU "-skipPdbGen" (
 		set StopOptions=%4
 	) else  (
-		set ETWScreenshotDir=%3
+		set ETWScreenshotDir=%4
 	)
 )
 
