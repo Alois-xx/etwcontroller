@@ -11,6 +11,47 @@ the profiling data to the right time point where much more insights are waiting 
 
 ![Main UI](ETWController/Documentation/Images/MainUI.png)
 
+## Predefined Recording Presets
+With the latest release is comes with an annotated predefined wpr recording profile called MultiProfile.wprp which shows most features present in ETW.
+The recorded data can be analyzed with [ETWAnalyzer](https://github.com/Siemens-Healthineers/ETWAnalyzer) in much greater detail. 
+
+- **Full (Network+CSwitch+File+Frequency)**
+  -  The catch all profile if you need to track the complete system which captures most data but can record only about 1-2 minutes on a busy machine.
+- **Default (CPU Samples/Disk/.NET Exceptions/Focus)**
+  -  This will capture no context switch data which spares a lot of space and is still very detailed.
+- **Frequency (CPU Samples/Disk/.NET Exceptions/Focus/Frequency)**
+   - Same as before but captures also CPU frequency data. 
+- **File (CPU Samples/Disk/.NET Exceptions/Focus/File IO)**
+  -  Same as default but additionally it captures all File accesses. Low additional overhead.
+- **Network (CPU Samples/Disk/.NET Exceptions/Focus/Network)**
+  -  Same as default but also records every network packet source and destination IP. No packet data is captured.
+- **VirtualAlloc (Long Term)**
+  - If you have big memory leaks this might be a first step to find in longer recording (up to 20 minutes) what went wrong. 
+- **UserGDILeaks (Long Term)**
+  - Since Windows 10 1909 GDI/User object creation destruction is also instrumented with ETW. Best Viewed with WPA.
+- **PMCSample (PMC Sampling for PMC Rollover + Default)**
+  - Capture CPU counters in sampling mode. Similar what VTune does.
+- **PMCBranch (PMC Cycles per Instruction and Branch data - Counting)**
+ - Capture CPU counters in sampling mode. Similar what VTune does.
+- **PMCLLC (PMC Cycles per Instruction and LLC data - Counting)**
+ - Capture CPU counters in sampling mode. Similar what VTune does.
+- **LBR (LBR - Last Branch Record Sampling)**
+ - Capture CPU counters in sampling mode. Similar what VTune does.
+- **SysCall (CPU Samples/Disk/.NET Exceptions/Focus/SysCall)**
+  - Same as default but records all Kernel calls from user mode processes with stack traces. Useful for security researchers.
+    Unlike strace on Linux only the return code of the API call is recorded and no method arguments are collected.
+- **WPR Default**
+ - WPR Default profile provided by MS. 
+- **WPR Default + .NET**
+  - WPR Default profile with .NET provider.
+
+All profiles except the WPR profiles can be combined. To change a profile select first a profile and then select ```<Manual Editing>``` to show the ```Start Command``` line.
+You can then add additional or other profile settings. The predefined settings are stored in ETWController.exe.config.
+
+You can change the CPU sampling rate by adding to the xxwpr command line ```-setprofint 100000``` to e.g. set a 10ms sample interval. WPR does support this command line switch 
+but it does not work when you try to start a profile with a custom sample rate. The xxwpr script works around that limitation and calls wpr -setprofint with your custom CPU sample 
+interval after the profile has been started.
+
 ## XCopy Deployable on Windows 10
 
 ### Recording Data
