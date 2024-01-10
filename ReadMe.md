@@ -20,11 +20,11 @@ The recorded data can be analyzed with [ETWAnalyzer](https://github.com/Siemens-
 - **Default (CPU Samples/Disk/.NET Exceptions/Focus)**
   -  This will capture no context switch data which spares a lot of space and is still very detailed.
 - **Frequency (CPU Samples/Disk/.NET Exceptions/Focus/Frequency)**
-   - Same as before but captures also CPU frequency data. 
+   - Same as Default but captures also CPU frequency data. 
 - **File (CPU Samples/Disk/.NET Exceptions/Focus/File IO)**
-  -  Same as default but additionally it captures all File accesses. Low additional overhead.
+  -  Same as Default but additionally it captures all File accesses. Low additional overhead.
 - **Network (CPU Samples/Disk/.NET Exceptions/Focus/Network)**
-  -  Same as default but also records every network packet source and destination IP. No packet data is captured.
+  -  Same as Default but also records every network packet source and destination IP. No packet data is captured.
 - **VirtualAlloc (Long Term)**
   - If you have big memory leaks this might be a first step to find in longer recording (up to 20 minutes) what went wrong. 
 - **UserGDILeaks (Long Term)**
@@ -38,7 +38,7 @@ The recorded data can be analyzed with [ETWAnalyzer](https://github.com/Siemens-
 - **LBR (LBR - Last Branch Record Sampling)**
  - Capture CPU counters in sampling mode. Similar what VTune does.
 - **SysCall (CPU Samples/Disk/.NET Exceptions/Focus/SysCall)**
-  - Same as default but records all Kernel calls from user mode processes with stack traces. Useful for security researchers.
+  - Same as Default but records all Kernel calls from user mode processes with stack traces. Useful for security researchers.
     Unlike strace on Linux only the return code of the API call is recorded and no method arguments are collected.
 - **WPR Default**
  - WPR Default profile provided by MS. 
