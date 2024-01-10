@@ -94,7 +94,21 @@ namespace ETWController.UI
         public string TraceStop
         {
             get { return _TraceStop; }
-            set { SetProperty<string>(ref _TraceStop, value); }
+            set 
+            { 
+                if( value != null)
+                {
+                    if (value.IndexOf("wpr", StringComparison.OrdinalIgnoreCase) == -1)
+                    {
+                        RootModel.IsSkipPdbEnabled = false;
+                    }
+                    else
+                    {
+                        RootModel.IsSkipPdbEnabled = true;
+                    }
+                }
+                SetProperty<string>(ref _TraceStop, value); 
+            }
         }
 
         public bool _IsCustomSetting;
@@ -145,7 +159,15 @@ namespace ETWController.UI
             }
         }
 
+        /// <summary>
+        /// wpr and xxwpr wrapper supported flag
+        /// </summary>
+        const string SkipPdbArg = "-skipPdbGen";
 
+
+        /// <summary>
+        /// Expand variables and add SkipPdb option when selected to stop command line
+        /// </summary>
         public string TraceStopFullCommandLine
         {
             get
@@ -154,6 +176,12 @@ namespace ETWController.UI
                 lret = lret.Replace(TraceFileNameVariable, RootModel.UnexpandedCountedTraceFileName);
                 lret = lret.Replace(TraceFileDirVariable,  GetDirectoryNameFromFileName(RootModel.UnexpandedCountedTraceFileName)); 
                 lret = lret.Replace(ScreenShotVariable, RootModel.ScreenshotDirectory);
+
+                // Append skip pdb argument to wpr/xxwpr stop command
+                if(RootModel.IsSkipPdbEnabled &&  RootModel.IsSkipPDB && lret.IndexOf(SkipPdbArg) == -1 )
+                {
+                    lret += " " + SkipPdbArg;
+                }
                 return lret;
             }
         }

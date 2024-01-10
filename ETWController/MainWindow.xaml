@@ -10,7 +10,7 @@
         Background="#F0F0F0"
         Title="ETW Controller and Logger" 
         d:DataContext="{d:DesignInstance l:DesignTimeCustomerViewModel, IsDesignTimeCreatable=True}"
-        Height="760" Width="700" Closing="Window_Closing" Closed="MainWindow_OnClosed"
+        Height="500" Width="760" Closing="Window_Closing" Closed="MainWindow_OnClosed"
         Initialized="MainWindow_OnInitialized">
     <Window.Resources>
         <ResourceDictionary>
@@ -106,6 +106,8 @@
                                 <Label Padding="5,0,15,0" VerticalAlignment="Center">_Filename:</Label>
                                 <TextBox Grid.Column="1" Text="{Binding UnexpandedTraceFileName}" VerticalAlignment="Center"/>
                                 <StackPanel Grid.Column="2" Grid.RowSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <CheckBox Margin="5,0" Content="Compress" VerticalAlignment="Center" ToolTip="Compress output file. This calls the stop command with 7z as file extension. The called command must handle compression." IsChecked="{Binding Compress}" />
+                                    <CheckBox VerticalAlignment="Center" Margin="5,0" Content="Skip PDB" ToolTip="Skip .NET PDB generation which can take a long time. Enable only if you are sure that do not need stacks from .NET Framework code."  IsEnabled="{Binding IsSkipPdbEnabled}" IsChecked="{Binding IsSkipPDB}" />
                                     <CheckBox Margin="5,0"  IsChecked="{Binding AppendIndexToOutputFileName}" Content="Append Index"
                                         VerticalAlignment="Center"
                                         ToolTip="Append a counter to the output file name to prevent overwriting old trace data by accident in the current trace session." />

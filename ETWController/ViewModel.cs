@@ -121,6 +121,39 @@ namespace ETWController
             }
         }
 
+        bool _IsSkipPDB;
+        public bool IsSkipPDB
+        {
+            get => _IsSkipPDB;
+            set
+            {
+                SetProperty(ref _IsSkipPDB, value);
+            }
+        }
+
+        bool _IsSkipEnabled;
+        public bool IsSkipPdbEnabled
+        {
+            get => _IsSkipEnabled;
+            set
+            {
+                SetProperty(ref _IsSkipEnabled, value);
+            }
+        }
+
+        private bool _Compress;
+        public bool Compress
+        {
+            get
+            {
+                return _Compress;
+            }
+            set
+            {
+                SetProperty(ref _Compress, value, "Compress");
+            }
+        }
+
         public void RestartScreenCapture()
         {
             if (Hooker != null && CaptureScreenShots)
@@ -158,6 +191,11 @@ namespace ETWController
                     string dir = Path.GetDirectoryName(lret);
                     string file = Path.GetFileNameWithoutExtension(lret);
                     lret = Path.Combine(dir, $"{file}_{TraceFileCounter}{Path.GetExtension(lret)}");
+                }
+
+                if (Compress)
+                {
+                    lret = lret.Replace(".etl", ".7z");
                 }
                 return lret;
             }
