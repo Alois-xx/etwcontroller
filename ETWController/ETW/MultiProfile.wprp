@@ -162,6 +162,47 @@
 				<Stack Value="ReadyThread"/>
 			</Stacks>
 		</SystemProvider>
+		
+		<SystemProvider Id="SystemProvider_HandleRef" Base="SystemProvider_Monitoring">
+			<Keywords Operation="Add">
+				<Keyword Value="Object"/>
+			</Keywords>
+			<Stacks>
+				<Stack Value="ObjectCreate"/>
+				<Stack Value="ObjectDelete"/>
+				<Stack Value="ObjectReference"/>
+			</Stacks>
+		</SystemProvider>
+    
+    <SystemProvider Id="SystemProvider_Mapping" Base="SystemProvider_Monitoring">
+      <Keywords Operation="Add">
+        <Keyword Value="VAMap" />
+      </Keywords>
+      <Stacks>
+        <Stack Value="MapFile"/>
+        <Stack Value="UnMapFile"/>
+      </Stacks>
+    </SystemProvider>
+
+    <SystemProvider Id="SystemProvider_Handle" Base="SystemProvider_Monitoring">
+			<Keywords Operation="Add">
+				<Keyword Value="Handle"/>
+			</Keywords>
+			<Stacks>
+				<Stack Value="HandleCreate"/>
+				<Stack Value="HandleClose"/>
+				<Stack Value="HandleDuplicate"/>
+			</Stacks>
+			<!-- For object id filters a similar filter like PoolTags should exist but currently it does not
+				The kernel can filter Handle types with NtSetSystemInformation(SystemPerformanceTraceInformation, objectfilter ...) which is the same structure
+				as the pool tag filters. The first 4 characters of the Handle type name are used and up to 4 filters are supported. If the handle type has less
+				chars you need to fill up with space. 
+			<PoolTags>
+				<PoolTag Value="Even"/>
+			</PoolTags>
+			-->
+		</SystemProvider>
+
 		<SystemProvider Id="SystemProvider_SysCall" Base="SystemProvider_Monitoring">
 			<Keywords Operation="Add">
 				<Keyword Value="SystemCall"/>
@@ -200,7 +241,7 @@
 			<Keywords Operation="Remove">
 				<Keyword Value="SampledProfile"   />
 				<Keyword Value="Filename"   />
-				<Keyword Value="DiskIO"     />
+				<Keyword Value="DiskIO"	 />
 				<Keyword Value="DiskIOInit" />
 				<Keyword Value="MemoryInfoWS" />
 			</Keywords>
@@ -713,8 +754,8 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 		<Profile Id="Default.Verbose.Memory" Name="Default" Description="Default (CPU Samples/Disk/.NET Exceptions/Focus)" Base="Default.Verbose.File" LoggingMode="Memory" DetailLevel="Verbose">
 
 			<!-- We need to remove the default collectors which could contain MaximumFileSize clauses which are not compatible with PercentageOfTotalMemory definitions. 
-		         As an alternative we could not inherit from Default.Verbose.File. With inheritance we can reuse Trace Merge and Rundown settings.
-		         The error is: The MaximumFileSize element does not match with the profiles already in the profile collection.
+			 As an alternative we could not inherit from Default.Verbose.File. With inheritance we can reuse Trace Merge and Rundown settings.
+			 The error is: The MaximumFileSize element does not match with the profiles already in the profile collection.
 			-->
 			<Collectors Operation="Remove">
 				<SystemCollectorId Value="SystemProfiling_System" />
@@ -887,7 +928,56 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 				</SystemCollectorId>
 			</Collectors>
 		</Profile>
-		<Profile Id="Sockets.Verbose.File" Name="Sockets" Description="Sockets (CPU Samples/Disk/.NET Exceptions/Focus/Sockets)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+		
+		<Profile Id="HandleRef.Verbose.File" Name="HandleRef" Description="HandleReference (CPU Samples/Disk/.NET Exceptions/Focus/HandleReference)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_HandleRef"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="HandleRef.Verbose.Memory" Name="HandleRef" Description="HandleReference (CPU Samples/Disk/.NET Exceptions/Focus/HandleReference)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_HandleRef"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+
+    <Profile Id="FileMapping.Verbose.File" Name="FileMapping" Description="FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+      <Collectors Operation="Add">
+        <!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
+        <SystemCollectorId Value="SystemProfiling_System">
+          <SystemProviderId Value="SystemProvider_Mapping"/>
+        </SystemCollectorId>
+      </Collectors>
+    </Profile>
+    <Profile Id="FileMapping.Verbose.Memory" Name="FileMapping" Description="FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+      <Collectors Operation="Add">
+        <SystemCollectorId Value="SystemProfiling_System">
+          <SystemProviderId Value="SystemProvider_Mapping"/>
+        </SystemCollectorId>
+      </Collectors>
+    </Profile>
+    
+    <Profile Id="Handle.Verbose.File" Name="Handle" Description="Handle (CPU Samples/Disk/.NET Exceptions/Focus/Handle)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_Handle"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="Handle.Verbose.Memory" Name="Handle" Description="Handle (CPU Samples/Disk/.NET Exceptions/Focus/Handle)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_Handle"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+
+	<Profile Id="Sockets.Verbose.File" Name="Sockets" Description="Sockets (CPU Samples/Disk/.NET Exceptions/Focus/Sockets)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
 			<Collectors Operation="Add">
 				<EventCollectorId Value="EventCollector_UserModeSession">
 					<EventProviders>
