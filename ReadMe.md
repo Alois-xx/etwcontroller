@@ -23,6 +23,17 @@ The recorded data can be analyzed with [ETWAnalyzer](https://github.com/Siemens-
    - Same as Default but captures also CPU frequency data. 
 - **File (CPU Samples/Disk/.NET Exceptions/Focus/File IO)**
   -  Same as Default but additionally it captures all File accesses. Low additional overhead.
+- **Handle (CPU Samples/Disk/.NET Exceptions/Focus/Handle)**
+  - Same as Default but capture all handle create/close/duplicate events. This is the goto profile for tracking handle leaks.
+  - WPA can analyze the data under Memory/Handle view but it has no easy view for leaks. 
+  - ETWAnalyzer can analyze handle leaks after  ```ETWAnalyzer -extract ObjectRef -fd ..etl``` with ```ETWAnalyzer -dump ObjectRef -Leak```
+- **HandleRef (CPU Samples/Disk/.NET Exceptions/Focus/HandleRef)**
+  -  Same as Default but capture all kernel object create/destroy/reference events. This is a high volume provider. 
+     E.g. when you wait/signal a handle the handle reference count is shortly incremented/decremented during the WaitForSingleObject/SetEvent calls. 
+   - WPA has no way to analyze the data. ETWAnalyzer can process the data with ```ETWAnalyzer -extract ObjectRef -fd ..etl```.
+- **FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)**
+  - Same as Default but capture all MapViewOfFile and UnMapViewOfFile calls. 
+  - WPA has no way to analyze the data. ETWAnalyzer can process it with ```ETWAnalyzer -extract ObjectRef -fd ..etl```.    
 - **Network (CPU Samples/Disk/.NET Exceptions/Focus/Network)**
   -  Same as Default but also records every network packet source and destination IP. No packet data is captured.
 - **VirtualAlloc (Long Term)**
@@ -52,12 +63,12 @@ You can change the CPU sampling rate by adding to the xxwpr command line ```-set
 but it does not work when you try to start a profile with a custom sample rate. The xxwpr script works around that limitation and calls wpr -setprofint with your custom CPU sample 
 interval after the profile has been started.
 
-## XCopy Deployable on Windows 10
+## XCopy Deployable on Windows 10/11
 
 ### Recording Data
-To record the data it needs wpr.exe which is already part of Windows 10. On Windows 7 you need to install the Windows Performance Toolkit which is part of the Windows 8.1 SDK (https://go.microsoft.com/fwlink/p/?LinkId=323507).
+To record the data it needs wpr.exe which is already part of Windows 10/11. On Windows 7 you need to install the Windows Performance Toolkit which is part of the Windows 8.1 SDK (https://go.microsoft.com/fwlink/p/?LinkId=323507).
 
 ### Analyzing Data
-To view the data it is best to install the latest Windows Performance Toolkit from the Windows 10 SDK (https://developer.microsoft.com/en-us/windows/downloads/sdk-archive).
+To view the data it is best to install the latest Windows Performance Toolkit from the Windows 11 SDK (https://developer.microsoft.com/en-us/windows/downloads/sdk-archive).
 
  
