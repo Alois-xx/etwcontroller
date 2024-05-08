@@ -24,9 +24,24 @@
                 <RowDefinition Height="20*"/>
             </Grid.RowDefinitions>
             <Label Grid.Row="0" Grid.Column="0" Padding="5,0" VerticalAlignment="Center">Preset:</Label>
-            <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset, Mode=TwoWay}" 
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+            <ComboBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset, Mode=TwoWay}" 
                       MinWidth="200" HorizontalAlignment="Left"
-                      Margin="0" VerticalAlignment="Center"/>
+                      Margin="0" VerticalAlignment="Center"
+                      />
+                <Label Visibility="{Binding HandleTypeFilterEnabled, Mode=TwoWay}">Handle Types</Label>
+                <ComboBox ItemsSource="{Binding EventFilters}" Visibility="{Binding HandleTypeFilterEnabled, Mode=TwoWay}"
+                          ToolTip="When handle tracing is enabled you can filter up to 4 different handle types which are recorded to increase the time how long you can record.">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Width="20" />
+                                <TextBlock Text="{Binding Name}" Width="100" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
             <Label Content="Start Command:" Grid.Column="0" Grid.Row="1" Padding="5,0" Margin="0,6,0,0"
                    Visibility="{Binding IsCustomSetting, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TraceStart}"  Margin="0,6,0,1"

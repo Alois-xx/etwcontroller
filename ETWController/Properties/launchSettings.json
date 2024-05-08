@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ETWController": {
+      "commandName": "Project"
+    },
+    "Profile 1": {
+      "commandName": "Executable",
+      "executablePath": "C:\\PerfTools\\ETWController\\ETWController.exe"
+    }
+  }
+}

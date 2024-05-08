@@ -63,6 +63,40 @@ namespace ETWController.UI
             get { return _Presets.ToArray(); }
         }
 
+        public class ETWEventFilter
+        {
+            public string Name { get; set; }
+            public bool IsSelected { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Name} {IsSelected}";
+            }
+        }
+
+        /// <summary>
+        /// Until xperf/wpr support handle type filtering we need to enable it on our own.
+        /// </summary>
+        internal static ETWHandleTypeFilter _HandleETWFilterController = new ETWHandleTypeFilter();
+
+        List<ETWEventFilter> _EventFilters = new List<ETWEventFilter>(_HandleETWFilterController.GetFilterNames().Select(x=> new ETWEventFilter {  Name = x}));
+
+        /// <summary>
+        /// Used by UI to display list in ComboBox with checkboxes
+        /// </summary>
+        public ETWEventFilter[] EventFilters
+        {
+            get => _EventFilters.ToArray();
+        }
+
+        /// <summary>
+        /// We do not support handle type filters on remote node so we disable it by default and enable it only for local recordings.
+        /// </summary>
+        public Visibility HandleTypeFilterEnabled
+        {
+            get; set;
+        } = Visibility.Collapsed;
+
         Preset _SelectedPreset = null;
         public Preset SelectedPreset
         {
@@ -190,6 +224,7 @@ namespace ETWController.UI
         {
             return Path.GetDirectoryName(fileName);
         }
+
 
         string _TraceCancel;
         /// <summary>

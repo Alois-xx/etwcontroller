@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
@@ -728,6 +729,8 @@ namespace ETWController
             MessageBoxDisplay = messageBoxDisplay;
             var addonData = ReadAddonData();
             LocalTraceSettings = new TraceControlViewModel(this, false, addonData);
+            LocalTraceSettings.HandleTypeFilterEnabled = System.Windows.Visibility.Visible;
+
             ServerTraceSettings = new TraceControlViewModel(this, true, addonData);
             _ReceivedMessages = new ObservableCollection<string>();
             _ServerTraceSessions = new string[]{ "Not yet read."};
@@ -868,7 +871,14 @@ namespace ETWController
             StatusWindow.Activate();
         }
 
-
+        void SetHandleTypeFilter()
+        {
+            var handleTraceFilters = LocalTraceSettings.EventFilters.Where(x => x.IsSelected).Select(x => x.Name).ToList();
+            if (handleTraceFilters.Count > 0)
+            {
+                TraceControlViewModel._HandleETWFilterController.Enable(handleTraceFilters);
+            }
+        }
 
         /// <summary>
         /// Start Tracing
@@ -899,6 +909,8 @@ namespace ETWController
             Environment.SetEnvironmentVariable("TIMENOW", _TraceStartTime.ToString("HHmmss"));
             Environment.SetEnvironmentVariable("TS", _TraceStartTime.ToString("yyyy-MM-dd_HHmmss"));
 
+           
+
             CancelButtonLabel = !string.IsNullOrEmpty(LocalTraceSettings.SelectedPreset.TraceCancelLabel) ? LocalTraceSettings.SelectedPreset.TraceCancelLabel : CancelButtonLabelDefault;
             StopButtonLabel = !string.IsNullOrEmpty(LocalTraceSettings.SelectedPreset.TraceStopLabel) ? LocalTraceSettings.SelectedPreset.TraceStopLabel : StopButtonLabelDefault;
 
@@ -924,7 +936,8 @@ namespace ETWController
                 LocalTraceSettings.AddLogEntry(wpaArgs);
                 Task.Factory.StartNew<Tuple<int, string>>(() => { return LocalTraceControler.ExecuteWPRCommand(wpaArgs); })
                             .ContinueWith(t => LocalTraceSettings.ProcessStartCommand(t.Result), UIScheduler)
-                            .ContinueWith((t) => UpdateMainButtons(), UIScheduler);
+                            .ContinueWith(t => SetHandleTypeFilter(), TaskScheduler.Default)
+                            .ContinueWith((t) => UpdateMainButtons(t), UIScheduler);
 
 
                 // for safety, if this is a command that never returns from Start:
@@ -1056,11 +1069,24 @@ namespace ETWController
             this.TraceFileCounter++;
         }
 
-        private void UpdateMainButtons()
+        private void UpdateMainButtons(Task result=null)
         {
             StartButtonEnabled = LocalTraceSettings.TraceStates == TraceStates.Stopped && ServerTraceSettings.TraceStates == TraceStates.Stopped;
-            StopButtonEnabled = (LocalTraceSettings.TraceStates == TraceStates.Running || ServerTraceSettings.TraceStates == TraceStates.Running); ;
+            StopButtonEnabled = (LocalTraceSettings.TraceStates == TraceStates.Running || ServerTraceSettings.TraceStates == TraceStates.Running);
             CancelButtonEnabled = (LocalTraceSettings.TraceStates != TraceStates.Stopped || ServerTraceSettings.TraceStates != TraceStates.Stopped);
+
+            if( result != null)
+            {
+                if( result.Exception != null )
+                {
+                    AggregateException aggregateException = result.Exception as AggregateException;
+                    Exception sourceEx = aggregateException.InnerException;
+                    string eMsg = $"{sourceEx.GetType().Name}: {sourceEx.Message}";
+                    SetStatusMessageWarning(eMsg, sourceEx);
+                    MessageBoxDisplay.ShowMessage(eMsg, "Error");
+                }
+            }
+
         }
 
         /// <summary>
@@ -1152,14 +1178,18 @@ namespace ETWController
             this.SlowEventMessage = Configuration.Default.SlowEventMessage;
             this.FastEventMessage = Configuration.Default.FastEventMessage;
             this.FastEventHotkey = Configuration.Default.FastEventHotkey;
-            this.LocalTraceSettings.TraceStart = Configuration.Default.LocalTraceStart;
-            this.LocalTraceSettings.TraceStop = Configuration.Default.LocalTraceStop;
-            this.LocalTraceSettings.TraceCancel = Configuration.Default.LocalTraceCancel;
-            this.LocalTraceSettings.UpdateSelectedPreset();
+
             this.ServerTraceSettings.TraceStart = Configuration.Default.ServerTraceStart;
             this.ServerTraceSettings.TraceStop = Configuration.Default.ServerTraceStop;
             this.ServerTraceSettings.TraceCancel = Configuration.Default.ServerTraceCancel;
             this.ServerTraceSettings.UpdateSelectedPreset();
+
+            // Local settings define skip pdb gen enablement. If server has not configured wpr then do not disable button on app start.
+            this.LocalTraceSettings.TraceStart = Configuration.Default.LocalTraceStart;
+            this.LocalTraceSettings.TraceStop = Configuration.Default.LocalTraceStop;
+            this.LocalTraceSettings.TraceCancel = Configuration.Default.LocalTraceCancel;
+            this.LocalTraceSettings.UpdateSelectedPreset();
+
             this.ServerTraceEnabled = Configuration.Default.ServerTraceEnabled;
             this.LocalTraceEnabled = Configuration.Default.LocalTraceEnabled;
             this.AlwaysShowCommandEditBoxes = Configuration.Default.AlwaysShowCommandEditBoxes;
