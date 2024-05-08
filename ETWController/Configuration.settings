@@ -89,9 +89,108 @@
     <Setting Name="CaptureScreenShots" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="CommandNameSubstitutions" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;string&gt;xxwpr|.\Scripts\xxWPR.cmd&lt;/string&gt;
+  &lt;string&gt;wpr|wpr.exe&lt;/string&gt;
+  &lt;string&gt;xxprofile|"%perftools%\xxprofile.cmd"&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
     <Setting Name="Presets" Type="ETWController.UI.Preset[]" Scope="Application">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfPreset xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Full (Network+CSwitch+File+Frequency)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start "ETW\MultiProfile.wprp!Network"  -start "ETW\MultiProfile.wprp!CSwitch" -start "ETW\MultiProfile.wprp!File" -start "ETW\MultiProfile.wprp!Frequency" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Default (CPU Samples/Disk/.NET Exceptions/Focus)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start "ETW\MultiProfile.wprp" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Frequency (CPU Samples/Disk/.NET Exceptions/Focus/Frequency)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!Frequency" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;File (CPU Samples/Disk/.NET Exceptions/Focus/File IO)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!File" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Handle (CPU Samples/Disk/.NET Exceptions/Focus/Handle)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -setprofint 200000 -start ".\ETW\MultiProfile.wprp!Handle" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Network (CPU Samples/Disk/.NET Exceptions/Focus/Network)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!Network" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;VirtualAlloc (Long Term)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!VirtualAlloc" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;UserGDILeaks (Long Term)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!UserGDILeaks" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;PMCSample (PMC Sampling for PMC Rollover + Default)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!PMCSample" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;PMCBranch (PMC Cycles per Instruction and Branch data - Counting)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!PMCBranch" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;PMCLLC (PMC Cycles per Instruction and LLC data - Counting)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!PMCLLC" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;LBR (LBR - Last Branch Record Sampling)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!LBR" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;SysCall (CPU Samples/Disk/.NET Exceptions/Focus/SysCall)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!SysCall" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
   &lt;Preset&gt;
     &lt;Name&gt;WPR Default&lt;/Name&gt;
     &lt;TraceStartCommand&gt;xxwpr -start GeneralProfile -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
@@ -107,14 +206,6 @@
     &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
   &lt;/Preset&gt;
 &lt;/ArrayOfPreset&gt;</Value>
-    </Setting>
-    <Setting Name="CommandNameSubstitutions" Type="System.Collections.Specialized.StringCollection" Scope="Application">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfString xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
-  &lt;string&gt;xxwpr|.\Scripts\xxWPR.cmd&lt;/string&gt;
-  &lt;string&gt;wpr|wpr.exe&lt;/string&gt;
-  &lt;string&gt;xxprofile|"%perftools%\xxprofile.cmd"&lt;/string&gt;
-&lt;/ArrayOfString&gt;</Value>
     </Setting>
   </Settings>
 </SettingsFile>
