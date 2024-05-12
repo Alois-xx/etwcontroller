@@ -41,22 +41,22 @@ The recorded data can be analyzed with [ETWAnalyzer](https://github.com/Siemens-
 - **UserGDILeaks (Long Term)**
   - Since Windows 10 1909 GDI/User object creation destruction is also instrumented with ETW. Best Viewed with WPA.
 - **PMCSample (PMC Sampling for PMC Rollover + Default)**
-  - Capture CPU counters in sampling mode. Similar what VTune does.
+   - Capture CPU counters in sampling mode. Similar what VTune does.
 - **PMCBranch (PMC Cycles per Instruction and Branch data - Counting)**
- - Capture CPU counters in sampling mode. Similar what VTune does.
+  - Capture CPU counters in sampling mode. Similar what VTune does.
 - **PMCLLC (PMC Cycles per Instruction and LLC data - Counting)**
- - Capture CPU counters in sampling mode. Similar what VTune does.
+  - Capture CPU counters in sampling mode. Similar what VTune does.
 - **LBR (LBR - Last Branch Record Sampling)**
- - Capture CPU counters in sampling mode. Similar what VTune does.
+  - Capture CPU counters in sampling mode. Similar what VTune does.
 - **SysCall (CPU Samples/Disk/.NET Exceptions/Focus/SysCall)**
-  - Same as Default but records all Kernel calls from user mode processes with stack traces. Useful for security researchers.
+   - Same as Default but records all Kernel calls from user mode processes with stack traces. Useful for security researchers.
     Unlike strace on Linux only the return code of the API call is recorded and no method arguments are collected.
 - **WPR Default**
- - WPR Default profile provided by MS. 
+  - WPR Default profile provided by MS. 
 - **WPR Default + .NET**
-  - WPR Default profile with .NET provider.
+   - WPR Default profile with .NET provider.
 
-All profiles except the WPR profiles can be combined. To change a profile select first a profile and then select ```<Manual Editing>``` to show the ```Start Command``` line.
+All profiles except the WPR Default profiles can be combined with the other profiles defined in MultiProfile.wprp. To change a profile select first a profile and then select ```<Manual Editing>``` to show the ```Start Command``` line.
 You can then add additional or other profile settings. The predefined settings are stored in ETWController.exe.config.
 
 You can change the CPU sampling rate by adding to the xxwpr command line ```-setprofint 100000``` to e.g. set a 10ms sample interval. WPR does support this command line switch 
@@ -66,8 +66,24 @@ interval after the profile has been started.
 ## XCopy Deployable on Windows 10/11
 
 ### Recording Data
-To record the data it needs wpr.exe which is already part of Windows 10/11. On Windows 7 you need to install the Windows Performance Toolkit which is part of the Windows 8.1 SDK (https://go.microsoft.com/fwlink/p/?LinkId=323507).
+To record the data it needs wpr.exe which is already part of Windows 10/11. If you need the latest version you can download it as part from the Windows SDK https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/ or the Windows ADK. If you need to update the wpr from your machine you can install from the SDK Iso **WPTx64 (OnecoreUAP)-x64_en-us.msi** which is just a 2.5 MB MSI which contains only the command line tool wpr to record things but misses the rest (WPRUI.exe present but does not work, and WPA).
+Be sure to extend the PATH environment so you are calling the newer WPR version and not the old one sitting in **C:\Windows\System32\wpr.exe**. ETWController uses the one which is in the path.
 
+### Windows 10 Issues
+If you get during stopping the trace an error message from WPR
+```
+wpr -stop problem.etl
+
+        Cannot change thread mode after it is set.
+
+        Profile Id: RunningProfile
+
+        Error code: 0x80010106
+```
+you need to install the latest Windows Performance Toolkit for Windows 10 or 11 (https://devblogs.microsoft.com/performance-diagnostics/wpr-start-and-stop-commands/). The problem is that a faulty WPR version was shipped with Windows 10, but things which can be installed
+via the Windows ADK or SDK will never be serviced by Windows updates. I have hoped that this issue would fix on itself over time but the guys keep telling me that if you can install a newer
+version on your own they will not update it for you. That can cause issues where the OS installation is frozen and you are not allowed to make changes in regulated environments. The Windows 11 
+version works out of the box though. 
 ### Analyzing Data
 To view the data it is best to install the latest Windows Performance Toolkit from the Windows 11 SDK (https://developer.microsoft.com/en-us/windows/downloads/sdk-archive).
 
