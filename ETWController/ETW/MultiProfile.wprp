@@ -11,17 +11,17 @@
 			 wpr -setprofint 100000 
 			 Execute your use case 
 			 wpr -stop c:\temp\Longterm.etl
-	   If you want to record a scenario where the system crashes you can record into a ring buffer file. To enable that
-	   see comments in file where FileMode="Circular" is declared
-	   To check the configured settings you can use 
+		 If you want to record a scenario where the system crashes you can record into a ring buffer file. To enable that
+		 see comments in file where FileMode="Circular" is declared
+		 To check the configured settings you can use 
 		 wpr -profiledetails MultiProfile.wprp
 		 wpr -profiledetails MultiProfile.wprp!MiniFilter
 		 wpr -profiledetails MultiProfile.wprp!CSwitch
-	   
-	   which will print the memory profile the used buffer sizes calculated on your current system
-	   
+		 
+		 which will print the memory profile the used buffer sizes calculated on your current system
+		 
 			 wpr -profiledetails MultiProfile.wprp -filemode
-	   
+		 
 		-->
 		<!-- 
 			If during stopping the ETW trace you get the error message 
@@ -29,12 +29,12 @@
 			Then you need to use the latest WPR from the Windows 11 SDK which has fixed this error. 
 		-->
 		<!--
-		    To record a shutdown trace which is not initiated by WPR (record shutdown until system stops)
+				To record a shutdown trace which is not initiated by WPR (record shutdown until system stops)
 				1. Start/Stop Pre Trace Profiling with
 					a. wpr -start CPU
 					b. wpr -stop c:\temp\PreTrace.etl
-				   This Trace file is needed later to inject image ID events with xperf, because the final merged trace from the reboot will not have loadable symbol information.
-				   These are needed because it reads from the kernel the ASLR module preferred load addresses. After a reboot the offsets will be different and we get no stacks!
+					 This Trace file is needed later to inject image ID events with xperf, because the final merged trace from the reboot will not have loadable symbol information.
+					 These are needed because it reads from the kernel the ASLR module preferred load addresses. After a reboot the offsets will be different and we get no stacks!
 				2. Start Profiling until Shutdown and capture all existing JITed stack method addresses with capturestateonodemand.
 					wpr -start MultiProfile.wprp!CSwitch -start MultiProfile.wprp!File -filemode -recordtempto c:\temp
 					wpr -capturestateondemand
@@ -173,18 +173,18 @@
 				<Stack Value="ObjectReference"/>
 			</Stacks>
 		</SystemProvider>
-    
-    <SystemProvider Id="SystemProvider_Mapping" Base="SystemProvider_Monitoring">
-      <Keywords Operation="Add">
-        <Keyword Value="VAMap" />
-      </Keywords>
-      <Stacks>
-        <Stack Value="MapFile"/>
-        <Stack Value="UnMapFile"/>
-      </Stacks>
-    </SystemProvider>
+		
+		<SystemProvider Id="SystemProvider_Mapping" Base="SystemProvider_Monitoring">
+			<Keywords Operation="Add">
+				<Keyword Value="VAMap" />
+			</Keywords>
+			<Stacks>
+				<Stack Value="MapFile"/>
+				<Stack Value="UnMapFile"/>
+			</Stacks>
+		</SystemProvider>
 
-    <SystemProvider Id="SystemProvider_Handle" Base="SystemProvider_Monitoring">
+		<SystemProvider Id="SystemProvider_Handle" Base="SystemProvider_Monitoring">
 			<Keywords Operation="Add">
 				<Keyword Value="Handle"/>
 			</Keywords>
@@ -278,11 +278,11 @@
 
 		<!-- Sampling Counter - Enables PMC Rollover Graph -->
 		<!-- When Strict is true the profile will not start when no such counters are present e.g. in VMs. BUT this will break WPRUI when even if the profiles are nowhere referenced with:
-		     The number of hardware counters in the profile collection has exceeded the maximum allowable limit by the OS -->
-    <HardwareCounter Id="HardwareCounters_SamplingCounters" Base="" Strict="true">
+				 The number of hardware counters in the profile collection has exceeded the maximum allowable limit by the OS -->
+		<HardwareCounter Id="HardwareCounters_SamplingCounters" Base="" Strict="false">
 			<SampledCounters>
 				<!-- Accordig to https://stackoverflow.com/questions/53840322/difference-between-llcmisses-and-cachemisses-on-hardware-counters the counters are first
-			     defined in a generic way, which have then Processor Architecture specific latter synonyms.
+					 defined in a generic way, which have then Processor Architecture specific latter synonyms.
 				 CPI = UnhaltedCoreCycles/InstructionRetired
 				 CPI From Intel Docs:
 					Metric Description
@@ -292,9 +292,9 @@
 
 			 wpr -pmcsources
 				Id  Name													Interval  Min      Max
-				  0 Timer													10000    1221    1000000
-				  2 TotalIssues == InstructionRetired						65536  4096 2147483647
-				  6 BranchInstructions   == BranchInstructionRetired		65536  4096 2147483647
+					0 Timer													10000    1221    1000000
+					2 TotalIssues == InstructionRetired						65536  4096 2147483647
+					6 BranchInstructions   == BranchInstructionRetired		65536  4096 2147483647
 				 10 CacheMisses == LLCMisses								65536  4096 2147483647
 				 11 BranchMispredictions == BranchMispredictsRetired		65536  4096 2147483647
 				 19 TotalCycles == UnhaltedCoreCycles						65536  4096 2147483647
@@ -302,8 +302,8 @@
 				 26 InstructionRetired										65536  4096 2147483647
 				 27 UnhaltedReferenceCycles									65536  4096 2147483647
 				 28 LLCReference											65536  4096 2147483647
-			    *29 LLCMisses												65536  4096 2147483647
-			    *30 BranchInstructionRetired								65536  4096 2147483647
+					*29 LLCMisses												65536  4096 2147483647
+					*30 BranchInstructionRetired								65536  4096 2147483647
 				*31 BranchMispredictsRetired								65536  4096 2147483647
 				 32 LbrInserts (LastBranchRecord)							65536  4096 2147483647
 				 33 InstructionsRetiredFixed								65536  4096 2147483647
@@ -324,7 +324,7 @@
 		</HardwareCounter>
 
 		<!-- Counting enabled CPI (Cycles per Instruction Graph) and Branch metrics -->
-		<HardwareCounter Id="HardwareCounters_EventCounters_CPI_Branch" Base="" Strict="true">
+		<HardwareCounter Id="HardwareCounters_EventCounters_CPI_Branch" Base="" Strict="false">
 			<Counters>
 				<!-- Only up to 4 counters are supported at a time. If you use 4 then you cannot use CPU sampling because that uses Timer! -->
 				<Counter Value="TotalCycles"/>
@@ -342,7 +342,7 @@
 		</HardwareCounter>
 
 		<!-- Counting enabled CPI (Cycles per Instruction Graph) and Last Level Cache (LLC) metrics -->
-		<HardwareCounter Id="HardwareCounters_EventCounters_CPI_LLC" Base="" Strict="true">
+		<HardwareCounter Id="HardwareCounters_EventCounters_CPI_LLC" Base="" Strict="false">
 			<Counters>
 				<!-- Only up to 4 counters are supported at a time. If you use 4 then you cannot use CPU sampling because that uses Timer!-->
 				<Counter Value="TotalCycles"/>
@@ -359,7 +359,7 @@
 		</HardwareCounter>
 
 		<!-- Last Branch Record samples Branch data from -> to jump targets which helps to determine e.g. often called methods -->
-	<HardwareCounter Id="HardwareCounters_EventCounters_LBR" Base="" Strict="true">
+		<HardwareCounter Id="HardwareCounters_EventCounters_LBR" Base="" Strict="false">
 			<LastBranch>
 				<Events>
 					<Event Value="SampledProfile" />
@@ -393,9 +393,9 @@
 		</HardwareCounter> 
 <!-- 
 	<EventProvider CaptureStateOnly="true" Id="EventProvider_DotNETRuntime_CaptureState" Level="5" Name="E13C0D23-CCBC-4E12-931B-D9CC2EEE27E4">
-	  <CaptureStateOnSave>
+		<CaptureStateOnSave>
 		<Keyword Value="0x70138"/>
-	  </CaptureStateOnSave>
+		</CaptureStateOnSave>
 	</EventProvider>
 -->
 		<EventProvider Id="EventProvider_Microsoft-Windows-Subsys-SMSS" Name="Microsoft-Windows-Subsys-SMSS" NonPagedMemory="true" />
@@ -420,7 +420,7 @@
 		0x10000         ThreadingKeyword                                        Microsoft-Windows-DotNETRuntime
 		0x20000         JittedMethodILToNativeMapKeyword                        Microsoft-Windows-DotNETRuntime
 		0x40000         OverrideAndSuppressNGenEventsKeyword                    Microsoft-Windows-DotNETRuntime
-	   -->
+		 -->
 			<CaptureStateOnSave>
 				<Keyword Value="0x50138"/>
 			</CaptureStateOnSave>
@@ -497,6 +497,8 @@
 				<Keyword Value = "0x42000" />  <!-- Low volume events needed for WPA Window in Focus Graph 0x40000 UIUnresponsiveness 0x2000  Focus -->
 			</Keywords>
 		</EventProvider>
+		
+		<EventProvider Id="EventProvider_CodeIntegrity"  Name="Microsoft-Windows-CodeIntegrity" NonPagedMemory="true" Stack="true"/>
 		<EventProvider Id="EventProvider_UserGDILeaks"  Name="Microsoft-Windows-Win32k" NonPagedMemory="true" Stack="true">
 			<Keywords>
 				<!--  Microsoft-Windows-Win32k
@@ -522,13 +524,27 @@
 			</Keywords>
 		</EventProvider>
 		
+		<!-- Edge providers  -->
+		<EventProvider Id="Edge" Name="3A5F2396-5C8F-4F1F-9B67-6CCA6C990E61" Level="5">
+				<Keywords>
+					<Keyword Value="0x10000000202F"/>
+				</Keywords>
+		</EventProvider>
+		<EventProvider Id="Edge_WebView" Name="E16EC3D2-BB0F-4E8F-BDB8-DE0BEA82DC3D" Level="5">
+				<Keywords>
+					<Keyword Value="0x3F0000054404"/>
+				</Keywords>
+		</EventProvider>
+		<EventProvider Id="Provider_V8js" Name="57277741-3638-4A4B-BDBA-0AC6E45DA56C" Level="5" />
+		
+		
 		<!-- Microsoft-Windows-Kernel-Processor-Power is needed to get CPU Frequency for different P-States this does NOT include thermal throttling events -->
 		<EventProvider Id="ProcessorPower" Name="Microsoft-Windows-Kernel-Processor-Power" />
 		<!-- EventProvider_Microsoft-Windows-Kernel-Processor-Power_CaptureState is needed to get cleartext names of HardwareDebugRegisterRundown and HardwareDebugParameterRundown -->
 		<EventProvider Id="ProcessorPower_CaptureState" Name="Microsoft-Windows-Kernel-Processor-Power" CaptureStateOnly="true"  NonPagedMemory="true" >
-		  <CaptureStateOnSave>
+			<CaptureStateOnSave>
 			<Keyword Value="0xffffffffffffffff"/>
-		  </CaptureStateOnSave>
+			</CaptureStateOnSave>
 		</EventProvider>
 
 		<!-- This will add Power profile information into ETW which shows up in WPA under Trace - Power Settings -->
@@ -601,7 +617,7 @@
 				<!-- <EventId Value="1013" /> --> <!-- AfdSendMessageWithAddress    ws2_32.dll!WSASendMs, mswsock.dll!WSPIoctl                                                     Keyword AFD_KW_SOURCE_WINSOCK 0x4 -->
 
 			<!-- Sample Data of nearly all Socket Provider events, the Endpoint pointer is filled during AfdConnectWithAddress/AfdConnectExWithAddress where then the pointer can be used in other events/s
-     to relate the socket which was open
+		 to relate the socket which was open
 Task Name,	 Id,	 EnterExit (Field 1),	 Location (Field 2),	 Process (Field 3),	 Endpoint (Field 4),	 Reason (Field 5),	 Field 6,	 Field 7,	 Field 8,	 Field 9,	 Field 10,	 Field 11,	 Field 12,	 Field 13,	 Field 14,	 Field 15,	 Count,	 Time (s)
 AfdAbort,	 1032,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 7,	 
 			,	 ,	 2,	 8028,	 0xFFFFAD083A6020C0,	 0xFFFFAD084BAE5580,	 Abortive disconnect requested on endpoint,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 1,	 6.979548700
@@ -721,7 +737,7 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 					</EventProviders>
 				</EventCollectorId>
 				<!-- When many .NET processes with JITed code (e.g. Visual Studio) are running the .NET Rundown events can overwrite our actual payload data. We need an extra 
-				     buffer during rundown. But since there is no way to define a buffer used only during rundown we are generous and get an extra GB just for managed stack traces in Memory mode, in file Mode we use 100MB. -->
+						 buffer during rundown. But since there is no way to define a buffer used only during rundown we are generous and get an extra GB just for managed stack traces in Memory mode, in file Mode we use 100MB. -->
 				<EventCollectorId Value="EventCollector_Rundown">
 					<BufferSize Value="1024"/>
 					<Buffers Value="100"/>
@@ -777,7 +793,7 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 					<BufferSize Value="1024"/>
 					<Buffers PercentageOfTotalMemory="true" Value="7" MaximumBufferSpace="4000"/>
 					<!-- If you want a fixed buffer size to get e.g. maximum ETL files sizes which do not take ages to load specify here the absolute memory buffer size. 
-					     you may want to set this for the SystemCollector as well because at the end both ETL files will be merged together.
+							 you may want to set this for the SystemCollector as well because at the end both ETL files will be merged together.
 						<BufferSize Value="1024"/>
 						<Buffers Value="800"/>
 					-->
@@ -945,23 +961,23 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 			</Collectors>
 		</Profile>
 
-    <Profile Id="FileMapping.Verbose.File" Name="FileMapping" Description="FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
-      <Collectors Operation="Add">
-        <!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
-        <SystemCollectorId Value="SystemProfiling_System">
-          <SystemProviderId Value="SystemProvider_Mapping"/>
-        </SystemCollectorId>
-      </Collectors>
-    </Profile>
-    <Profile Id="FileMapping.Verbose.Memory" Name="FileMapping" Description="FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
-      <Collectors Operation="Add">
-        <SystemCollectorId Value="SystemProfiling_System">
-          <SystemProviderId Value="SystemProvider_Mapping"/>
-        </SystemCollectorId>
-      </Collectors>
-    </Profile>
-    
-    <Profile Id="Handle.Verbose.File" Name="Handle" Description="Handle (CPU Samples/Disk/.NET Exceptions/Focus/Handle)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+		<Profile Id="FileMapping.Verbose.File" Name="FileMapping" Description="FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_Mapping"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="FileMapping.Verbose.Memory" Name="FileMapping" Description="FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_Mapping"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+		
+		<Profile Id="Handle.Verbose.File" Name="Handle" Description="Handle (CPU Samples/Disk/.NET Exceptions/Focus/Handle)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
 			<Collectors Operation="Add">
 				<!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
 				<SystemCollectorId Value="SystemProfiling_System">
@@ -976,8 +992,7 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 				</SystemCollectorId>
 			</Collectors>
 		</Profile>
-
-	<Profile Id="Sockets.Verbose.File" Name="Sockets" Description="Sockets (CPU Samples/Disk/.NET Exceptions/Focus/Sockets)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+		<Profile Id="Sockets.Verbose.File" Name="Sockets" Description="Sockets (CPU Samples/Disk/.NET Exceptions/Focus/Sockets)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
 			<Collectors Operation="Add">
 				<EventCollectorId Value="EventCollector_UserModeSession">
 					<EventProviders>
@@ -1015,6 +1030,46 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 					<Buffers PercentageOfTotalMemory="true" Value="15" MaximumBufferSpace="4000" />
 					<SystemProviderId Value="SystemProvider_VirtualAlloc"/>
 				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="CodeIntegrity.Verbose.File" Name="CodeIntegrity" Description="CodeIntegrity (CPU Samples/Disk/.NET Exceptions/Focus/CodeIntegrity)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<EventCollectorId Value="EventCollector_UserModeSession">
+					<EventProviders>
+						<EventProviderId Value="EventProvider_CodeIntegrity"/>
+					</EventProviders>
+				</EventCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="CodeIntegrity.Verbose.Memory" Name="CodeIntegrity" Description="CodeIntegrity (CPU Samples/Disk/.NET Exceptions/Focus/CodeIntegrity)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<EventCollectorId Value="EventCollector_UserModeSession">
+					<EventProviders>
+						<EventProviderId Value="EventProvider_CodeIntegrity"/>
+					</EventProviders>
+				</EventCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="Edge.Verbose.File" Name="Edge" Description="Edge/WebView2 (CPU Samples/Disk/.NET Exceptions/Focus/Edge)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<EventCollectorId Value="EventCollector_UserModeSession">
+					<EventProviders>
+						<EventProviderId Value="Edge" />
+						<EventProviderId Value="Edge_WebView" />
+						<EventProviderId Value="Provider_V8js"/>
+					</EventProviders>
+				</EventCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="Edge.Verbose.Memory" Name="Edge" Description="Edge/WebView2 (CPU Samples/Disk/.NET Exceptions/Focus/Edge)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<EventCollectorId Value="EventCollector_UserModeSession">
+					<EventProviders>
+						<EventProviderId Value="Edge" />
+						<EventProviderId Value="Edge_WebView" />
+						<EventProviderId Value="Provider_V8js"/>
+					</EventProviders>
+				</EventCollectorId>
 			</Collectors>
 		</Profile>
 		<Profile Id="PMCSample.Verbose.File" Name="PMCSample" Description="PMC Sampling for PMC Rollover + Default" Base="Default.Verbose.File" LoggingMode="File" DetailLevel="Verbose">
@@ -1101,8 +1156,6 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 				</SystemCollectorId>
 			</Collectors>
 		</Profile>
-
-		
 		<Profile Id="PMCLLC.Verbose.Memory" Name="PMCLLC" Description="PMC Cycles per Instruction and LLC data - Counting" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
 			<Collectors Operation="Remove">
 				<SystemCollectorId Value="SystemProfiling_System"/>
