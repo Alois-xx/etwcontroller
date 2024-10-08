@@ -173,7 +173,40 @@
 				<Stack Value="ObjectReference"/>
 			</Stacks>
 		</SystemProvider>
-		
+
+		<SystemProvider Id="SystemProvider_Registry" Base="SystemProvider_Monitoring">
+			<Keywords Operation="Add">
+				<Keyword Value="Registry"/>
+				<Keyword Value="RegistryHive"/>
+			</Keywords>
+			<!-- 
+			<Stacks>
+				<Stack Value="RegistryCloseKey" />
+				<Stack Value="RegistryCreateKey" />
+				<Stack Value="RegistryDeleteKey" />
+				<Stack Value="RegistryDeleteValue" />
+				<Stack Value="RegistryEnumerateKey" />
+				<Stack Value="RegistryEnumerateValueKey" />
+				<Stack Value="RegistryFlush" />
+				<Stack Value="RegistryKcbCreate" />
+				<Stack Value="RegistryKcbDelete" />
+				<Stack Value="RegistryOpenKey" />
+				<Stack Value="RegistryQueryKey" />
+				<Stack Value="RegistryQueryMultipleValue" />
+				<Stack Value="RegistryQuerySecurity" />
+				<Stack Value="RegistryQueryValue" />
+				<Stack Value="RegistrySetInformation" />
+				<Stack Value="RegistrySetSecurity" />
+				<Stack Value="RegistrySetValue" />
+				<Stack Value="RegistryVirtualize" />
+				<Stack Value="RegHiveInit" />
+				<Stack Value="RegHiveDestroy" />
+				<Stack Value="RegHiveLink" />
+				<Stack Value="RegHiveDirty" />
+			 </Stacks>
+			 -->
+		</SystemProvider>
+
 		<SystemProvider Id="SystemProvider_Mapping" Base="SystemProvider_Monitoring">
 			<Keywords Operation="Add">
 				<Keyword Value="VAMap" />
@@ -961,6 +994,22 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 			</Collectors>
 		</Profile>
 
+		<Profile Id="Registry.Verbose.File" Name="Registry" Description="Registry (CPU Samples/Disk/.NET Exceptions/Focus/Registry)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_Registry"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="Registry.Verbose.Memory" Name="Registry" Description="Registry (CPU Samples/Disk/.NET Exceptions/Focus/Registry)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+			<Collectors Operation="Add">
+				<SystemCollectorId Value="SystemProfiling_System">
+					<SystemProviderId Value="SystemProvider_Registry"/>
+				</SystemCollectorId>
+			</Collectors>
+		</Profile>
+		
 		<Profile Id="FileMapping.Verbose.File" Name="FileMapping" Description="FileMapping (CPU Samples/Disk/.NET Exceptions/Focus/FileMapping)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
 			<Collectors Operation="Add">
 				<!-- In the kernel session we define how much memory it needs and which SystemProviderId is enable which enables the corresponding kernel and stackwalks -->
