@@ -372,7 +372,7 @@
             <Entrypoint Module="srtsp64.sys" Method="*"/>
         </Tag>
     </Tag>
-    <Tag Name="Antivirus - Palo Alto Endpoint Protection\Intercepts CreateProcess/LoadLibrary which can induce large delays duringprocess start" Priority="1">
+    <Tag Name="Antivirus - Palo Alto Endpoint Protection\Intercepts CreateProcess/LoadLibrary/WriteFile which can induce large delays" Priority="1">
         <Entrypoint Module="cyverak.sys" Method="*"/>
         <Tag Name="File System Filter Driver cyvrfsfd.sys" Priority="1">
             <Entrypoint Module="cyvrfsfd.sys" Method="*"/>
@@ -383,19 +383,24 @@
         <Tag Name="Network Driver cyvrmtgn.sys" Priority="1">
             <Entrypoint Module="cyvrmtgn.sys" Method="*"/>
         </Tag>
+        <Tag Name="Cortex XDR tedrdrv.sys" Priority="1">
+          <Entrypoint Module="tedrdrv.sys" Method="*"/>
+        </Tag>
     </Tag>
-	
-    <Tag Name="Antivirus - Palo Alto Networks - FSFilter Activity Monitor cyvrlpc.sys" Priority="1">
-        <Entrypoint Module="cyvrlpc.sys" Method="*"/>
-    </Tag>
-	
     <Tag Name="Antivirus - ESET NOD32">
         <Tag Name="FSFilter Driver ehdrv.sys">
             <Entrypoint Module="ehdrv.sys" Method="*"/>
         </Tag>
+      <Tag Name="FSFilter Driver eamonm.sys">
+        <Entrypoint Module="eamonm.sys" Method="*"/>
+      </Tag>
     </Tag>
-	
-    <Tag Name="Antivirus - Mc Afee" Priority="1" >
+    <Tag Name="Antivirus - BitDefender" Priority="1">
+       <Tag Name="FSFilter Driver ehdrv.sys">
+         <Entrypoint Module="vlflt.sys" Method="*"/>
+      </Tag>
+    </Tag>
+  <Tag Name="Antivirus - Mc Afee" Priority="1" >
         <Entrypoint Module="MfeAVSvc.exe" Method="*"/>
         <Entrypoint Module="mfecore.dll" Method="*"/>
         <Entrypoint Module="mfefires.dll" Method="*"/>
@@ -436,6 +441,12 @@
             <Entrypoint Module="csagent.sys" Method="*" />
         </Tag>
     </Tag>
+
+  <Tag Name="Antivirus - Carbon Black" Priority="1">
+    <Tag Name="Driver Parity.sys">
+      <Entrypoint Module="Parity.sys" Method="*" />
+    </Tag>
+  </Tag>
 	
     <Tag Name="Antivirus - CyberArk Security" Priority="1">
         <Tag Name="vfdrv.sys">
@@ -712,6 +723,10 @@
     <Entrypoint Module="libcef.dll" Method="**"/>
   </Tag>
 
+  <Tag Name="Broadcast Window Message">
+    <Entrypoint Module="win32kfull.sys" Method="xxxBroadcastMessageEx*"/>
+  </Tag>
+
   <Tag Name="UI Automation Overhead">
     <Entrypoint Module="ole32.dll" Method="ThreadWndProc*"/>
     <Entrypoint Module="oleacc.dll" Method="LresultFromObject*"/>
@@ -745,11 +760,35 @@
       <Entrypoint Module="perfproc.dll" Method="CollectSysProcessObjectData*"/>
     </Tag>
   </Tag>
+  <Tag Name="libssl">
+    <Tag Name="Read" Priority="1">
+      <Entrypoint Module="libssl-3-x64.dll" Method="SSL_read*"/>
+    </Tag>
+    <Tag Name="Write" Priority="1">
+      <Entrypoint Module="libssl-3-x64.dll" Method="SSL_write*"/>
+    </Tag>
+    <Entrypoint Module="libssl-3-x64.dll" Method="*"/>
+  </Tag>
+
   <Tag Name="zlib de/compression" Priority="1">
     <Entrypoint Module="zlib.dll" />
   </Tag>
+  <Tag Name="ZSTD de/compression" Priority="1">
+    <Entrypoint Module="libzstd.dll" />
+    <Tag Name="Compress" Priority="2">
+      <Entrypoint Module="libzstd.dll"  Method="ZSTD_compress"/>
+    </Tag>
+    <Tag Name="Decompress" Priority="2">
+      <Entrypoint Module="libzstd.dll"  Method="ZSTD_decompress"/>
+    </Tag>
+  </Tag>
+
+  
   <Tag Name="Libjpeg" Priority="1">
     <Entrypoint Module="libjpeg.dll" />
+  </Tag>
+  <Tag Name="JPEG Compression" Priority="1">
+    <Entrypoint Module="uic_transcoder.dll" />
   </Tag>
   <Tag Name="OpenMP">
     <Tag Name="Intel OpenMP CPU Spinning" >
@@ -841,6 +880,27 @@
       <Entrypoint Module="PresentationCore.ni.dll" Method="*System.Windows.UIElement.Measure*"/>
       <Entrypoint Module="PresentationCore.dll" Method="*System.Windows.UIElement::Measure*"/>
     </Tag>
+    <Tag Name="Grid Arrange">
+      <Entrypoint Module="PresentationFramework.ni.dll" Method="System.Windows.Controls.Grid.ArrangeOverride*"/>
+      <Entrypoint Module="PresentationFramework.dll" Method="System.Windows.Controls.Grid::ArrangeOverride*"/>
+    </Tag>
+    <Tag Name="ContentPresenter ArrangeOverride">
+      <Entrypoint Module="PresentationFramework.ni.dll" Method="System.Windows.Controls.ContentPresenter.ArrangeOverride*"/>
+      <Entrypoint Module="PresentationFramework.dll" Method="System.Windows.Controls.ContentPresenter::ArrangeOverride*"/>
+    </Tag>
+    <Tag Name="UIElement Arrange">
+      <Entrypoint Module="PresentationCore.ni.dll" Method="System.Windows.UIElement.Arrange*"/>
+      <Entrypoint Module="PresentationCore.dll" Method="System.Windows.UIElement::Arrange*"/>
+    </Tag>
+    <Tag Name="FrameworkElement ArrangeCore">
+      <Entrypoint Module="PresentationFramework.ni.dll" Method="System.Windows.FrameworkElement.ArrangeCore*"/>
+      <Entrypoint Module="PresentationFramework.dll" Method="System.Windows.FrameworkElement::ArrangeCore*"/>
+    </Tag>
+    <Tag Name="UIElement Arrange">
+      <Entrypoint Module="PresentationCore.ni.dll" Method="System.Windows.UIElement.Arrange*"/>
+      <Entrypoint Module="PresentationCore.dll" Method="System.Windows.UIElement::Arrange*"/>
+    </Tag>
+
     <Tag Name="XamlServices Transform">
       <Entrypoint Module="System.Xaml.dll" Method="System.Xaml.XamlServices::Transform*"/>
       <Entrypoint Module="System.Xaml.ni.dll" Method="System.Xaml.XamlServices.Transform*"/>
