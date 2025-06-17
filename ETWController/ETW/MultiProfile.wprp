@@ -29,6 +29,9 @@
 			Then you need to use the latest WPR from the Windows 11 SDK which has fixed this error. 
 		-->
 		<!--
+    		wpr -start MultiProfile.wprp!CSWitch -start MultiProfile.wprp!File -shutdown -filemode -instancename Shutdown 
+				wpr -stop c:\temp\Shutdown_%ComputerName%.etl -instancename Shutdown
+    
 				To record a shutdown trace which is not initiated by WPR (record shutdown until system stops)
 				1. Start/Stop Pre Trace Profiling with
 					a. wpr -start CPU
@@ -434,8 +437,28 @@
 		<EventProvider Id="EventProvider_Microsoft-Windows-Subsys-SMSS" Name="Microsoft-Windows-Subsys-SMSS" NonPagedMemory="true" />
 		<EventProvider Id="EventProvider_Microsoft-Windows-Winlogon" Name="Microsoft-Windows-Winlogon" NonPagedMemory="true" />
 		<EventProvider Id="EventProvider_Microsoft-Windows-Wininit" Name="Microsoft-Windows-Wininit" NonPagedMemory="true" />
-		
-		<EventProvider CaptureStateOnly="true" Id="MultiProfile_DotNETRuntimeRundown_CaptureState" Level="5" Name="a669021c-c450-4609-a035-5af59af4df18" Stack="false">
+		<!-- Logs during shutdown which process was tried to shut down and when. See Microsoft-Windows-Subsys-Csr/csr:ShutdownProcess/win:Start/Stop events
+				 Processes are in specific shutdown groups which are tried to shut down in parallel inside each group
+		--> 
+		<EventProvider Id="EventProvider_Microsoft-Windows-Subsys-Csr" Name="Microsoft-Windows-Subsys-Csr" NonPagedMemory="true" />
+    <!-- This logs most relevant events which process and which thread in each process is tried to shut down. 
+         You do not need to create your own region file. WPA provides already one at File Name: C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\Catalog\FullBoot.Shutdown.Regions.xml
+         This defines 
+         Full Shutdown
+					|- User Session Shutdown
+					|- Full Shutdown<itself>
+					|- Logoff Request To User Feedback
+					|- Shutdown Processes   This is where you want to investigate most
+					|- Winlogon Shutdown
+					|- Pre-Shutdown Notification
+					|- System Session Shutdown
+					|- Shutdown Services
+					|- Shutdown System
+    -->
+    <EventProvider Id="EventProvider_Microsoft-Windows-Winsrv" Name="Microsoft-Windows-Winsrv" NonPagedMemory="true" />
+
+    <!-- There are still issues with JITed code and shutdown trace: https://github.com/dotnet/runtime/issues/113412. Currently JITed code does not show up in a shutdown trace if the JIT start event is not in the trace. -->
+    <EventProvider CaptureStateOnly="true" Id="MultiProfile_DotNETRuntimeRundown_CaptureState" Level="5" Name="a669021c-c450-4609-a035-5af59af4df18" Stack="false">
 			<!-- Default of .NET provider of wpr is 0x70138
 		c:\PerfTools\BitmaskDecoder.exe  0x70138 c:\Windows\Microsoft.NET\Framework64\v4.0.30319\CLR-ETW.man | findstr /i rundown
 		0x8             LoaderRundownKeyword                                    Microsoft-Windows-DotNETRuntimeRundown
@@ -514,6 +537,42 @@
 				<EventId Value="1013"/> <!-- TcpCreateEndpoint Useful to find out who initiates a TCP connection from an unusual code location -->
 			</StackFilters>
 		</EventProvider>
+		
+		<EventProvider Id="EventProvider_TCPProvider_Light"  Name="Microsoft-Windows-TCPIP" NonPagedMemory="true" Stack="false">
+			<CaptureStateOnSave> <!-- Get during rundown all open connections and some additional metrics which are stored by WPR. E.g. TcpConnectionRundown, IpRouteRundown, IpInterfaceRundown, TcpConnectionSummary, RssBindingRundow, RssPortRundown -->
+				<Keyword Value="0xffffffff"/>
+			</CaptureStateOnSave>
+			<EventFilters FilterIn="false"> <!-- These events are not necessary to display send/receive metrics in WPA but cost a lot of space -->
+				<EventId Value="1065"/>  <!-- TcpTcbStartTimer -->
+				<EventId Value="1157"/>  <!-- TcpDeliveryIndicated -->
+				<EventId Value="1205"/>  <!-- TcpipReceiveSlowPath -->
+				<EventId Value="1206"/>  <!-- TcpipSendSlowPath -->
+				<EventId Value="1064"/>  <!-- TcpTcbStartTimer -->
+				<EventId Value="1090"/>  <!-- TcpReleaseIndication -->
+				<EventId Value="1319"/>  <!-- TcpipTimerDpcRescheduleEvent -->
+				<EventId Value="1320"/>  <!-- TcpipTimerDpcFiredEvent -->
+				<EventId Value="1454"/>  <!-- Firewall Packet inspection result -->
+				<EventId Value="1455"/>  <!-- Firewall Create Port -->
+				<EventId Value="1367"/>  <!-- TcpipNblOob -->
+				<EventId Value="1227"/>  <!-- TcpRscNblOobInfo -->
+				
+				<!--Restrict just to send/receive events but make WPA TCP graphs no longer working  -->
+				<EventId Value="1160"/> <!-- TcpSendTransmitted -->
+				<EventId Value="1159"/> <!-- TcpSendPosted -->
+				<EventId Value="1426"/> <!-- TcpSendComplete -->
+				<EventId Value="1476"/> <!-- TcpipLoopbackPacketTransmit -->
+				<EventId Value="1161"/> <!-- TcpSendAdvance -->
+				<EventId Value="1330"/> <!-- TcpDataTransferCumAck -->
+				<EventId Value="1167"/> <!-- TcpSrttMeasurementComplete-->
+				<EventId Value="1341"/> <!-- TcpDataTransferRttSample -->
+				<EventId Value="1229"/> <!-- TcpCwndRestart -->
+
+			</EventFilters>
+			<StackFilters FilterIn="true">
+				<EventId Value="1013"/> <!-- TcpCreateEndpoint Useful to find out who initiates a TCP connection from an unusual code location -->
+			</StackFilters>
+		</EventProvider>
+		
 		<!-- Microsoft-Windows-DNS-Client provider flags
 			0x0000000000000100  ut:GenericEvent			0x0000000010000000  ut:DnsAutoLogKeyword	0x0000000020000000  ut:PolicyTable		0x0000000040000000  ut:PerfCheckPoints
 			0x0000000080000000  ut:RegistrationEvent	0x0000000100000000  ut:SendPath				0x0000000200000000  ut:ReceivePath		0x0000000400000000  ut:L3ConnectPath
@@ -600,6 +659,32 @@
 			</StackFilters>
 		</EventProvider>
 		
+		<EventProvider Id="EventProvider_Socket_Light" Name="Microsoft-Windows-Winsock-AFD" NonPagedMemory="true" Stack="true">
+			<!-- 
+			Microsoft-Windows-Winsock-AFD            {E53C6823-7BB8-44BB-90DC-3F86090D48A6}
+			Value               Keyword              Description
+			0x0000000000000001  AFD_KW_DATAGRAM      Datagram socket		0x0000000000000002  AFD_KW_STREAM        Stream socket
+			0x0000000000000004  AFD_KW_SOURCE_WINSOCK Winsock initiated event	0x0000000000000008  AFD_KW_SOURCE_TRANSPORT Transport initiated event
+			0x0000000000000010  AFD_KW_FASTPATH      Fastpath I/O			0x0000000000000020  AFD_KW_BUFFERED      Buffered
+			0x0000000000000040  AFD_KW_RIO           RIO				0x0000000000000080  AFD_KW_NRT           NRT
+			0x0000010000000000  ut:Dropped						0x8000000000000000  Microsoft-Windows-Winsock-AFD/Operational Microsoft-Windows-Winsock Network Event/Operational
+			Value               Level                Description
+			0x02                win:Error            Error
+			0x03                win:Warning          Warning
+			0x04                win:Informational    Information
+			0x05                win:Verbose          Verbose
+		-->
+			<Keywords>
+				<Keyword Value="0x4"/>
+			</Keywords>
+			<EventFilters FilterIn="true" >
+				<EventId Value="1000" /> 
+				<EventId Value="1018" />
+				<EventId Value="1021" /> 
+				<EventId Value="1001" /> 
+				<EventId Value="1024" /> 
+			</EventFilters>
+		</EventProvider>
 		
 		<EventProvider Id="EventProvider_Socket" Name="Microsoft-Windows-Winsock-AFD" NonPagedMemory="true" Stack="true">
 			<!-- 
@@ -765,7 +850,9 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Subsys-SMSS"/>
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Winlogon"/>
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Wininit"/>
-						<EventProviderId Value="ProcessorPower_CaptureState" />
+						<EventProviderId Value="EventProvider_Microsoft-Windows-Subsys-Csr"/>
+            					<EventProviderId Value="EventProvider_Microsoft-Windows-Winsrv"/>            
+            <EventProviderId Value="ProcessorPower_CaptureState" />
 						<EventProviderId Value="WindowsKernelPower_CaptureState" />
 					</EventProviders>
 				</EventCollectorId>
@@ -837,7 +924,9 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Subsys-SMSS"/>
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Winlogon"/>
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Wininit"/>
-						<EventProviderId Value="ProcessorPower_CaptureState" />
+						<EventProviderId Value="EventProvider_Microsoft-Windows-Subsys-Csr"/>
+            					<EventProviderId Value="EventProvider_Microsoft-Windows-Winsrv"/>
+            <EventProviderId Value="ProcessorPower_CaptureState" />
 						<EventProviderId Value="WindowsKernelPower_CaptureState" />
 				</EventProviders>
 				</EventCollectorId>
@@ -942,21 +1031,45 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 			</Collectors>
 		</Profile>
 
-		<Profile Id="Network.Verbose.File" Name="Network" Description="Network (CPU Samples/Disk/.NET Exceptions/Focus/Network)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+		<Profile Id="Network.Verbose.File" Name="Network" Description="Network (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
 			<Collectors Operation="Add">
 				<EventCollectorId Value="EventCollector_UserModeSession">
 					<EventProviders>
 						<EventProviderId Value="EventProvider_TCPProvider"/>
+						<EventProviderId Value="EventProvider_Socket_Light"/>
 						<EventProviderId Value="EventProvider_DNSClient"/>
 					</EventProviders>
 				</EventCollectorId>
 			</Collectors>
 		</Profile>
-		<Profile Id="Network.Verbose.Memory" Name="Network" Description="Network (CPU Samples/Disk/.NET Exceptions/Focus/Network)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
+		<Profile Id="Network.Verbose.Memory" Name="Network" Description="Network (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Verbose">
 			<Collectors Operation="Add">
 				<EventCollectorId Value="EventCollector_UserModeSession">
 					<EventProviders>
 						<EventProviderId Value="EventProvider_TCPProvider"/>
+						<EventProviderId Value="EventProvider_Socket_Light"/>
+						<EventProviderId Value="EventProvider_DNSClient"/>
+					</EventProviders>
+				</EventCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="Network.Light.File" Name="Network" Description="NetworkLight (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Light">
+			<Collectors Operation="Add">
+				<EventCollectorId Value="EventCollector_UserModeSession">
+					<EventProviders>
+						<EventProviderId Value="EventProvider_TCPProvider_Light"/>
+						<EventProviderId Value="EventProvider_Socket_Light"/>
+						<EventProviderId Value="EventProvider_DNSClient"/>
+					</EventProviders>
+				</EventCollectorId>
+			</Collectors>
+		</Profile>
+		<Profile Id="Network.Light.Memory" Name="Network" Description="NetworkLight (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Light">
+			<Collectors Operation="Add">
+				<EventCollectorId Value="EventCollector_UserModeSession">
+					<EventProviders>
+						<EventProviderId Value="EventProvider_TCPProvider_Light"/>
+						<EventProviderId Value="EventProvider_Socket_Light"/>
 						<EventProviderId Value="EventProvider_DNSClient"/>
 					</EventProviders>
 				</EventCollectorId>
@@ -1098,8 +1211,8 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 					</EventProviders>
 				</EventCollectorId>
 			</Collectors>
-		</Profile>
-		<Profile Id="Edge.Verbose.File" Name="Edge" Description="Edge/WebView2 (CPU Samples/Disk/.NET Exceptions/Focus/Edge)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
+		</Profile>    
+			<Profile Id="Edge.Verbose.File" Name="Edge" Description="Edge/WebView2 (CPU Samples/Disk/.NET Exceptions/Focus/Edge)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Verbose">
 			<Collectors Operation="Add">
 				<EventCollectorId Value="EventCollector_UserModeSession">
 					<EventProviders>
