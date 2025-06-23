@@ -330,7 +330,7 @@ namespace ETWController.UI
 
             OpenTraceCommand = new DelegateCommand((o) =>
             {
-                string outFile = RootModel.StopData.TraceFileName;
+                string outFile = RootModel.StopData.TraceFileNameNotCompressed;
                 if (outFile != null)
                 {
                     var exe = ExtractExecName(RootModel.TraceOpenCmdLine);

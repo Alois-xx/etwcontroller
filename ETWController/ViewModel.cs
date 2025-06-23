@@ -142,16 +142,16 @@ namespace ETWController
             }
         }
 
-        private bool _Compress;
         public bool Compress
         {
             get
             {
-                return _Compress;
+                return Configuration.Default.CompressOnSave;
             }
             set
             {
-                SetProperty(ref _Compress, value, "Compress");
+                SetPropertyNoStore(Configuration.Default.CompressOnSave, value, "Compress");
+                Configuration.Default.CompressOnSave = value;
             }
         }
 

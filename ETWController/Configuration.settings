@@ -136,7 +136,14 @@
     &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
   &lt;/Preset&gt;
   &lt;Preset&gt;
-    &lt;Name&gt;Network (CPU Samples/Disk/.NET Exceptions/Focus/Network)&lt;/Name&gt;
+    &lt;Name&gt;Network (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)&lt;/Name&gt;
+    &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!Network" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
+    &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
+    &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
+    &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
+  &lt;/Preset&gt;
+  &lt;Preset&gt;
+    &lt;Name&gt;Network Light (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)&lt;/Name&gt;
     &lt;TraceStartCommand&gt;xxwpr -start ".\ETW\MultiProfile.wprp!Network" -start ETW\HookEvents.wprp&lt;/TraceStartCommand&gt;
     &lt;TraceStopCommand&gt;xxwpr -stop $FileName $ScreenshotDir&lt;/TraceStopCommand&gt;
     &lt;TraceCancelCommand&gt;xxwpr -cancel&lt;/TraceCancelCommand&gt;
@@ -206,6 +213,9 @@
     &lt;NeedsManualEdit&gt;false&lt;/NeedsManualEdit&gt;
   &lt;/Preset&gt;
 &lt;/ArrayOfPreset&gt;</Value>
+    </Setting>
+    <Setting Name="CompressOnSave" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

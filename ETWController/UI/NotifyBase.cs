@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace ETWController.UI
 {
@@ -19,16 +15,36 @@ namespace ETWController.UI
         /// <param name="propertyName">Name of the property used to notify listeners.  This
         /// value is optional and can be provided automatically when invoked from compilers that
         /// support CallerMemberName.</param>
-        /// <returns>True if the value was changed, false if the existing value matched the
-        /// desired value.</returns>
-        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        protected void SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
-            if (object.Equals(storage, value)) return false;
+            if (object.Equals(storage, value))
+            {
+                return;
+            }
 
             storage = value;
             this.OnPropertyChanged(propertyName);
-            return true;
         }
+
+
+        /// <summary>
+        /// Call WPF listeners but do not set the property
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="currentValue"></param>
+        /// <param name="newValue"></param>
+        /// <param name="propertyName">Name of the property used to notify listeners.  This
+        /// value is optional and can be provided automatically when invoked from compilers that
+        /// support CallerMemberName.</param>
+        protected void SetPropertyNoStore<T>(T currentValue, T newValue, [CallerMemberName] string propertyName = null)
+        {
+            if (object.Equals(currentValue, newValue))
+            {
+                return;
+            }
+            this.OnPropertyChanged(propertyName);
+        }
+
 
         /// <summary>
         /// Notifies listeners that a property value has changed.
