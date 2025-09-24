@@ -535,6 +535,7 @@
 			</EventFilters>
 			<StackFilters FilterIn="true">
 				<EventId Value="1013"/> <!-- TcpCreateEndpoint Useful to find out who initiates a TCP connection from an unusual code location -->
+        			<!-- <EventId Value="1159"/> --> <!-- When needed one can find out who injects network packets by enabling this -->
 			</StackFilters>
 		</EventProvider>
 		
@@ -558,7 +559,7 @@
 				
 				<!--Restrict just to send/receive events but make WPA TCP graphs no longer working  -->
 				<EventId Value="1160"/> <!-- TcpSendTransmitted -->
-				<EventId Value="1159"/> <!-- TcpSendPosted -->
+				<!-- <EventId Value="1159"/> --> <!-- Keep TcpSendPosted for tracking firewall bugs which is used by ETWAnalyzer -->
 				<EventId Value="1426"/> <!-- TcpSendComplete -->
 				<EventId Value="1476"/> <!-- TcpipLoopbackPacketTransmit -->
 				<EventId Value="1161"/> <!-- TcpSendAdvance -->
@@ -570,6 +571,7 @@
 			</EventFilters>
 			<StackFilters FilterIn="true">
 				<EventId Value="1013"/> <!-- TcpCreateEndpoint Useful to find out who initiates a TCP connection from an unusual code location -->
+        			<!-- <EventId Value="1159"/> --> <!-- When needed one can find out who injects network packets by enabling this -->
 			</StackFilters>
 		</EventProvider>
 		
@@ -678,7 +680,8 @@
 				<Keyword Value="0x4"/>
 			</Keywords>
 			<EventFilters FilterIn="true" >
-				<EventId Value="1000" /> 
+				<EventId Value="1000" />  <!-- Socket Creation -->
+				<EventId Value="1001" />  <!-- Socket Close    -->
 				<EventId Value="1018" />
 				<EventId Value="1021" /> 
 				<EventId Value="1001" /> 
@@ -852,7 +855,7 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Wininit"/>
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Subsys-Csr"/>
             					<EventProviderId Value="EventProvider_Microsoft-Windows-Winsrv"/>            
-            <EventProviderId Value="ProcessorPower_CaptureState" />
+           					<EventProviderId Value="ProcessorPower_CaptureState" />
 						<EventProviderId Value="WindowsKernelPower_CaptureState" />
 					</EventProviders>
 				</EventCollectorId>
@@ -926,7 +929,7 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Wininit"/>
 						<EventProviderId Value="EventProvider_Microsoft-Windows-Subsys-Csr"/>
             					<EventProviderId Value="EventProvider_Microsoft-Windows-Winsrv"/>
-            <EventProviderId Value="ProcessorPower_CaptureState" />
+            					<EventProviderId Value="ProcessorPower_CaptureState" />
 						<EventProviderId Value="WindowsKernelPower_CaptureState" />
 				</EventProviders>
 				</EventCollectorId>
@@ -1053,7 +1056,7 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 				</EventCollectorId>
 			</Collectors>
 		</Profile>
-		<Profile Id="Network.Light.File" Name="Network" Description="NetworkLight (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Light">
+		<Profile Id="Network.Light.File" Name="Network" Description="Network (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.File"  LoggingMode="File" DetailLevel="Light">
 			<Collectors Operation="Add">
 				<EventCollectorId Value="EventCollector_UserModeSession">
 					<EventProviders>
@@ -1064,7 +1067,7 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 				</EventCollectorId>
 			</Collectors>
 		</Profile>
-		<Profile Id="Network.Light.Memory" Name="Network" Description="NetworkLight (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Light">
+		<Profile Id="Network.Light.Memory" Name="Network" Description="Network (CPU Samples/Disk/.NET Exceptions/Focus/TCP/Socket)" Base="Default.Verbose.Memory" LoggingMode="Memory" DetailLevel="Light">
 			<Collectors Operation="Add">
 				<EventCollectorId Value="EventCollector_UserModeSession">
 					<EventProviders>
