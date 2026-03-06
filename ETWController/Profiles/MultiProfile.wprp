@@ -873,7 +873,6 @@ AfdWaitForListen,	 1036,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 ,	 46,
 			<!-- When user and kernel session are merged we need especially the ImageId events or we wont get any stack traces -->
 			<TraceMergeProperties>
 				<TraceMergeProperty Id="TraceMerge_Default" Name="TraceMerge_Default">
-					<DeletePreMergedTraceFiles Value="true"/>
 					<!-- 
 					<SkipMerge Value="true"/>
 					-->

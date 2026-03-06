@@ -22,7 +22,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="ETW\MultiProfile.wprp" />
+    <None Remove="Profiles\MultiProfile.wprp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -37,20 +37,20 @@
     <Reference Include="PresentationCore" /><Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ETW\MultiProfile.wprp">
+    <Content Include="Profiles\MultiProfile.wprp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Scripts\License.txt">
+    <Content Include="Scripts\License">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ETW\default.stacktags">
+    <Content Include="Profiles\default.stacktags">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="ETW\PageFault.stacktags">
+    <Content Include="Profiles\PageFault.stacktags">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ETW\Overview.wpaProfile">
+    <Content Include="Profiles\Overview.wpaProfile">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Properties\app.manifest">
@@ -61,7 +61,7 @@
       <LastGenOutput>Configuration.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
-    <Content Include="ETW\HookEvents.wprp">
+    <Content Include="Profiles\HookEvents.wprp">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -71,15 +71,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ETW\GC.xml">
+    <Content Include="Profiles\GC.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ETW\HookRegions.xml">
+    <Content Include="Profiles\HookRegions.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Screenshots\HtmlTemplate.html" />
-    <Content Include="Scripts\7z.dll">
+    <Content Include="Scripts\Longtermrecording.ps1">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     </Content>
+	  <Content Include="Scripts\7z.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Scripts\7z.exe">

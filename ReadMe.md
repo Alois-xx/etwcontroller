@@ -55,7 +55,11 @@ The recorded data can be analyzed with [ETWAnalyzer](https://github.com/Siemens-
   - WPR Default profile provided by MS. 
 - **WPR Default + .NET**
    - WPR Default profile with .NET provider.
-
+- **LongTerm Default**
+   - Use LongTermRecording.ps1 to record the MultiProfile.wprp Default profile into a folder where a new .etl file is created every 10 minutes by default.
+- **LongTerm Network**
+   - Use LongTermRecording.ps1 to record the MultiProfile.wprp Network profile into a folder where a new .etl file is created every 10 minutes by default.
+   
 All profiles except the WPR Default profiles can be combined with the other profiles defined in MultiProfile.wprp. To change a profile select first a profile and then select ```<Manual Editing>``` to show the ```Start Command``` line.
 You can then add additional or other profile settings. The predefined settings are stored in ETWController.exe.config.
 
@@ -87,4 +91,47 @@ version works out of the box though.
 ### Analyzing Data
 To view the data it is best to install the latest Windows Performance Toolkit from the Windows 11 SDK (https://developer.microsoft.com/en-us/windows/downloads/sdk-archive).
 
- 
+## Long Term Recording of ETW Data 
+It is rarely known that you can record ETW data for hours or even days. If you need to know what your system was doing before a crash or a network hang which happens sporadically this is the way to go. 
+You can use the LongTermRecording.ps1 script to record the data in a folder where a new .etl file is created every 10 minutes by default. With a tight set of filters on TCP and e.g. Socket providers
+you can track down nearly all network connectivity issues without needing to record data with Wireshark. To limit the amount of sampled data the sample rate is set to 2ms (default is 1ms) which will
+reduce the data rate produced by sampling by a factor two. 
+The trick is to record ETW data to files and not to memory. Each ETW session (Kernel/User/Rundown) gets its own file which can be closed fast if the merge step is omitted. That way we scale
+with the amount of disk space and not with the amount of memory. After the recording is stopped the data is merged and compressed (.7z is default but zip is also possible).
+Since this is a lot of data you need to use a tool like ETWAnalyzer to analyze the data where you can query e.g. your TCP connections for retransmissions or other network related issues.
+The main benefit of ETW for network analysis is that you see the stack traces of every socket connect and disconnect. You have full process correlation and CPU sampling data which is not available with Wireshark.
+
+### LongTermRecording.ps1
+```
+SYNOPSIS
+    Records long term ETW traces using WPR with one or more configurable profiles to an output folder.
+    When -RestartEveryMinutes duration (default is 10 minutes) is reached profiling is stopped and the files are renamed with a timestamp prefix.
+    Profiling continues until -TotalRecordingHours is reached, Ctrl+C is pressed, or if the disk has less than 6 GB of free space.
+    After profiling was stopped you must merge (-Merge) the files before you can transfer them to another machine.
+    Additionally you can compress the files (-Zip or -SevenZip). When -SevenZip is used 7z exe must be in path or reside in current directory.
+    7z provides better compression ratios (up to a factor two smaller than zip files).
+
+SYNTAX
+    LongtermRecording.ps1 [[-Start] <String[]>] [[-OutputFolder] <String>] [[-WprpPath] <String>]
+    [[-RestartEveryMinutes] <Int32>] [[-SampleRate] <Int32>] [[-TotalRecordingHours] <Single>] [-Merge] [-Zip] [-SevenZip] [-Stop] [[-SleepExit] <Int32>]
+    [<CommonParameters>]
+    -------------------------- EXAMPLE 1 --------------------------
+    PS C:\>.\LongtermRecording.ps1 -Merge -OutputFolder "c:\temp\multi" -SevenZip
+    Merge and compress with 7z.
+    -------------------------- EXAMPLE 2 --------------------------
+    PS C:\>.\LongtermRecording.ps1 -Merge -OutputFolder "c:\temp\multi"
+    Merge files but do not compress.
+    -------------------------- EXAMPLE 3 --------------------------
+    PS C:\>.\LongtermRecording.ps1 -OutputFolder "c:\temp\multi" -SevenZip
+    Compress an already merged folder.
+    -------------------------- EXAMPLE 4 --------------------------
+    PS C:\>.\LongtermRecording.ps1 -Stop -Merge -SevenZip -OutputFolder "c:\temp\multi"
+    Stop already running recording via a second script invocation. Pending data is saved to disk.
+    Then merge the data and compress it.
+    -------------------------- EXAMPLE 5 --------------------------
+    PS C:\>.\LongtermRecording.ps1 -Start "Network.Light" -OutputFolder "c:\temp\network" -TotalRecordingHours 0.5
+    Record Network data to folder c:\temp\Network for 30 minutes. Folder is created if it does not yet exist.
+    -------------------------- EXAMPLE 6 --------------------------
+    PS C:\>.\LongtermRecording.ps1 -Start "CSwitch","Network.Light" -OutputFolder "c:\temp\multi" -RestartEveryMinutes 3
+    Record with multiple profiles and create every 3 minutes a new file because Context Switch tracing will create a lot of data.
+```
