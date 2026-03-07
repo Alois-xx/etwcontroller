@@ -56,9 +56,9 @@ The recorded data can be analyzed with [ETWAnalyzer](https://github.com/Siemens-
 - **WPR Default + .NET**
    - WPR Default profile with .NET provider.
 - **LongTerm Default**
-   - Use LongTermRecording.ps1 to record the MultiProfile.wprp Default profile into a folder where a new .etl file is created every 10 minutes by default.
+   - Use LongTermRecording.ps1 to record the MultiProfile.wprp Default profile into a folder where a new .etl file is created every 10 minutes by (default).
 - **LongTerm Network**
-   - Use LongTermRecording.ps1 to record the MultiProfile.wprp Network profile into a folder where a new .etl file is created every 10 minutes by default.
+   - Use LongTermRecording.ps1 to record the MultiProfile.wprp Network profile into a folder where a new .etl file is created every 10 minutes by (default).
    
 All profiles except the WPR Default profiles can be combined with the other profiles defined in MultiProfile.wprp. To change a profile select first a profile and then select ```<Manual Editing>``` to show the ```Start Command``` line.
 You can then add additional or other profile settings. The predefined settings are stored in ETWController.exe.config.
@@ -93,7 +93,7 @@ To view the data it is best to install the latest Windows Performance Toolkit fr
 
 ## Long Term Recording of ETW Data 
 It is rarely known that you can record ETW data for hours or even days. If you need to know what your system was doing before a crash or a network hang which happens sporadically this is the way to go. 
-You can use the LongTermRecording.ps1 script to record the data in a folder where a new .etl file is created every 10 minutes by default. With a tight set of filters on TCP and e.g. Socket providers
+You can use the LongTermRecording.ps1 script to record the data into a folder where a new .etl file is created every 10 minutes by default. With a tight set of filters on TCP and e.g. Socket providers
 you can track down nearly all network connectivity issues without needing to record data with Wireshark. To limit the amount of sampled data the sample rate is set to 2ms (default is 1ms) which will
 reduce the data rate produced by sampling by a factor two. 
 The trick is to record ETW data to files and not to memory. Each ETW session (Kernel/User/Rundown) gets its own file which can be closed fast if the merge step is omitted. That way we scale
