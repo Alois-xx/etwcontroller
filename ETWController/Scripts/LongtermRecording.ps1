@@ -830,7 +830,8 @@ function GetLogFileName()
             $null = New-Item -Path $dir -ItemType Directory -Force
             # Grant Users modify access so any user can update the patched profile
             $acl = Get-Acl -LiteralPath $dir
-            $rule = New-Object System.Security.AccessControl.FileSystemAccessRule("Users", "Modify", "ContainerInherit,ObjectInherit", "None", "Allow")
+            $sid = New-Object System.Security.Principal.SecurityIdentifier("S-1-5-32-545")
+            $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($sid, "Modify", "ContainerInherit,ObjectInherit", "None", "Allow")
             $acl.AddAccessRule($rule)
             Set-Acl -LiteralPath $dir -AclObject $acl
         }
