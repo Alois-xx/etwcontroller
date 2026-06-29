@@ -78,7 +78,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Screenshots\HtmlTemplate.html" />
     <Content Include="Scripts\Longtermrecording.ps1">
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
      </Content>
