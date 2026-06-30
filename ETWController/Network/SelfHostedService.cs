@@ -14,6 +14,11 @@ namespace ETWController.Network
     /// </summary>
     class SelfHostedService
     {
+        /// <summary>
+        /// Maximum time the client waits for a remote call to return before it stops waiting and aborts the channel.
+        /// </summary>
+        static readonly TimeSpan OperationTimeout = TimeSpan.FromMinutes(10);
+
         EndpointAddress RemoteEndpointAddress;
 
 
@@ -67,12 +72,16 @@ namespace ETWController.Network
             try
             {
                 var clientChanel = (IClientChannel)channel;
-                clientChanel.OperationTimeout = TimeSpan.FromMinutes(10);
+                clientChanel.OperationTimeout = OperationTimeout;
                 TReturn result = code(channel);
-                
+
                 clientChanel.Close();
                 error = false;
                 return result;
+            }
+            catch(TimeoutException ex)
+            {
+                throw new TimeoutException($"The remote operation has not yet completed, but the client stopped waiting for it to return after {OperationTimeout.TotalMinutes:F0} minutes. The remote operation may still be running on the server.", ex);
             }
             catch(ProtocolException ex)
             {
@@ -98,9 +107,15 @@ namespace ETWController.Network
             bool error = true;
             try
             {
+                var clientChanel = (IClientChannel)channel;
+                clientChanel.OperationTimeout = OperationTimeout;
                 code(channel);
-                ((IClientChannel)channel).Close();
+                clientChanel.Close();
                 error = false;
+            }
+            catch(TimeoutException ex)
+            {
+                throw new TimeoutException($"The remote operation has not yet completed, but the client stopped waiting for it to return after {OperationTimeout.TotalMinutes:F0} minutes. The remote operation may still be running on the server.", ex);
             }
             finally
             {
@@ -121,8 +136,8 @@ namespace ETWController.Network
         {
           //  var binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
             var binding = new WSHttpBinding(SecurityMode.None);
-            binding.ReceiveTimeout = TimeSpan.FromMinutes(10);
-            binding.SendTimeout = TimeSpan.FromMinutes(10);
+            binding.ReceiveTimeout = OperationTimeout;
+            binding.SendTimeout = OperationTimeout;
             return binding;
         }
     }
