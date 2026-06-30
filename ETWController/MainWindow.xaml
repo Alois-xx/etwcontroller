@@ -44,6 +44,10 @@
                           ToolTip="When checked, start remote ETW recording when the Start button is hit" 
                           IsChecked="{Binding ServerTraceEnabled}"/>
                 <Separator />
+                <MenuItem IsCheckable="True" x:Name="RemoteControlEnabledCB" Header="Enable Remote Control"
+                          ToolTip="When checked, start the message receiver to receive keyboard/mouse events from remote machines and open the firewall ports for the configured ports.&#x0a;When unchecked, stop the message receiver and close the firewall ports again."
+                          IsChecked="{Binding RemoteControlEnabled}"/>
+                <Separator />
                 <MenuItem Header="Register ETW Provider" Command="{Binding Commands[RegisterETWProvider]}" ToolTip="Register ETW Provider to record mouse and keyboard. &#x0a;Creates manifest and registers ETW provider in system. &#x0a;&#x0a;This needs to be done once on a machine only, it is persisted even over reboots."/>
                 <Separator />
                 <MenuItem Header="Edit Configuration..." Command="{Binding Commands[Config]}" ToolTip="Open config window"/>

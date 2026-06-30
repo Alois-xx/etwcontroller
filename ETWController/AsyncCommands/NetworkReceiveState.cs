@@ -90,18 +90,39 @@ namespace ETWController.Commands
         {
             Model = model;
             Scheduler = scheduler;
-            CreateAndExecuteStartCommand();
+        }
+
+        /// <summary>
+        /// Start the message receiver if it is not already running.
+        /// </summary>
+        public void Start()
+        {
+            if (Receiver == null && (StartCommand == null || StartCommand.ExecutionState == CommandState.Finished))
+            {
+                CreateAndExecuteStartCommand();
+            }
+        }
+
+        /// <summary>
+        /// Stop the message receiver if it is currently running.
+        /// </summary>
+        public void Stop()
+        {
+            if (Receiver != null)
+            {
+                CreateAndExecuteStopCommand();
+            }
         }
 
         public void NetworkReceiveChangeState()
         {
             if (Receiver != null)
             {
-                CreateAndExecuteStopCommand();
+                Stop();
             }
-            else if( Receiver == null && (StartCommand == null || StartCommand.ExecutionState == CommandState.Finished) )
+            else
             {
-                CreateAndExecuteStartCommand();
+                Start();
             }
         }
 

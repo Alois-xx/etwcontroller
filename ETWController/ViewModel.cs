@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
@@ -360,6 +361,33 @@ namespace ETWController
         {
             get { return _NetworkSendEnabled; }
             set { SetProperty<bool>(ref _NetworkSendEnabled, value); }
+        }
+
+        bool _RemoteControlEnabled;
+        /// <summary>
+        /// When true the message receiver is started and the firewall ports are opened so this machine can be
+        /// remote controlled and receive keyboard/mouse events. When set back to false the message receiver is
+        /// stopped and the firewall ports are closed again.
+        /// </summary>
+        public bool RemoteControlEnabled
+        {
+            get { return _RemoteControlEnabled; }
+            set
+            {
+                SetProperty<bool>(ref _RemoteControlEnabled, value);
+                if (value)
+                {
+                    OpenFirewallPorts();
+                    NetworkReceiveState?.Start();
+                    SetStatusMessage("Remote control enabled. Firewall ports opened and message receiver started.");
+                }
+                else
+                {
+                    NetworkReceiveState?.Stop();
+                    Task.Factory.StartNew(() => CloseFirwallPorts());
+                    SetStatusMessage("Remote control disabled. Message receiver stopped and firewall ports closed.");
+                }
+            }
         }
 
         bool _StartButtonEnabled = true;
@@ -772,6 +800,8 @@ namespace ETWController
             NetworkSendState = new NetworkSendState(this, UIScheduler);
             NetworkReceiveState = new NetworkReceiveState(this, UIScheduler);
             WCFHost = new WCFHostServiceState(this, UIScheduler);
+            TraceControlerService.RemoteWPRCommandStarted += OnRemoteWPRCommandStarted;
+            TraceControlerService.RemoteWPRCommandFinished += OnRemoteWPRCommandFinished;
             Hooker = new NetworkedHooker(this);
             if( !HookEvents.IsAlreadyRegistered() )
             {
@@ -1049,7 +1079,9 @@ namespace ETWController
             if (this.ServerTraceEnabled)
             {
                 ServerTraceSettings.TraceStates = TraceStates.Stopping;
-                var command = WCFHost.CreateExecuteWPRCommand(finalCommandLine);
+                // use the remote configured stop command and not the local one to stop the remote profiling
+                var serverCommandLine = ApplyCommandSubstitutions(ServerTraceSettings.TraceStopFullCommandLine);
+                var command = WCFHost.CreateExecuteWPRCommand(serverCommandLine);
                 command.Completed = (output) =>
                 {
                     ServerTraceSettings.ProcessStopCommand(output);
@@ -1062,7 +1094,7 @@ namespace ETWController
                     ServerTraceSettings.ProcessStartCommand(new Tuple<int, string>(1, "Error: " + s));
                     UpdateMainButtons();
                 };
-                ServerTraceSettings.AddLogEntry(finalCommandLine);
+                ServerTraceSettings.AddLogEntry(serverCommandLine);
                 command.Execute();
             }
              
@@ -1087,6 +1119,81 @@ namespace ETWController
                 }
             }
 
+        }
+
+        int _RemoteCommandRunningCount;
+        bool _SavedStartButtonEnabled;
+        bool _SavedStopButtonEnabled;
+        bool _SavedCancelButtonEnabled;
+
+        /// <summary>
+        /// Called on this (remote) instance when another ETWController triggers a WPR command via the WCF service.
+        /// While the command is running the trace buttons are disabled and a message is shown in the status bar so 
+        /// the user at the remote machine knows that tracing is being controlled from another machine.
+        /// </summary>
+        /// <param name="command">Executed command line.</param>
+        void OnRemoteWPRCommandStarted(string command)
+        {
+            RunOnUIThread(() =>
+            {
+                if (_RemoteCommandRunningCount == 0)
+                {
+                    _SavedStartButtonEnabled = StartButtonEnabled;
+                    _SavedStopButtonEnabled = StopButtonEnabled;
+                    _SavedCancelButtonEnabled = CancelButtonEnabled;
+                }
+                _RemoteCommandRunningCount++;
+
+                StartButtonEnabled = false;
+                StopButtonEnabled = false;
+                CancelButtonEnabled = false;
+
+                SetStatusMessage($"A remote command is currently running: {command}");
+                ReceivedMessages.Add($"Started remote command: {command}");
+            });
+        }
+
+        /// <summary>
+        /// Called on this (remote) instance when a remote initiated WPR command has finished. Restores the trace 
+        /// buttons to the state they had before the remote command was started.
+        /// </summary>
+        /// <param name="command">Executed command line.</param>
+        void OnRemoteWPRCommandFinished(string command)
+        {
+            RunOnUIThread(() =>
+            {
+                if (_RemoteCommandRunningCount > 0)
+                {
+                    _RemoteCommandRunningCount--;
+                }
+
+                if (_RemoteCommandRunningCount == 0)
+                {
+                    StartButtonEnabled = _SavedStartButtonEnabled;
+                    StopButtonEnabled = _SavedStopButtonEnabled;
+                    CancelButtonEnabled = _SavedCancelButtonEnabled;
+
+                    SetStatusMessage($"Remote command finished: {command}");
+                    ReceivedMessages.Add($"Finished from remote command: {command}");
+                }
+            });
+        }
+
+        /// <summary>
+        /// Marshal an action onto the UI thread. The remote WCF callbacks arrive on a background thread but the 
+        /// status bar and button properties must be updated on the UI thread.
+        /// </summary>
+        /// <param name="action">Action to execute on the UI thread.</param>
+        void RunOnUIThread(Action action)
+        {
+            if (UIScheduler != null)
+            {
+                Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, UIScheduler);
+            }
+            else
+            {
+                action();
+            }
         }
 
         /// <summary>
@@ -1288,6 +1395,9 @@ namespace ETWController
 
         public void Dispose()
         {
+            TraceControlerService.RemoteWPRCommandStarted -= OnRemoteWPRCommandStarted;
+            TraceControlerService.RemoteWPRCommandFinished -= OnRemoteWPRCommandFinished;
+
             if( Hooker != null )
             {
                 Hooker.Dispose();

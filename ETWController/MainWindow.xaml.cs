@@ -37,7 +37,6 @@ namespace ETWController
                 this.Hide();
                 this.ShowInTaskbar = false;
             }
-            Model.OpenFirewallPorts();
             if( App.SendToServer != null)
             {
                 Model.NetworkSendState.NetworkSendChangeState();

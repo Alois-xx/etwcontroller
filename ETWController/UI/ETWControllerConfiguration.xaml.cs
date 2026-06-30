@@ -34,10 +34,14 @@ namespace ETWController.UI
         private void Ok(object sender, RoutedEventArgs e)
         {
             // Reset sender and receiver to connect to new host and or port
-            Model.NetworkReceiveState.Restart();
+            if (Model.RemoteControlEnabled)
+            {
+                // Only restart the receiver and reopen the firewall ports when remote control is enabled
+                Model.NetworkReceiveState.Restart();
+                Model.OpenFirewallPorts();
+            }
             Model.NetworkSendState.RestartIfStarted();
             Model.WCFHost.Restart();
-            Model.OpenFirewallPorts();
             Model.RestartScreenCapture();
 
             Task.Factory.StartNew(() => Model.SaveSettings());
