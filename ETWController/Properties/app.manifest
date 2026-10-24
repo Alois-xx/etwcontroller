@@ -36,7 +36,18 @@
       <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}"></supportedOS>
 
       <!-- If your application is designed to work with Windows 8.1, uncomment the following supportedOS node-->
-      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"></supportedOS>
+
+      <!-- Screenshot capture and mouse hook coordinates must be in physical pixels on
+           mixed-scaling multi-monitor setups. Without these settings the process runs in
+           the virtualized 96-DPI coordinate space, which produces incomplete screenshots
+           and shifted click markers whenever a monitor uses a scaling different from the
+           system DPI. The Windows 8.1 supportedOS entry above is required for PerMonitorV2
+           to take effect on Windows 10/11. -->
+      <windowsSettings>
+        <dpiAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true/pm</dpiAware>
+        <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2, system</dpiAwareness>
+      </windowsSettings>
 
     </application>
   </compatibility>

@@ -232,31 +232,41 @@ namespace ETWController.Screenshots
                         return new KeyValuePair<string, Exception>(null, null);
                     }
 
-                    // Determine the size of the "virtual screen", which includes all monitors.
-                    int screenLeft = SystemInformation.VirtualScreen.Left;
-                    int screenTop = SystemInformation.VirtualScreen.Top;
-                    int screenWidth = SystemInformation.VirtualScreen.Width;
-                    int screenHeight = SystemInformation.VirtualScreen.Height;
+                    // Re-read the monitor layout per capture. Screen.AllScreens invalidates its cached screen
+                    // set when display settings change (internal SystemEvents.DisplaySettingsChanging handler),
+                    // so this picks up monitors added, removed or moved during a long recording. The bitmap
+                    // origin is derived from the same union bounds the coordinate mapper uses, so bitmap
+                    // coordinates and marker coordinates can never disagree.
+                    IScreen[] screens = Screen.AllScreens.Select(x => new ScreenFacade(x)).ToArray();
+                    Rectangle virtualBounds = ScreenCoordinateMapper.VirtualScreenBounds(screens);
+                    if (virtualBounds.Width <= 0 || virtualBounds.Height <= 0)
+                    {
+                        return new KeyValuePair<string, Exception>(null, null);
+                    }
+
+                    var now = DateTime.Now;
 
                     // Create a bitmap of the appropriate size to receive the screenshot.
-                    using (Bitmap bmp = new Bitmap(screenWidth, screenHeight))
+                    using (Bitmap bmp = new Bitmap(virtualBounds.Width, virtualBounds.Height))
                     {
-                        var now = DateTime.Now;
                         // Draw the screenshot into our bitmap.
                         using (Graphics g = Graphics.FromImage(bmp))
                         {
-                            g.CopyFromScreen(screenLeft, screenTop, 0, 0, bmp.Size);
+                            g.CopyFromScreen(virtualBounds.Left, virtualBounds.Top, 0, 0, bmp.Size);
+
+                            TimeStampBitmap(now, bmp);
+
+                            bool bClicked = clickX != -1 && clickY != -1;
+
+                            // Mark the actual event position when we have it. Falling back to the live
+                            // cursor position only when no click position was passed produces a marker
+                            // that reflects where the click happened instead of where the cursor has
+                            // already moved to by the time the asynchronous capture runs.
+                            Point markerSource = bClicked ? new Point(clickX, clickY) : Cursor.Position;
+                            Point markerPos = ScreenCoordinateMapper.ScreenToDesktopCoordinates(markerSource.X, markerSource.Y, screens);
+
+                            MarkMouseClick(markerPos.X, markerPos.Y, bmp, g, bClicked);
                         }
-
-                        TimeStampBitmap(now, bmp);
-
-                        bool bClicked = clickX != -1 && clickY != -1;
-                      
-                        var cursor = Cursor.Position;
-                        var cursorPosInVirtualDesktopCoordinates = ScreenCoordinateMapper.ScreenToDesktopCoordinates(cursor.X, cursor.Y, Screen.AllScreens.Select(x => new ScreenFacade(x)).ToArray());
-                        clickX = cursorPosInVirtualDesktopCoordinates.X;
-                        clickY = cursorPosInVirtualDesktopCoordinates.Y;
-                        MarkMouseClick(clickX, clickY, bmp, bClicked);
 
                         string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
                         bmp.Save(savePath, JpgEncoder, EncoderParameters);
@@ -308,29 +318,36 @@ namespace ETWController.Screenshots
         }
 
         /// <summary>
-        /// Draw a red rectangle where the click event did happen so it is easy to find in the screenshots
+        /// Draw a red rectangle where the click event did happen so it is easy to find in the screenshots.
+        /// Coordinates must be bitmap coordinates relative to the top left of the union bounds of all
+        /// monitors, i.e. the result of ScreenCoordinateMapper.ScreenToDesktopCoordinates.
+        /// Coordinates outside the bitmap are skipped instead of mirrored via Math.Abs to the wrong quadrant.
         /// </summary>
-        /// <param name="clickX"></param>
-        /// <param name="clickY"></param>
-        /// <param name="bmp"></param>
-        private static void MarkMouseClick(int clickX, int clickY, Bitmap bmp, bool wasClicked)
+        /// <param name="x">Bitmap x-coordinate of the marker.</param>
+        /// <param name="y">Bitmap y-coordinate of the marker.</param>
+        /// <param name="bmp">Screenshot bitmap.</param>
+        /// <param name="g">Graphics object created on the bitmap.</param>
+        /// <param name="wasClicked">True draws a red marker (click), false a green one (no click).</param>
+        public static void MarkMouseClick(int x, int y, Bitmap bmp, Graphics g, bool wasClicked)
         {
-            for (int x = Math.Abs(clickX); x < bmp.Width && x < Math.Abs(clickX) + 14; x++)
+            if (x < 0 || y < 0 || x >= bmp.Width || y >= bmp.Height)
             {
-                for (int y = Math.Abs(clickY); y < bmp.Height && y < Math.Abs(clickY) + 14; y++)
-                {
-                    Color c = bmp.GetPixel(x, y);
-                    if (wasClicked)
-                    {
-                        // red is click
-                        bmp.SetPixel(x, y, Color.FromArgb(255, c.G / 2, c.B / 2));
-                    }
-                    else
-                    {
-                        // green is no click
-                        bmp.SetPixel(x, y, Color.FromArgb(c.R/2, 255, c.B / 2));
-                    }
-                }
+                Trace.TraceWarning($"Mouse marker at ({x},{y}) is outside the screenshot bitmap and was skipped.");
+                return;
+            }
+
+            // Draw the marker in one call instead of GetPixel/SetPixel for 196 pixels.
+            // Translucent colors keep the original look (red = click, green = no click).
+            Color markerColor = wasClicked
+                ? Color.FromArgb(160, 255, 0, 0)
+                : Color.FromArgb(160, 0, 255, 0);
+
+            int width = Math.Min(14, bmp.Width - x);
+            int height = Math.Min(14, bmp.Height - y);
+
+            using (SolidBrush brush = new SolidBrush(markerColor))
+            {
+                g.FillRectangle(brush, x, y, width, height);
             }
         }
 

@@ -42,16 +42,36 @@ namespace ETWController.Screenshots
 
         static Point GetShiftVector(IScreen[] allScreens)
         {
-            // get top left coordinates of virtual desktop boundary in screen coordinates
-            var topLeftVirtualDesktopZeroPoint = allScreens.Select(screen => screen.Bounds).Aggregate(Point.Empty,
-                (point, screen) => new Point(
-                                          Math.Min(point.X, screen.X),
-                                          Math.Min(point.Y, screen.Y)));
+            if (allScreens == null || allScreens.Length == 0)
+            {
+                return Point.Empty;
+            }
 
-            // calculate shift vector
-            int shiftVectorX = -topLeftVirtualDesktopZeroPoint.X;
-            int shiftVectorY = -topLeftVirtualDesktopZeroPoint.Y;
-            return new Point(shiftVectorX, shiftVectorY);
+            Rectangle bounds = VirtualScreenBounds(allScreens);
+
+            // calculate shift vector from the top left of the virtual desktop boundary
+            return new Point(-bounds.X, -bounds.Y);
+        }
+
+        /// <summary>
+        /// Returns the minimum bounding rectangle of all monitors in screen coordinates.
+        /// This is the single source of truth for both the screenshot bitmap origin and the
+        /// marker coordinates, so bitmap origin and coordinate mapping can never disagree.
+        /// </summary>
+        public static Rectangle VirtualScreenBounds(IScreen[] allScreens)
+        {
+            int left = int.MaxValue, top = int.MaxValue;
+            int right = int.MinValue, bottom = int.MinValue;
+
+            foreach (var screen in allScreens)
+            {
+                left = Math.Min(left, screen.Bounds.Left);
+                top = Math.Min(top, screen.Bounds.Top);
+                right = Math.Max(right, screen.Bounds.Right);
+                bottom = Math.Max(bottom, screen.Bounds.Bottom);
+            }
+
+            return new Rectangle(left, top, right - left, bottom - top);
         }
     }
 
