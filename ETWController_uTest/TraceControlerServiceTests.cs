@@ -1,5 +1,5 @@
 ﻿using ETWController;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,20 +8,19 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
-    class TraceControlerServiceTests
+    public class TraceControlerServiceTests
     {
-        [Test]
+        [Fact]
         public void Can_Execute_WPR()
         {
             TraceControlerService service = new TraceControlerService();
             Tuple<int,string> lret = service.ExecuteWPRCommand("-status");
-            Assert.IsTrue(lret.Item2.Contains("WPR is not recording"));
-            Assert.AreEqual(0, lret.Item1);
+            Assert.Contains("WPR is not recording", lret.Item2);
+            Assert.Equal(0, lret.Item1);
         }
 
 
-        [Test]
+        [Fact]
         public void ListActiveSessions()
         {
             TraceControlerService service = new TraceControlerService();

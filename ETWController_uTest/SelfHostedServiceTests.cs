@@ -1,6 +1,6 @@
 ﻿using ETWController;
 using ETWController.Network;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,12 +11,11 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
     public class SelfHostedServiceTests
     {
         const string WCFServerUri = "http://localhost:8090/TraceControlerService";
 
-        [Test]
+        [Fact]
         public void HostServiceAndConnect()
         {
             SelfHostedService server = new SelfHostedService(WCFServerUri);
@@ -32,7 +31,7 @@ namespace ETWController_uTest
             }
         }
 
-        [Test]
+        [Fact]
         public void Server_Does_Disconnect()
         {
             SelfHostedService server = new SelfHostedService(WCFServerUri);

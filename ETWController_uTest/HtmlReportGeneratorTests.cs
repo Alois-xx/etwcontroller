@@ -1,5 +1,5 @@
 ﻿using ETWController.Screenshots;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,11 +9,9 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
     public class HtmlReportGeneratorTests
     {
-        [Test]
-        [Explicit]
+        [Fact(Skip = "Explicit test, run manually")]
         public void GenerateHtmlReport()
         {
             string path = @"C:\temp\ScreensTest";
@@ -22,7 +20,7 @@ namespace ETWController_uTest
             gen.GenerateReport();
         }
 
-        [Test]
+        [Fact]
         public void ThrowsOnNotFoundDirectory()
         {
             Assert.Throws<DirectoryNotFoundException>(() =>

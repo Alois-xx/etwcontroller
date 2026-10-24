@@ -1,5 +1,5 @@
 ﻿using ETWController.UI;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,31 +8,30 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
     public class TraceControlViewModelTests
     {
-        [Test]
+        [Fact]
         public void CanExtract_Exe_Name()
         {
             const string cmdLine = "wpa -i c:\\temp\\otherfile.etl";
             string exe = TraceControlViewModel.ExtractExecName(cmdLine);
-            Assert.AreEqual("wpa", exe);
+            Assert.Equal("wpa", exe);
         }
 
-        [Test]
+        [Fact]
         public void Can_Extract_Exe_Name_With_Quotation_Marks()
         {
             const string cmdLine = "\"C:\\program files\\wpa.exe\" -i c:\\temp\\otherfile.etl";
             string exe = TraceControlViewModel.ExtractExecName(cmdLine);
-            Assert.AreEqual("\"C:\\program files\\wpa.exe\"", exe);
+            Assert.Equal("\"C:\\program files\\wpa.exe\"", exe);
             Console.WriteLine($"ExeName: {exe}");
         }
 
-        [Test]
+        [Fact]
         public void CanExtractDirectoryWithPlaceholders()
         {
             string ret = TraceControlViewModel.GetDirectoryNameFromFileName(@"C:\temp\etlFile%COMPUTERNAME%.ETL");
-            Assert.AreEqual(@"C:\temp", ret);
+            Assert.Equal(@"C:\temp", ret);
         }
     }
 }

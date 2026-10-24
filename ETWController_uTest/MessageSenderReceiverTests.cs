@@ -1,6 +1,6 @@
 ﻿using ETWController;
 using ETWController.Network;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,14 +11,13 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
     public class MessageSenderReceiverTests
     {
         /// <summary>
         /// The trivial use use. Open Server, Open Sender send one message and check if server
         /// has received it. 
         /// </summary>
-        [Test]
+        [Fact]
         public void Can_Send_And_Receive_On_LocalHost()
         {
             string message = "Hi Network";
@@ -38,7 +37,7 @@ namespace ETWController_uTest
                                 Console.WriteLine("Got: {0}", recMsg);
                             };
                         b.SignalAndWait(100);
-                        Assert.AreEqual(message, received);
+                        Assert.Equal(message, received);
                     }
                 }
             }
@@ -47,7 +46,7 @@ namespace ETWController_uTest
         /// <summary>
         /// 
         /// </summary>
-        [Test]
+        [Fact]
         public void Can_Close_Connection_And_Reconnect()
         {
             string message = "Hi Network";
@@ -68,7 +67,7 @@ namespace ETWController_uTest
 
                 sendTask.Wait();
                 Thread.Sleep(50);
-                Assert.AreEqual(message, received);
+                Assert.Equal(message, received);
             }
 
             using (var rec2 = new MessageReceiver(5600, NetworkProtocolType.TCP))
@@ -87,12 +86,12 @@ namespace ETWController_uTest
                 sendTask.Wait();
 
                 Thread.Sleep(50);
-                Assert.AreEqual(secondMessage, received);
+                Assert.Equal(secondMessage, received);
             }
         }
 
 
-        [Test]
+        [Fact]
         public void Connect_To_Not_Existing_Server_Throws_SocketException()
         {
             Assert.Throws<System.Net.Sockets.SocketException>( () =>
@@ -111,7 +110,7 @@ namespace ETWController_uTest
         ///     TCP KeepAlive did not help either. But that is ok since we do want to measure round trip times anyway. 
         ///  b) Throw some IOException
         /// </summary>
-        [Test]
+        [Fact]
         public void Server_Exited()
         {
             const string MsgText = "First Message";
@@ -131,7 +130,7 @@ namespace ETWController_uTest
                     sender.Send(MsgText);
                     receiver.Dispose();
                     b.SignalAndWait(500);
-                    Assert.AreEqual(MsgText, received);
+                    Assert.Equal(MsgText, received);
                 }
 
                 Assert.Throws<IOException>(() =>
@@ -143,7 +142,7 @@ namespace ETWController_uTest
         /// <summary>
         /// Send from 5 senders in parallel 1000 messages and ensure that all are received. 
         /// </summary>
-        [Test]
+        [Fact]
         public void Receive_5000_Messages()
         {
             using(var receiver = new MessageReceiver(5600, NetworkProtocolType.TCP ))
@@ -181,8 +180,8 @@ namespace ETWController_uTest
                 Console.WriteLine("Got {0} messages. Last 100: {1}", received.Count,
                     String.Join(Environment.NewLine, received.Skip(4900)));
 
-                Assert.AreEqual(5000, received.Count);
-                Assert.AreEqual("Message 5000", received.Last());
+                Assert.Equal(5000, received.Count);
+                Assert.Equal("Message 5000", received.Last());
             }
         }
     }

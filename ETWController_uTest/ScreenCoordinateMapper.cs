@@ -2,7 +2,7 @@
    Restricted - Copyright (C) Siemens Healthcare GmbH/Siemens Medical Solutions USA, Inc., 2016. All rights reserved
    ------------------------------------------------------------------------------------------------- */
 
-using NUnit.Framework;
+using Xunit;
 using System.Drawing;
 using ETWController.Screenshots;
 using System;
@@ -10,7 +10,6 @@ using System.Diagnostics;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
     public class ScreenCoordinateMapperTests
     {
         /// <summary>
@@ -34,15 +33,15 @@ namespace ETWController_uTest
         /// |-----------------------|                 |
         ///                         |-----------------|
         /// </summary>
-        [Test]
+        [Fact]
         public void DesktopToScreenCoordinates()
         {
             var mon1 = new ScreenFacade(new Rectangle(0,0, 200, 100), isPrimary: true);
             var mon2 = new ScreenFacade(new Rectangle(200, 50, 200, 100));
             
             var monPoint = ScreenCoordinateMapper.DesktopToScreenCoordinates(200, 50, new IScreen[] { mon1, mon2 });
-            Assert.AreEqual(200, monPoint.X);
-            Assert.AreEqual(50, monPoint.Y);
+            Assert.Equal(200, monPoint.X);
+            Assert.Equal(50, monPoint.Y);
 
            // var point2 = ScreenshotCoordinateMapper.
         }
@@ -61,14 +60,14 @@ namespace ETWController_uTest
         ///  -----------
         ///  III  |   IV
         /// </summary>
-        [Test]
+        [Fact]
         public void CalcBoundsOnQuadrantIII()
         {
             ScreenFacade negMon = new ScreenFacade(new Rectangle(-100, 0, 100, 200));
             IScreen[] screens = new IScreen[] { negMon };
             var xy = ScreenCoordinateMapper.ScreenToDesktopCoordinates(-10, 20, screens);
-            Assert.AreEqual(90, xy.X);
-            Assert.AreEqual(20, xy.Y);
+            Assert.Equal(90, xy.X);
+            Assert.Equal(20, xy.Y);
 
         }
 
@@ -87,15 +86,15 @@ namespace ETWController_uTest
         ///  III  |   IV
         ///       ˅
         /// </summary>
-        [Test]
+        [Fact]
         public void CalcBoundsOnQuadrantI()
         {
             ScreenFacade negMon = new ScreenFacade(new Rectangle(0,-200, 100, 200));
             ScreenFacade primary = new ScreenFacade(new Rectangle(0, 0, 150, 250));
             IScreen[] screens = new IScreen[] { negMon, primary };
             var xy = ScreenCoordinateMapper.ScreenToDesktopCoordinates(10, -20, screens);
-            Assert.AreEqual(10, xy.X);
-            Assert.AreEqual(180, xy.Y);
+            Assert.Equal(10, xy.X);
+            Assert.Equal(180, xy.Y);
         }
 
         /// <summary>
@@ -113,14 +112,14 @@ namespace ETWController_uTest
         ///  III  |   IV
         ///       ˅
         /// </summary>
-        [Test]
+        [Fact]
         public void CalcBoundsOnQuadrantII()
         {
             ScreenFacade negMon = new ScreenFacade(new Rectangle(-100, -200, 100, 200));
             IScreen[] screens = new IScreen[] { negMon };
             var xy = ScreenCoordinateMapper.ScreenToDesktopCoordinates(-10, -20, screens);
-            Assert.AreEqual(90, xy.X);
-            Assert.AreEqual(180, xy.Y);
+            Assert.Equal(90, xy.X);
+            Assert.Equal(180, xy.Y);
         }
 
 
@@ -137,14 +136,14 @@ namespace ETWController_uTest
         ///  -----------
         ///  III  |   IV
         /// </summary>
-        [Test]
+        [Fact]
         public void CalcBoundsOnQuadrantIV()
         {
             ScreenFacade negMon = new ScreenFacade(new Rectangle(0, 0, 100, 200));
             IScreen[] screens = new IScreen[] { negMon };
             var xy = ScreenCoordinateMapper.ScreenToDesktopCoordinates(10, 20, screens);
-            Assert.AreEqual(10, xy.X);
-            Assert.AreEqual(20, xy.Y);
+            Assert.Equal(10, xy.X);
+            Assert.Equal(20, xy.Y);
         }
 
 
@@ -166,25 +165,25 @@ namespace ETWController_uTest
         ///       |
         ///       ˅
         /// </summary>
-        [Test]
+        [Fact]
         public void CalcOverlappingQuadrants()
         {
             ScreenFacade negMon = new ScreenFacade(new Rectangle(-50, -50, 100, 200));
             IScreen[] screens = new IScreen[] { negMon };
             var xy = ScreenCoordinateMapper.ScreenToDesktopCoordinates(-10, -20, screens);
-            Assert.AreEqual(40, xy.X);
-            Assert.AreEqual(30, xy.Y);
+            Assert.Equal(40, xy.X);
+            Assert.Equal(30, xy.Y);
 
             var xy00 = ScreenCoordinateMapper.ScreenToDesktopCoordinates(0, 0, screens);
-            Assert.AreEqual(50, xy00.X);
-            Assert.AreEqual(50, xy00.Y);
+            Assert.Equal(50, xy00.X);
+            Assert.Equal(50, xy00.Y);
 
             var xy50_150 = ScreenCoordinateMapper.ScreenToDesktopCoordinates(49, 149, screens);
-            Assert.AreEqual(99, xy50_150.X);
-            Assert.AreEqual(199, xy50_150.Y);
+            Assert.Equal(99, xy50_150.X);
+            Assert.Equal(199, xy50_150.Y);
         }
 
-        [Test]
+        [Fact]
         public void PerfMaping()
         {
             var negMon = new ScreenFacade(new Rectangle(-50, -50, 100, 200));
@@ -199,7 +198,7 @@ namespace ETWController_uTest
             Console.WriteLine($"Calls/s {Runs / sw.Elapsed.TotalSeconds:N0}");
         }
 
-        [Test]
+        [Fact]
         public void VirtualScreenBoundsOnDiagonalLayout()
         {
             // Two monitors in different quadrants that do not form a rectangular grid:
@@ -211,19 +210,19 @@ namespace ETWController_uTest
 
             var bounds = ScreenCoordinateMapper.VirtualScreenBounds(new IScreen[] { mon1, mon2 });
 
-            Assert.AreEqual(-100, bounds.X);
-            Assert.AreEqual(-50, bounds.Y);
-            Assert.AreEqual(200, bounds.Width);
-            Assert.AreEqual(200, bounds.Height);
+            Assert.Equal(-100, bounds.X);
+            Assert.Equal(-50, bounds.Y);
+            Assert.Equal(200, bounds.Width);
+            Assert.Equal(200, bounds.Height);
 
             // The shift vector must be the negated top-left origin so that mapping a point on
             // mon1 gives the same coordinates the screenshot bitmap uses.
             var mapped = ScreenCoordinateMapper.ScreenToDesktopCoordinates(-50, 0, new IScreen[] { mon1, mon2 });
-            Assert.AreEqual(50, mapped.X);
-            Assert.AreEqual(50, mapped.Y);
+            Assert.Equal(50, mapped.X);
+            Assert.Equal(50, mapped.Y);
         }
 
-        [Test]
+        [Fact]
         public void MarkMouseClickDrawsRedMarkerAtGivenPosition()
         {
             using (var bmp = new Bitmap(100, 100))
@@ -235,17 +234,17 @@ namespace ETWController_uTest
                 }
 
                 Color marker = bmp.GetPixel(17, 27);
-                Assert.Greater(marker.R, 150);
-                Assert.Less(marker.G, 150);
+                Assert.True(marker.R > 150);
+                Assert.True(marker.G < 150);
 
                 // Outside the marker area the bitmap must be untouched.
                 // Note: GetPixel returns an ARGB color which is never equal to the named
                 // Color.White (different Color state), so compare ToArgb() values.
-                Assert.AreEqual(Color.FromArgb(255, 255, 255, 255).ToArgb(), bmp.GetPixel(30, 40).ToArgb());
+                Assert.Equal(Color.FromArgb(255, 255, 255, 255).ToArgb(), bmp.GetPixel(30, 40).ToArgb());
             }
         }
 
-        [Test]
+        [Fact]
         public void MarkMouseClickDrawsGreenMarkerWhenNotClicked()
         {
             using (var bmp = new Bitmap(100, 100))
@@ -257,12 +256,12 @@ namespace ETWController_uTest
                 }
 
                 Color marker = bmp.GetPixel(57, 57);
-                Assert.Greater(marker.G, 150);
-                Assert.Less(marker.R, 150);
+                Assert.True(marker.G > 150);
+                Assert.True(marker.R < 150);
             }
         }
 
-        [Test]
+        [Fact]
         public void MarkMouseClickSkipsNegativeCoordinatesInsteadOfMirroring()
         {
             using (var bmp = new Bitmap(100, 100))
@@ -278,7 +277,7 @@ namespace ETWController_uTest
 
                 // Must be skipped, not mirrored: compare ARGB values because a named color
                 // like Color.White is never equal to a known-color ARGB value.
-                Assert.AreEqual(Color.FromArgb(255, 255, 255, 255).ToArgb(), bmp.GetPixel(10, 10).ToArgb());
+                Assert.Equal(Color.FromArgb(255, 255, 255, 255).ToArgb(), bmp.GetPixel(10, 10).ToArgb());
             }
         }
     }

@@ -1,7 +1,7 @@
 ﻿using ETWController;
 using ETWController.UI;
 using ETWController_uTest.TestHelper;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,14 +13,16 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
-    public class ViewModelTests
+    public class ViewModelTests : IDisposable
     {
         ConcurrentQueue<string> TraceMessages = new ConcurrentQueue<string>();
         List<TraceStates> LocalTraceStateChanges = new List<TraceStates>();
-        App CurrentApp = null;
+        // WPF allows exactly one Application instance per AppDomain and xUnit creates a new
+        // test class instance per test, so the App must be shared across all tests of this
+        // fixture (static, created once by the first test that runs).
+        static App CurrentApp = null;
 
-        [Test]
+        [Fact]
         public void Start_Stop_Verify_MessageBox_Is_Displayed_IfOutputFile_Was_Not_Created()
         {
             using (var tmp = TempDir.Create())
@@ -43,7 +45,7 @@ namespace ETWController_uTest
             }
         }
 
-        [Test]
+        [Fact]
         public void Start_Stop_Verify_MessageBox_Is_Displayed_IfOutputDirectory_Contains_No_EtlFiles()
         {
             using (var tmp = TempDir.Create())
@@ -66,7 +68,7 @@ namespace ETWController_uTest
             }
         }
 
-        [Test]
+        [Fact]
         public void Start_Stop_Verify_No_MessageBox_Is_Shown_If_New_ETL_Files_Created_In_Directory()
         {
             using (var tmp = TempDir.Create())
@@ -92,7 +94,7 @@ namespace ETWController_uTest
         }
 
 
-        [Test]
+        [Fact]
         public void Start_Stop_Verify_No_MessageBox_Is_Shown_If_Too_Old_Files_Created_In_Directory()
         {
             using (var tmp = TempDir.Create())
@@ -119,7 +121,7 @@ namespace ETWController_uTest
             }
         }
 
-        [Test]
+        [Fact]
         public void Display_MessageBox_When_OutputFile_During_Trace_Start_Cannot_Be_Deleted()
         {
             using (var tmp = TempDir.Create())
@@ -131,8 +133,8 @@ namespace ETWController_uTest
                     {
                         ClearStates();
                         model.Commands["StartTracing"].Execute(null);
-                        Assert.AreEqual(2, LocalTraceStateChanges.Count);
-                        Assert.AreEqual(TraceStates.Starting, LocalTraceStateChanges[0]);
+                        Assert.Equal(2, LocalTraceStateChanges.Count);
+                        Assert.Equal(TraceStates.Starting, LocalTraceStateChanges[0]);
                     }
 
                     MessageBoxShown($"Could not delete old trace file {etlFile}");
@@ -153,7 +155,7 @@ namespace ETWController_uTest
             {
                 int idx = tracemessage.IndexOf(MessageBoxStringPrefix);
 
-                Assert.IsFalse( idx == 0, $"MessageBox shown: {tracemessage}");
+                Assert.False( idx == 0, $"MessageBox shown: {tracemessage}");
             }
         }
 
@@ -168,7 +170,9 @@ namespace ETWController_uTest
                 }
            }
 
-            Assert.AreEqual(count, containsCount, $"substrings \"{substring1}\" \"{substring2 ?? "none"}\" were not found the expected number of times.");
+            // xUnit v2 Assert.Equal has no message overload, so the diagnostic message is printed manually.
+            if (count != containsCount)
+                throw new Exception($"substrings \"{substring1}\" \"{substring2 ?? "none"}\" were not found the expected number of times. Expected {count}, found {containsCount}.");
         }
 
         ViewModel Create(string tempDir, bool bUseTraceDirStopVariable=false)
@@ -222,18 +226,23 @@ namespace ETWController_uTest
                 Thread.Sleep(1);
             }
 
-            Assert.AreEqual(targetState, model.LocalTraceSettings.TraceStates);
+            Assert.Equal(targetState, model.LocalTraceSettings.TraceStates);
         }
 
-        [SetUp]
-        public void ClearStates()
+        // xUnit runs the constructor before each test where NUnit's [SetUp] ran.
+        public ViewModelTests()
+        {
+            ClearStates();
+        }
+
+        void ClearStates()
         {
             TraceMessages = new ConcurrentQueue<string>();
             LocalTraceStateChanges.Clear();
         }
 
-        [TearDown]
-        public void PrintMesages()
+        // xUnit calls Dispose after each test, which is where NUnit's [TearDown] ran.
+        public void Dispose()
         {
             foreach (var m in TraceMessages)
             {

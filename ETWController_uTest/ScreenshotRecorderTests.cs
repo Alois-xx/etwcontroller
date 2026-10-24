@@ -1,6 +1,6 @@
 ﻿using ETWController.Screenshots;
 using ETWController_uTest.TestHelper;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
     public class ScreenshotRecorderTests
     {
 
@@ -21,7 +20,7 @@ namespace ETWController_uTest
         /// from several threads. Things are working out nicely now and this test is here
         /// to keep it that way
         /// </summary>
-        [Test]
+        [Fact]
         public void RenderToSeveralThreads()
         {
             using (var tmp = TempDir.Create())
@@ -48,7 +47,7 @@ namespace ETWController_uTest
         /// There are race conditions when the timer callbacks are still executing and we leave the dispose method 
         /// already. Ensure that this does not happen.
         /// </summary>
-        [Test]
+        [Fact]
         public void Create_And_Dispose_Fast_Many_ScreenshotRecoder_Instances()
         {
             using (var tmp = TempDir.Create())
@@ -67,7 +66,7 @@ namespace ETWController_uTest
             }
         }
        
-        [Test]
+        [Fact]
         public void EnsureOldestFilesAreCleared()
         {
             using (var tmp = TempDir.Create())
@@ -81,19 +80,19 @@ namespace ETWController_uTest
                     fi.CreationTime = DateTime.Now + TimeSpan.FromMinutes(i);
                 }
 
-                Assert.AreEqual(20, Directory.GetFiles(tmp.Name, "*.jpg").Length);
+                Assert.Equal(20, Directory.GetFiles(tmp.Name, "*.jpg").Length);
 
                 ScreenshotRecorder.ClearFiles(tmp.Name, 10);
 
                 HashSet<string> expectedFiles = new HashSet<string>(Enumerable.Range(10, 10).Select(x => $"{x}.jpg"));
 
                 var afterDeletion = Directory.GetFiles(tmp.Name, "*.jpg");
-                Assert.AreEqual(10, afterDeletion.Length);
+                Assert.Equal(10, afterDeletion.Length);
 
                 foreach (var file in afterDeletion)
                 {
                     string jpg = Path.GetFileName(file);
-                    Assert.IsTrue(expectedFiles.Contains(jpg), $"File {file} was not exepcted to exist after deletion of 10 oldest files.");
+                    Assert.True(expectedFiles.Contains(jpg), $"File {file} was not exepcted to exist after deletion of 10 oldest files.");
                 }
             }
         }

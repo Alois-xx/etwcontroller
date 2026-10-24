@@ -1,6 +1,6 @@
 ﻿using ETWController;
 using ETWController_uTest.TestHelper;
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,30 +10,29 @@ using System.Threading.Tasks;
 
 namespace ETWController_uTest
 {
-    [TestFixture]
     public class RedirectedProcessTests
     {
-        [Test]
+        [Fact]
         public void Can_Redirect_Stderr()
         {
             RedirectedProcess proc = new RedirectedProcess("cmd", "/c echo hi from stderr 1>&2");
             var lret = proc.Start();
             Console.WriteLine("Exit code: {0}", lret.Item1);
             Console.WriteLine(lret.Item2);
-            Assert.AreEqual("hi from stderr ", lret.Item2.TrimEnd(Environment.NewLine.ToArray()));
+            Assert.Equal("hi from stderr ", lret.Item2.TrimEnd(Environment.NewLine.ToArray()));
         }
 
-        [Test]
+        [Fact]
         public void Can_Redirect_Stdout()
         {
             RedirectedProcess proc = new RedirectedProcess("cmd", "/c echo hi from stdout");
             var lret = proc.Start();
             Console.WriteLine("Exit code: {0}", lret.Item1);
             Console.WriteLine(lret.Item2);
-            Assert.AreEqual("hi from stdout", lret.Item2.TrimEnd(Environment.NewLine.ToArray()));
+            Assert.Equal("hi from stdout", lret.Item2.TrimEnd(Environment.NewLine.ToArray()));
         }
 
-        [Test]
+        [Fact]
         public void Can_Redirect_Large_Data()
         {
            using(var tmp = TempDir.Create())
@@ -43,7 +42,7 @@ namespace ETWController_uTest
                File.WriteAllLines(txtfile, lines);
                var type = new RedirectedProcess("cmd", String.Format("/C type {0}",txtfile));
                var lret = type.Start();
-               Assert.AreEqual(String.Join(Environment.NewLine, lines), lret.Item2.TrimEnd(Environment.NewLine.ToCharArray()));
+               Assert.Equal(String.Join(Environment.NewLine, lines), lret.Item2.TrimEnd(Environment.NewLine.ToCharArray()));
            }
         }
     }
