@@ -216,7 +216,9 @@ namespace ETWController
                 {
                     if (screenshotTask.Result.Key != null)
                     {
-                        Model.ReceivedMessages.Add($"Saved Screenshot to {screenshotTask.Result.Key}");
+                        // TakeScreenshot returns the path the writer thread writes the frame to.
+                        // If a frame is dropped (writer still busy) the key is null and nothing is added.
+                        Model.ReceivedMessages.Add($"Screenshot captured for {screenshotTask.Result.Key}");
                     }
                     if(screenshotTask.Result.Value != null)
                     {

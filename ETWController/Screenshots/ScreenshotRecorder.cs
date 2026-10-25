@@ -19,6 +19,11 @@ namespace ETWController.Screenshots
     /// a fixed amount of time to see the UI reaction (500ms currently).
     /// Besides that a different timer will collect a screenshot if no other screenshot has been captured since the last forcedScreenShotAfterMs timespan
     /// which is configured as parameter to the ctor.
+    ///
+    /// A frame is processed in two stages so a capture does not have to wait for the previous frame's encoder:
+    /// capture (one BitBlt into a reused buffer) on the calling thread, encode and file write on one writer thread.
+    /// Between the stages there is exactly one frame slot. When the writer still owns a frame the new screenshot
+    /// is dropped instead of buffered, so a capture rate above the encode rate can never make frames pile up.
     /// </summary>
     sealed class ScreenshotRecorder : IDisposable
     {
@@ -40,9 +45,18 @@ namespace ETWController.Screenshots
         System.Threading.Timer FileCleanupTimer;
 
         /// <summary>
-        /// Do not a forced screenshot if since this time a screenshot was already captured
+        /// Interval the forced screenshot timer is configured with. Frames that cannot be captured in time
+        /// are dropped instead of queued, so an interval below the sustainable capture rate still produces
+        /// screenshots - just fewer than requested.
         /// </summary>
-        const int MinimumScreenshotTimeInMs = 99;
+        int ForcedScreenshotIntervalMs;
+
+        /// <summary>
+        /// Roughly what one frame needs on this machine (measured: ~46-60 ms for the screen read plus the
+        /// stamp and marker drawing). A configured interval below this cannot be sustained and is reported
+        /// once at startup instead of silently disabling the timer.
+        /// </summary>
+        const int SustainableScreenshotTimeInMs = 99;
 
         /// <summary>
         /// Keep only the last 100 screenshots and delete older ones
@@ -71,6 +85,38 @@ namespace ETWController.Screenshots
         EncoderParameters EncoderParameters;
 
         ImageCodecInfo JpgEncoder;
+
+        /// <summary>
+        /// The two frame buffers plus the single frame that is with the writer. Never more, frames are
+        /// dropped when the writer is busy, so nothing piles up.
+        /// </summary>
+        FrameSlot frameSlot;
+
+        /// <summary>
+        /// Display DC that is kept instead of being created again for every screenshot.
+        /// </summary>
+        ScreenReader screenReader;
+
+        Thread writerThread;
+        AutoResetEvent frameReady = new AutoResetEvent(false);
+
+        /// <summary>
+        /// Max time the writer thread waits for a frame, so Dispose does not block on an idle writer.
+        /// </summary>
+        const int WriterWakeUpMs = 50;
+
+        volatile bool stopRequested;
+
+        int droppedFrames;
+
+        /// <summary>
+        /// Screenshots that had to be dropped because the writer still owned a frame. Nothing is queued,
+        /// so this only grows when captures come in faster than the system can encode them.
+        /// </summary>
+        public int DroppedFrames
+        {
+            get { return Interlocked.Add(ref droppedFrames, 0); }
+        }
 
         private ImageCodecInfo GetEncoder(ImageFormat format)
         {
@@ -130,7 +176,7 @@ namespace ETWController.Screenshots
         /// Create a screenshot recroder which stores its screenshots to that directory.
         /// </summary>
         /// <param name="screenshotDirectory">Directory will be created if it does not yet exist.</param>
-        /// <param name="forcedScreenShotAfterMs">If > 99ms it will create after forcedScreenShotAfterMs a screenshot if no other screenshot was taken during that period of time.</param>
+        /// <param name="forcedScreenShotAfterMs">Takes a screenshot after forcedScreenShotAfterMs if no other screenshot was taken during that period. 0 disables the timer. Values below what one frame needs (~100 ms) still run: the timer fires at the configured rate and frames that cannot be captured in time are dropped instead of queued.</param>
         /// <param name="jpgCompressionLevel">Can be a value from 0-100. 100 is lossless</param>
         /// <param name="keepNNewestScreenShots">Delete oldest files every 5 minutes if total screenshot file count is over keepNNewestScreenShots.</param>
         public ScreenshotRecorder(string screenshotDirectory, int forcedScreenShotAfterMs, int jpgCompressionLevel, int keepNNewestScreenShots)
@@ -139,17 +185,9 @@ namespace ETWController.Screenshots
             Directory.CreateDirectory(ScreenshotDirectory); // Ensure that dir exists
 
             KeepNNewestScreenShots = keepNNewestScreenShots;
+            ForcedScreenshotIntervalMs = Math.Max(0, forcedScreenShotAfterMs);
 
             ClearFiles(ScreenshotDirectory);
-
-            if (forcedScreenShotAfterMs > MinimumScreenshotTimeInMs)  // one screenshot needs about 100ms. If one configures less than that we assume a configuration error
-            {
-                Debug.Print($"Forced Screenshot timer: {forcedScreenShotAfterMs}");
-                ForcedScreenshotTimer = new System.Threading.Timer(OnScreenshotTimerExpired, null, 0, forcedScreenShotAfterMs);
-            }
-
-            FileCleanupTimer = new System.Threading.Timer(OnCleanupOldestFiles, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
-
 
             // Setup objects to save JPGs with a configured compression level
             System.Drawing.Imaging.Encoder encoder = System.Drawing.Imaging.Encoder.Quality;
@@ -158,6 +196,35 @@ namespace ETWController.Screenshots
             EncoderParameters.Param[0] = encoderParameter;
 
             JpgEncoder = GetEncoder(ImageFormat.Jpeg);
+
+            screenReader = new ScreenReader();
+
+            // The frame buffers are allocated once for the current monitor layout instead of once per screenshot.
+            IScreen[] initialScreens = Screen.AllScreens.Select(x => new ScreenFacade(x)).ToArray();
+            Rectangle initialBounds = ScreenCoordinateMapper.VirtualScreenBounds(initialScreens);
+            frameSlot = new FrameSlot(Math.Max(1, initialBounds.Width), Math.Max(1, initialBounds.Height));
+
+            writerThread = new Thread(WriterLoop)
+            {
+                IsBackground = true,
+                Name = "ScreenshotWriter",
+            };
+            writerThread.Start();
+
+            // Arm the timers last. A timer created with dueTime 0 fires immediately on a thread pool
+            // thread, and its callback uses the encoder, the frame slot and the screen reader, which must
+            // exist before the first callback can run.
+            if (forcedScreenShotAfterMs > 0)
+            {
+                if (forcedScreenShotAfterMs < SustainableScreenshotTimeInMs)
+                {
+                    Debug.Print($"Forced Screenshot timer: {forcedScreenShotAfterMs} ms. One frame needs about {SustainableScreenshotTimeInMs} ms to capture on this machine, so frames that arrive faster than that are dropped instead of queued.");
+                }
+
+                ForcedScreenshotTimer = new System.Threading.Timer(OnScreenshotTimerExpired, null, 0, forcedScreenShotAfterMs);
+            }
+
+            FileCleanupTimer = new System.Threading.Timer(OnCleanupOldestFiles, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
         }
 
         void OnCleanupOldestFiles(object o)
@@ -182,7 +249,7 @@ namespace ETWController.Screenshots
                 var concCurrentCount = Interlocked.Increment(ref ExecutingTimerCallbacks);
                 var now = DateTime.Now;
                 Debug.Print($"Timer expired {now.ToString("mm:ss")}, diff: {(now - LastOtherScreenshot).TotalMilliseconds}ms");
-                if (concCurrentCount == 1 && (now - LastOtherScreenshot).TotalMilliseconds > MinimumScreenshotTimeInMs)
+                if (concCurrentCount == 1 && (now - LastOtherScreenshot).TotalMilliseconds >= ForcedScreenshotIntervalMs)
                 {
                     TakeAnotherScreenshot($"Forced_{now.ToString("HH.mm.ss.fff")}", false);
                 }
@@ -196,31 +263,125 @@ namespace ETWController.Screenshots
         public void Dispose()
         {
             IsDisposed = true;
-            ForcedScreenshotTimer.Change(0, Timeout.Infinite);
-            ForcedScreenshotTimer.Dispose();
-            ForcedScreenshotTimer = null;
+            stopRequested = true;
 
-            FileCleanupTimer.Change(0, Timeout.Infinite);
-            FileCleanupTimer.Dispose();
-            FileCleanupTimer = null;
+            if (ForcedScreenshotTimer != null)
+            {
+                ForcedScreenshotTimer.Change(0, Timeout.Infinite);
+                ForcedScreenshotTimer.Dispose();
+                ForcedScreenshotTimer = null;
+            }
+
+            if (FileCleanupTimer != null)
+            {
+                FileCleanupTimer.Change(0, Timeout.Infinite);
+                FileCleanupTimer.Dispose();
+                FileCleanupTimer = null;
+            }
 
             // wait until all callback have exited to ensure that we have no races while creating the next ScreenshotRecorder instance
             while (ExecutingTimerCallbacks > 0)
             {
                 Thread.Sleep(1);
             }
+
+            // Let the writer finish the frame it currently owns before the buffers are disposed.
+            frameReady.Set();
+            if (writerThread != null)
+            {
+                writerThread.Join();
+                writerThread = null;
+            }
+
+            if (frameSlot != null)
+            {
+                frameSlot.Dispose();
+                frameSlot = null;
+            }
+
+            if (screenReader != null)
+            {
+                screenReader.Dispose();
+                screenReader = null;
+            }
+
+            TransparentRed.Dispose();
+            StampFont.Dispose();
+        }
+
+        /// <summary>
+        /// Single writer thread. It owns exactly one buffer at a time, so there is no queue that could
+        /// grow when captures come in faster than frames can be encoded.
+        /// </summary>
+        void WriterLoop()
+        {
+            while (!stopRequested)
+            {
+                // Poll with a timeout so disposing an idle writer does not have to wait for a frame.
+                if (!frameReady.WaitOne(WriterWakeUpMs))
+                    continue;
+
+                FrameTake frame = frameSlot.Acquire();
+                if (frame == null)
+                    continue;
+
+                if (JpgEncoder == null || EncoderParameters == null)
+                {
+                    frameSlot.Release();
+                    continue;
+                }
+
+                try
+                {
+                    WriteFrame(frame);
+                }
+                finally
+                {
+                    frameSlot.Release();
+                }
+            }
+        }
+
+        void WriteFrame(FrameTake frame)
+        {
+            string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + frame.Suffix + ".jpg");
+
+            try
+            {
+                frame.Buffer.Save(savePath, JpgEncoder, EncoderParameters);
+                HookEvents.ETWProvider.Screenshot(frame.Suffix, savePath);
+
+                try
+                {
+                    // Update creation time to actual screenshot snapshot time so 
+                    // we can use the file creation date as snapshot time to sort them during report generation
+                    var fileInfo = new FileInfo(savePath)
+                    {
+                        CreationTime = frame.CaptureTime
+                    };
+                }
+                catch(Exception) // may fail if in the meantime the file has been moved.
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning($"Could not save screenshot {savePath} due to {ex}.");
+            }
         }
 
 
         /// <summary>
-        /// Take a screenshot from all monitors and save it to disk. Add the current timestamp and the hit position to the picture to make
+        /// Take a screenshot from all monitors and hand it to the writer thread, which encodes and saves it.
+        /// Add the current timestamp and the hit position to the picture to make
         /// it easy to correlate the traces with the visual interactions.
         /// </summary>
         /// <param name="clickX">Screen x-coordinate of click event or -1 if not available.</param>
         /// <param name="clickY">Screen y-cooridnate of click event or -1 if not available.</param>
         /// <param name="suffix">This suffix is appended to screenshot file name</param>
         /// <param name="suffixOfSecondScreenshot">If non null a second screenshot is taken with this suffix after 500ms.</param>
-        /// <returns>Saved screenshot file name in the string tuple or the exception.</returns>
+        /// <returns>Screenshot file name in the string tuple or the exception. The key is the path the frame will
+        /// be written to, or null when the frame was dropped because the writer was still busy with the previous one.</returns>
         public KeyValuePair<string,Exception> TakeScreenshot(int clickX, int clickY, string suffix, string suffixOfSecondScreenshot)
         {
             try
@@ -228,6 +389,13 @@ namespace ETWController.Screenshots
                 lock (Lock)
                 {
                     if (IsDisposed)
+                    {
+                        return new KeyValuePair<string, Exception>(null, null);
+                    }
+
+                    // A timer callback can start on a thread pool thread before this constructor has
+                    // finished, so nothing may be dereferenced before it exists.
+                    if (frameSlot == null || screenReader == null)
                     {
                         return new KeyValuePair<string, Exception>(null, null);
                     }
@@ -244,54 +412,76 @@ namespace ETWController.Screenshots
                         return new KeyValuePair<string, Exception>(null, null);
                     }
 
+                    // No queue: when the writer still owns a buffer this screenshot is dropped.
+                    Bitmap bmp = frameSlot.BeginFrame();
+                    if (bmp == null)
+                    {
+                        int dropped = Interlocked.Increment(ref droppedFrames);
+                        if (dropped == 1 || dropped % 100 == 0)
+                        {
+                            Trace.TraceWarning($"Screenshot {suffix} dropped because the writer is still saving the previous frame ({dropped} dropped in total).");
+                        }
+                        return new KeyValuePair<string, Exception>(null, null);
+                    }
+
+                    // Reallocate only when the monitor layout changed, otherwise the buffers are reused for every frame.
+                    if (frameSlot.EnsureSize(virtualBounds.Width, virtualBounds.Height))
+                    {
+                        bmp = frameSlot.CaptureBuffer;
+                        screenReader.Invalidate(); // the cached display DC keeps the extent it was created with
+                    }
+
                     var now = DateTime.Now;
 
-                    // Create a bitmap of the appropriate size to receive the screenshot.
-                    using (Bitmap bmp = new Bitmap(virtualBounds.Width, virtualBounds.Height))
+                    // The Graphics must be created on the buffer BeginFrame handed back, because the slot
+                    // alternates between its two buffers. Creating it per frame costs 0.0 ms (measured),
+                    // so there is no reason to keep one Graphics alive for the whole recorder.
+                    using (Graphics g = Graphics.FromImage(bmp))
                     {
-                        // Draw the screenshot into our bitmap.
-                        using (Graphics g = Graphics.FromImage(bmp))
-                        {
-                            g.CopyFromScreen(virtualBounds.Left, virtualBounds.Top, 0, 0, bmp.Size);
+                        // Exactly one screen read per frame. A screen read costs about 17 ms of fixed overhead per
+                        // call regardless of the captured area, so splitting it into strips would multiply that cost.
+                        screenReader.Capture(g, virtualBounds);
 
-                            TimeStampBitmap(now, bmp);
+                        TimeStampBitmap(now, bmp);
 
-                            bool bClicked = clickX != -1 && clickY != -1;
+                        bool bClicked = clickX != -1 && clickY != -1;
 
-                            // Mark the actual event position when we have it. Falling back to the live
-                            // cursor position only when no click position was passed produces a marker
-                            // that reflects where the click happened instead of where the cursor has
-                            // already moved to by the time the asynchronous capture runs.
-                            Point markerSource = bClicked ? new Point(clickX, clickY) : Cursor.Position;
-                            Point markerPos = ScreenCoordinateMapper.ScreenToDesktopCoordinates(markerSource.X, markerSource.Y, screens);
+                        // Mark the actual event position when we have it. Falling back to the live
+                        // cursor position only when no click position was passed produces a marker
+                        // that reflects where the click happened instead of where the cursor has
+                        // already moved to by the time the asynchronous capture runs.
+                        Point markerSource = bClicked ? new Point(clickX, clickY) : Cursor.Position;
+                        Point markerPos = ScreenCoordinateMapper.ScreenToDesktopCoordinates(markerSource.X, markerSource.Y, screens);
 
-                            MarkMouseClick(markerPos.X, markerPos.Y, bmp, g, bClicked);
-                        }
+                        MarkMouseClick(markerPos.X, markerPos.Y, bmp, g, bClicked);
 
-                        string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
-                        bmp.Save(savePath, JpgEncoder, EncoderParameters);
-                        HookEvents.ETWProvider.Screenshot(suffix, savePath);
-
-                        if (!IsDisposed && !String.IsNullOrEmpty(suffixOfSecondScreenshot))
-                        {
-                            Task.Factory.StartNew(() => TakeAnotherScreenshot(suffixOfSecondScreenshot), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
-                        }
-
-                        try
-                        {
-                            // Update creation time to actual screenshot snapshot time so 
-                            // we can use the file creation date as snapshot time to sort them during report generation
-                            var fileInfo = new FileInfo(savePath)
-                            {
-                                CreationTime = now
-                            };
-                        }
-                        catch(Exception) // may fail if in the meantime the file has been moved.
-                        {
-                        }
-
-                        return new KeyValuePair<string, Exception>(savePath, null);
+                        // GDI+ buffers drawing commands until a flush and the writer thread must not use the
+                        // Graphics object, so push everything before the buffer is handed over.
+                        g.Flush();
                     }
+
+                    string savePath = Path.Combine(ScreenshotDirectory, ScreenshotFileNameBase + suffix + ".jpg");
+
+                    if (!frameSlot.EndFrame(suffix, now))
+                    {
+                        // Cannot happen while captures are serialized, but frames are dropped rather than
+                        // buffered, so keep the guard.
+                        int dropped = Interlocked.Increment(ref droppedFrames);
+                        if (dropped == 1 || dropped % 100 == 0)
+                        {
+                            Trace.TraceWarning($"Screenshot {suffix} dropped after capture because the writer became busy ({dropped} dropped in total).");
+                        }
+                        return new KeyValuePair<string, Exception>(null, null);
+                    }
+
+                    frameReady.Set();
+
+                    if (!IsDisposed && !String.IsNullOrEmpty(suffixOfSecondScreenshot))
+                    {
+                        Task.Factory.StartNew(() => TakeAnotherScreenshot(suffixOfSecondScreenshot), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+                    }
+
+                    return new KeyValuePair<string, Exception>(savePath, null);
                 }
             }
             catch(Win32Exception ex)

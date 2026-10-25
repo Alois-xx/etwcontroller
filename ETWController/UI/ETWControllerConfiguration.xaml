@@ -82,7 +82,7 @@
                 <TextBox  Grid.Row="4" Grid.Column="1"  Width="60" HorizontalAlignment="Left" Validation.ErrorTemplate="{StaticResource portValidation}" Style="{StaticResource textBoxInError}" ToolTip="Time in ms between two screenshots regardless if a mouse click or keyboard press did happen (100ms-60000ms)." KeyboardNavigation.TabIndex="4">
                     <Binding Path="ForcedScreenshotIntervalinMs" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" >
                         <Binding.ValidationRules>
-                            <ui:PortnumberValidator Min="100" Max="60000"/>
+                            <ui:PortnumberValidator Min="10" Max="60000"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox>
